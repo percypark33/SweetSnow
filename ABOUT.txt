@@ -1,0 +1,3 @@
+Files Claude coded/edited on 2026-08-18 for the August menu update.
+Working copies live in ~/sweet-snow (the live tree that deploys + feeds the TVs).
+This folder is Claude's save — other AI tools' folders are untouched.
