@@ -24,7 +24,7 @@
   --ink:    #1E3A52;
   --yellow: #FFD84D;
   --amber:  #FFC117;
-  --red:    #E8465A;
+  --red:    #C9303E; /* was #E8465A — 3.9:1 on white; this passes AA (5.3:1) */
   --muted:  #4A6C87;
   --ing:    #3E617C;
   --cream:  #FFFFFF;
@@ -1119,7 +1119,7 @@ h1, h2, h3 {
   border-radius: 12px;
   resize: vertical;
 }
-.ballot textarea::placeholder, .ask ::placeholder { color: #B9AF9C; }
+.ballot textarea::placeholder, .ask ::placeholder { color: #5E7589; }
 .ballot :is(textarea, input):focus {
   outline: none;
   border-color: var(--ink);
