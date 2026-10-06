@@ -1,0 +1,10 @@
+/* Simple pages (/thanks, /privacy, 404) share the home page's header and footer
+   from base.css + showcase.css; this only adds the article column. */
+.theme-showcase .page-main{padding-block:50px 100px;max-width:680px}
+.theme-showcase .page-main h1{font-size:clamp(40px,5.5vw,68px);letter-spacing:-2.5px;line-height:1.02;margin-bottom:22px}
+.theme-showcase .page-main p,.theme-showcase .page-main li{font-size:16px;line-height:1.75;color:#555}
+.theme-showcase .page-main .updated{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#747474;margin-bottom:30px}
+.theme-showcase .page-main a:not(.button){text-underline-offset:4px}
+.theme-showcase .page-main .button{margin-top:26px}
+.theme-showcase .site-footer{margin-top:0}
+@media(max-width:700px){.theme-showcase .page-main{padding-block:30px 70px}.theme-showcase .page-main p{font-size:15px}}
