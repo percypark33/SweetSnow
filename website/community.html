@@ -9,12 +9,12 @@
   <meta name="description" content="The Sweet Snow menu: real milk shaved into soft snow, one size made to share, plus hot taiyaki and Dubai chewy cookies. Inside QT Golden Market Place, 9772 Garden Grove Blvd, Garden Grove, CA. Vote on what we make next." />
   <meta name="author" content="Sweet Snow" />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://www.sweetsnow.org/" />
+  <link rel="canonical" href="https://www.sweetsnow.org/community" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Sweet Snow" />
-  <meta property="og:url" content="https://www.sweetsnow.org/" />
+  <meta property="og:url" content="https://www.sweetsnow.org/community" />
   <meta property="og:title" content="Sweet Snow — Menu · Korean Shaved Ice" />
   <meta property="og:description" content="Real milk shaved into soft snow — creamy, never watery. See the full menu and vote on what we make next." />
   <!-- The card people see when the link is shared. Drawn, not photographed,
@@ -37,8 +37,9 @@
   <meta name="geo.placename" content="Garden Grove" />
   <meta name="geo.position" content="33.7739;-117.9414" />
 
-  <link rel="icon" href="assets/logo-icon.png" type="image/png" />
-  <link rel="apple-touch-icon" href="assets/logo-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icon-32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
   <link rel="manifest" href="site.webmanifest" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -88,7 +89,7 @@
   <header class="chrome" id="top">
     <div class="chrome-inner">
       <a class="chrome-logo" href="#top" aria-label="Sweet Snow">
-        <img src="assets/sweet-snow-arched-logo.png?v=brand-header-sept16" alt="" width="905" height="564" fetchpriority="high" />
+        <img src="/assets/sweet-snow-arched-logo-320.png" alt="" width="320" height="199" fetchpriority="high" />
       </a>
       <nav class="index" id="indexBar" aria-label="Sections"></nav>
     </div>
@@ -185,8 +186,9 @@
         </div>
 
         <div class="vote-pair">
-          <form class="ballot" id="voteForm" hidden name="coming-soon-vote" method="POST" action="/thanks"
-                data-netlify="true" netlify-honeypot="bot-field">
+          <!-- Both ballots post to the Vercel function in api/form.js (the host has
+               no Netlify Forms). The bot-field honeypot is checked there. -->
+          <form class="ballot" id="voteForm" hidden name="coming-soon-vote" method="POST" action="/api/form">
             <input type="hidden" name="form-name" value="coming-soon-vote" />
             <p class="hp-field" aria-hidden="true">
               <label>Don't fill this out: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
@@ -199,16 +201,15 @@
             <button type="submit" class="btn btn-vote">Cast my vote</button>
           </form>
 
-          <form class="ballot" id="ideaForm" name="menu-idea" method="POST" action="/thanks"
-                data-netlify="true" netlify-honeypot="bot-field">
+          <form class="ballot" id="ideaForm" name="menu-idea" method="POST" action="/api/form">
             <input type="hidden" name="form-name" value="menu-idea" />
             <p class="hp-field" aria-hidden="true">
               <label>Don't fill this out: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
             </p>
             <p class="ballot-kicker">Your idea</p>
             <div class="q">
-              <label class="q-label" for="voteIdea">Something we haven't thought of <i>optional</i></label>
-              <textarea id="voteIdea" name="idea" rows="5" required
+              <label class="q-label" for="voteIdea">Something we haven't thought of</label>
+              <textarea id="voteIdea" name="idea" rows="5" required maxlength="2000"
                         placeholder="A flavor from home, something you had on a trip, anything"></textarea>
             </div>
             <button type="submit" class="btn btn-vote">Send idea</button>
