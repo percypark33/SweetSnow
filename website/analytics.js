@@ -13,9 +13,12 @@
   if (navigator.globalPrivacyControl === true || navigator.doNotTrack === "1") return;
   window.__sweetSnowAnalyticsStarted = true;
 
+  // Section ids on / (photo-studio design) and on /community (menu page).
   var sections = {
-    menu: "menu", bingsu: "bingsu", toppings: "toppings", hot: "hot_and_fresh",
-    comingSoon: "coming_soon", cups: "cup_bingsu", vote: "vote", catering: "catering"
+    menu: "menu", layers: "how_its_made", extras: "extras", visit: "visit",
+    "coming-soon": "coming_soon", cups: "cup_bingsu", ideas: "ideas",
+    bingsu: "bingsu", toppings: "toppings", hot: "hot_and_fresh",
+    comingSoon: "coming_soon", vote: "vote", catering: "catering"
   };
   function referrerOrigin() {
     try { return document.referrer ? new URL(document.referrer).origin + "/" : ""; }
