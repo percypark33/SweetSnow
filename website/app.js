@@ -2,9 +2,8 @@
    SWEET SNOW — sweetsnow.org
    ------------------------------------------------------------
    Everything on the page is rendered from menu-2026-august.js so
-   that a price never exists in two places. Sections are numbered
-   in one continuous run (bingsu, then hot) because that is how
-   guests order at the counter.
+   that a price never exists in two places. Menu items are grouped
+   by Classic and Special and displayed without order numbers.
    ============================================================ */
 
 (function () {
@@ -20,34 +19,51 @@
     );
 
   const BING = M.bingsu || {};
-  const FLAV = BING.flavors || [];
+  const FLAV = (BING.flavors || []).filter(f => !f.hidden);
+  const ICE = BING.ice || [];
 
-  const HOT_START = FLAV.length + 1;
+  const HOT_START = M.hotStart || FLAV.length + 1;
+
+  function cupSectionPrice(C) {
+    const fallback = C.price || "";
+    const prices = (C.flavors || [])
+      .map((f) => f.price || fallback)
+      .filter(Boolean);
+    const uniq = [...new Set(prices)].sort(
+      (a, b) => parseFloat(a) - parseFloat(b)
+    );
+    if (!uniq.length) return "";
+    if (uniq.length === 1) return "$" + uniq[0];
+    return "$" + uniq[0] + "–$" + uniq[uniq.length - 1];
+  }
 
   /* -------------------------------------------------------------
      Menu rows
      ------------------------------------------------------------- */
 
-  // One row: order number, illustration, name, dot leader, price.
+  // One row: illustration, name, dot leader, price.
   function row(o) {
-    const tape = o.badge
+    const soon = o.badge === "COMING SOON" || o.soon;
+    const tapeLabel = o.hint ? "" : (soon ? "COMING SOON" : o.badge === "SEASONAL" ? "SEASONAL" : "");
+    const tape = tapeLabel
       ? `<span class="tape${
-          o.badge === "SPECIAL" ? " special"
-          : o.badge === "SIGNATURE" ? " signature"
-          : o.badge === "COMING SOON" ? " soon"
+          soon ? " soon"
+          : o.badge === "SPECIAL" ? " special"
+          : o.badge === "CLASSIC" || o.badge === "SIGNATURE" ? " classic"
           : ""
-        }">${esc(o.badge)}</span>`
+        }">${esc(tapeLabel)}</span>`
       : "";
-    return `<li class="item${o.badge === "COMING SOON" ? " is-soon" : ""}" data-kind="${esc(o.kind || "bingsu")}" data-name="${esc(o.name)}">
-      <span class="item-no">${o.n}</span>
+    return `<li class="item${soon ? " is-soon" : ""}${o.hint ? " is-hint" : ""}" data-kind="${esc(o.kind || "bingsu")}" data-name="${esc(o.name)}"${o.inventoryName ? ` data-inventory-name="${esc(o.inventoryName)}"` : ""}>
       <span class="item-art" style="--halo:${o.halo || "#F5EFDC"}">${o.art}</span>
       <div class="item-body">
         <p class="item-line">
-          <span class="item-nm">${esc(o.name)}${o.ko ? `<i class="ko">${esc(o.ko)}</i>` : ""}</span>
-          <span class="item-dots" aria-hidden="true"></span>
-          <span class="item-pr${o.up ? " up" : ""}">${esc(o.price)}</span>
+          <span class="item-nm">${esc(o.name)}${o.brandLabel ? ` <small class="item-brand">${esc(o.brandLabel)}</small>` : ""}${o.ko ? `<i class="ko">${esc(o.ko)}</i>` : ""}</span>
+          ${o.price ? `<span class="item-dots" aria-hidden="true"></span>
+          <span class="item-pr${o.up ? " up" : ""}">${esc(o.price)}</span>` : ""}
         </p>
+        ${o.subtitle ? `<p class="item-subtitle">${esc(o.subtitle)}</p>` : ""}
         ${o.ing ? `<p class="item-ing">${esc(o.ing)}</p>` : ""}
+        ${o.extra || ""}
         ${tape}
       </div>
     </li>`;
@@ -55,66 +71,173 @@
 
   function renderBingsu() {
     const base = BING.price || "";
-    if ($("bingsuPrice")) $("bingsuPrice").textContent = "$" + base;
+    if ($("bingsuPrice")) $("bingsuPrice").textContent = "";
     if ($("bingsuNote")) $("bingsuNote").textContent = BING.priceNote || "";
     if ($("bingsuQuality")) $("bingsuQuality").textContent = BING.qualityNote || "";
-    if ($("bingsuMix")) $("bingsuMix").textContent = BING.mixNote || "";
+    if ($("bingsuMix")) $("bingsuMix").textContent = BING.cupSoon || BING.mixNote || "";
+    if ($("bingsuSeason")) $("bingsuSeason").textContent = BING.mixSeasonNote || "";
+    if ($("marketNote")) $("marketNote").textContent = BING.marketNote || "";
+    if ($("specialNote")) $("specialNote").textContent = BING.specialNote || "";
 
-    const list = $("bingsuList");
-    if (!list) return;
-    list.innerHTML = FLAV.map((f, i) =>
+    if ($("iceBlurb")) $("iceBlurb").textContent = BING.iceBlurb || "";
+    const iceBlock = $("shavedIce");
+    if (iceBlock) iceBlock.hidden = !ICE.length;
+
+    const flavorRow = (f, n) =>
       row({
-        n: i + 1,
-        art: ART.bowl ? ART.bowl(f.name) : "",
-        halo: ART.halo ? ART.halo(f.name) : "",
+        n: n,
+        art: f.hint && ART.ghost ? ART.ghost() : ART.bowl ? ART.bowl(f.artName || f.name, esc(f.name)) : "",
+        halo: f.hint ? "#EEF3F6" : ART.halo ? ART.halo(f.artName || f.name) : "",
         name: f.name,
+        inventoryName: f.inventoryName,
+        brandLabel: f.brandLabel,
+        subtitle: f.subtitle,
         ko: f.ko,
         ing: f.ing,
-        price: "$" + (f.price || base),
-        up: Boolean(f.price && f.price !== base),
+        price: f.hint || f.price === null ? "" : "$" + (f.price || base),
+        up: false,
         badge: f.badge,
+        soon: f.soon,
+        hint: f.hint,
+        extra: (f.recipeNote ? `<p class="item-recipe-note">${esc(f.recipeNote)}</p>` : "") + (f.specialNote ? `<p class="item-special-note">${esc(f.specialNote)}</p>` : "") + (f.upgrade
+          ? `<p class="item-upgrade">or ${esc(f.upgrade.ing)} — $${esc(f.upgrade.price)}</p>`
+          : "") + (f.staffPicks?.length
+          ? `<aside class="staff-picks" aria-label="Recommended toppings for ${esc(f.name)}">
+              <p class="staff-picks-title">Recommended toppings</p>
+              <ul>${f.staffPicks.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
+            </aside>` : ""),
         kind: "bingsu"
+      });
+
+    let n = 1;
+    const fill = (id, list) => {
+      const el = $(id);
+      if (!el) return;
+      el.innerHTML = list
+        .map((f) => {
+          const html = flavorRow(f, n);
+          if (!f.hint) n += 1;
+          return html;
+        })
+        .join("");
+    };
+    const isSoon = (f) => f.badge === "COMING SOON" || f.soon;
+    const available = FLAV.filter(f => !isSoon(f));
+    const ordered = (items, names = []) => items.sort((a, b) => {
+      const rank = f => names.includes(f.name) ? names.indexOf(f.name) : names.length;
+      return rank(a) - rank(b);
+    });
+    const classics = ordered(available.filter(f => f.badge === "CLASSIC"), BING.classicOrder);
+    const specials = ordered(available.filter(f => f.badge !== "CLASSIC"), BING.specialOrder);
+    fill("bingsuList", classics);
+    fill("bingsuSpecialList", specials);
+    // Shared desktop rows keep each fruit special beside its original even
+    // when one description or recommendation box wraps onto more lines.
+    if ($("bingsuColumns")) $("bingsuColumns").style.setProperty("--bingsu-rows", Math.max(classics.length, specials.length) + 1);
+    fill("bingsuIce", ICE.filter(f => !isSoon(f)));
+    const upcoming = [...FLAV, ...ICE].filter(isSoon);
+    fill("comingSoonList", upcoming);
+    if ($("comingSoon")) $("comingSoon").hidden = !upcoming.length;
+  }
+
+  function renderCups() {
+    const C = M.cupBingsu || {};
+    const list = C.flavors || [];
+    if ($("cups")) $("cups").hidden = C.enabled === false;
+    if (C.enabled === false) return;
+    if ($("cups")) $("cups").classList.toggle("is-coming-soon", !!C.soon);
+    if ($("cupStatus")) $("cupStatus").hidden = !C.soon;
+    if ($("cupBlurb")) $("cupBlurb").textContent = C.blurb || "Single serve.";
+    if ($("cupPrice")) $("cupPrice").textContent = cupSectionPrice(C);
+    if ($("cupNote")) $("cupNote").textContent = C.priceNote || "";
+    const wrap = $("cupList");
+    if (!wrap) return;
+    wrap.innerHTML = list
+      .map((f, i) => {
+        const price = "$" + (f.price || C.price || "");
+        return `<li class="cup-card item${C.soon ? " is-soon" : ""}" data-kind="cup" data-name="${esc(f.name)}">
+          <span class="cup-art" style="--halo:${ART.halo ? ART.halo(f.name) : "#F5EFDC"}">${
+            ART.cup ? ART.cup(f.name) : ""
+          }</span>
+          <p class="cup-nm">${esc(f.name)}${
+            f.ko ? `<i class="ko">(${esc(f.ko)})</i>` : ""
+          }</p>
+          <p class="cup-pr">${esc(price)}</p>
+          ${f.ing ? `<p class="cup-ing">${esc(f.ing)}</p>` : ""}
+        </li>`;
       })
-    ).join("");
+      .join("");
+  }
+
+  // One red line per choice, so "pick a flavor" reads as a list
+  // rather than a run-on line.
+  const optsHtml = (o) =>
+    o
+      ? `<ul class="t-opts">${[]
+          .concat(o)
+          .map((v) => `<li>${esc(v)}</li>`)
+          .join("")}</ul>`
+      : "";
+
+  function tierHtml(t) {
+    return `<div class="tier${t.tone ? " is-" + esc(t.tone) : ""}${(t.items || []).length > 8 ? " is-long" : ""}">
+      ${
+        t.price
+          ? `<p class="tier-price">+$${esc(t.price)}${t.each === false ? "" : "<small>each</small>"}</p>`
+          : t.label
+            ? `<p class="tier-price">${esc(t.label)}</p>`
+            : ""
+      }
+      ${t.note ? `<p class="t-note">${esc(t.note)}</p>` : ""}
+      <ul class="tier-items">
+        ${(t.items || [])
+          .map(
+            (it) => `<li>
+              <span class="t-row"><span class="t-nm">${esc(it.en)}</span>${
+                it.price ? `<span class="t-pr">+$${esc(it.price)}</span>` : ""
+              }${
+                it.ko ? `<span class="ko">${esc(it.ko)}</span>` : ""
+              }</span>
+              ${optsHtml(it.opts)}
+              ${it.note ? `<p class="t-note">${esc(it.note)}</p>` : ""}
+            </li>`
+          )
+          .join("")}
+      </ul>
+    </div>`;
   }
 
   function renderToppings() {
     const T = M.toppings || {};
-    if ($("topNote")) $("topNote").textContent = T.note || "";
+    if ($("topNote")) $("topNote").textContent = [T.note, T.freeNote].filter(Boolean).join(" · ");
+    if ($("toppingServingNote")) $("toppingServingNote").textContent = T.servingNote || "";
 
     const wrap = $("tiers");
     if (!wrap) return;
-    // One red line per choice, so "pick a flavor" reads as a list
-    // rather than a run-on line.
-    const opts = (o) =>
-      o
-        ? `<ul class="t-opts">${[]
-            .concat(o)
-            .map((v) => `<li>${esc(v)}</li>`)
-            .join("")}</ul>`
-        : "";
-
-    wrap.innerHTML = (T.tiers || [])
-      .map(
-        (t) => `<div class="tier">
-          ${t.label ? `<p class="tier-label">${esc(t.label)}</p>` : ""}
-          <p class="tier-price">+$${esc(t.price)}<small>each</small></p>
-          <ul class="tier-items">
-            ${(t.items || [])
-              .map(
-                (it) => `<li>
-                  <span class="t-row"><span class="t-nm">${esc(it.en)}</span>${
-                    it.ko ? `<span class="ko">${esc(it.ko)}</span>` : ""
-                  }</span>
-                  ${opts(it.opts)}
-                </li>`
-              )
-              .join("")}
-          </ul>
-        </div>`
-      )
-      .join("");
+    wrap.innerHTML = (T.tiers || []).map(tierHtml).join("");
     if ($("fruitNote")) $("fruitNote").textContent = T.fruitNote || "";
+  }
+
+  function renderExtraFruit() {
+    const F = M.extraFruit || {};
+    const wrap = $("extraFruit");
+    if (!wrap) return;
+    if (!(F.items || []).length) {
+      wrap.hidden = true;
+      wrap.innerHTML = "";
+      return;
+    }
+    wrap.hidden = false;
+    wrap.innerHTML = tierHtml({
+      label: F.title || "Extra fruit",
+      note: F.note,
+      items: F.items
+    });
+    const cream = M.creamTop;
+    if (cream) wrap.innerHTML += `<section class="tier cream-top" aria-label="${esc(cream.title)}">
+      <h3>${esc(cream.title)}</h3>
+      <p class="cream-top-price">+$${esc(cream.price)}</p>
+    </section>`;
   }
 
   function renderHot() {
@@ -126,6 +249,13 @@
     const DB = M.dubaiTaiyaki || {};
     const CK = M.cookie || {};
 
+    // Bulk deals apply to regular taiyaki only, so they render inside that
+    // row — not as a footer under all four hot items.
+    const dealHtml =
+      (TK.deals || [])
+        .map((d) => `<span class="deal">${esc(d.qty)} — $${esc(d.price)}</span>`)
+        .join("") + (TK.dealNote ? `<span class="deal-note">${esc(TK.dealNote)}</span>` : "");
+
     const rows = [
       {
         n: HOT_START,
@@ -135,13 +265,15 @@
         ko: TK.ko,
         ing: [TK.fillings, TK.note].filter(Boolean).join(" · "),
         price: "$" + (TK.price || ""),
-        kind: "hot"
+        kind: "hot",
+        extra: dealHtml ? `<p class="deals deals-inline">${dealHtml}</p>` : ""
       },
       {
         n: HOT_START + 1,
         art: ART.iceFish ? ART.iceFish() : "",
         halo: "#FFF3DC",
         name: IC.title,
+        enabled: IC.enabled,
         ko: IC.ko,
         ing: IC.note,
         price: "$" + (IC.price || ""),
@@ -169,15 +301,9 @@
       }
     ];
 
-    list.innerHTML = rows.map(row).join("");
-
+    list.innerHTML = rows.filter(item => item.enabled !== false).map(row).join("");
     const deals = $("deals");
-    if (deals) {
-      deals.innerHTML =
-        (TK.deals || [])
-          .map((d) => `<span class="deal">${esc(d.qty)} — $${esc(d.price)}</span>`)
-          .join("") + (TK.dealNote ? `<span class="deal-note">${esc(TK.dealNote)}</span>` : "");
-    }
+    if (deals) deals.innerHTML = "";
   }
 
   /* -------------------------------------------------------------
@@ -197,9 +323,9 @@
   // `covers` lets one link stay highlighted across several sections, so
   // Menu stays lit for the whole menu.
   const NAV = [
-    { href: "#menu", label: "Menu", pri: true, covers: ["menu", "bingsu", "toppings", "hot"] },
-    { href: "#visit", label: "Visit", covers: ["visit"] },
-    { href: "#vote", label: "Vote", act: true, covers: ["vote"] }
+    { href: "#menu", label: "Menu", pri: true, covers: ["menu", "bingsu", "shavedIce", "extraFruit", "cups", "toppings", "hot", "comingSoon"] },
+    { href: "#vote", label: "Vote", act: true, covers: ["vote"] },
+    { href: "#catering", label: "Catering", soon: true, covers: ["catering"] }
   ];
 
   function renderIndex() {
@@ -209,7 +335,7 @@
       `<div class="index-track">` +
       NAV.map((l) => {
         const cls = [l.pri && "pri", l.act && "act"].filter(Boolean).join(" ");
-        return `<a class="${cls}" href="${l.href}">${esc(l.label)}</a>`;
+        return `<a class="${cls}" href="${l.href}">${esc(l.label)}${l.soon ? '<small class="nav-soon">Coming soon</small>' : ""}</a>`;
       }).join("") +
       `</div>`;
   }
@@ -290,18 +416,16 @@
   function renderHours() {
     const list = $("hours");
     const rows = M.hours || [];
-    const S = M.schedule || {};
     const now = shopClock();
-    const today = S[now.day];
 
     if (list) {
       list.innerHTML = rows
         .map((h) => {
           // Match today to a display row: no hours today means the
           // "closed" line, otherwise the row quoting today's close.
-          const isToday = today
-            ? Boolean(h.time) && h.time.indexOf(fmtShort(today.close)) !== -1
-            : !h.time;
+          const day = now.day;
+          const isToday = (day >= 1 && day <= 4 && /mon/i.test(h.days) && /thu/i.test(h.days))
+            || ((day === 0 || day === 5 || day === 6) && /fri/i.test(h.days) && /sun/i.test(h.days));
           return `<li${isToday ? ' class="is-today"' : ""}>
             <span class="h-day">${esc(h.days)}</span>
             ${h.time ? '<span class="h-dots" aria-hidden="true"></span>' : ""}
@@ -320,24 +444,33 @@
   }
 
   /* -------------------------------------------------------------
-     The ballot
+     Coming-soon vote — one pick, filled from the menu badges
      ------------------------------------------------------------- */
 
-  function chips(name, values) {
-    return values
+  function renderSurvey() {
+    const wrap = $("qSoon");
+    if (!wrap) return;
+    const soon = FLAV.filter((f) => f.badge === "COMING SOON");
+    const form = $("voteForm");
+    const voteSec = $("vote");
+    if (!soon.length) {
+      if (form) form.hidden = true;
+      if (voteSec) voteSec.classList.add("is-ideas-only");
+      wrap.innerHTML = "";
+      return;
+    }
+    if (form) form.hidden = false;
+    if (voteSec) voteSec.classList.remove("is-ideas-only");
+    wrap.innerHTML = soon
       .map(
-        (v) => `<label class="chip">
-          <input type="checkbox" name="${name}" value="${esc(v)}" />
-          <span>${esc(v)}</span>
+        (f) => `<label class="soon-pick">
+          <input type="radio" name="first" value="${esc(f.name)}" required />
+          <span class="soon-nm">${esc(f.name)}${
+            f.ko ? `<i class="ko">${esc(f.ko)}</i>` : ""
+          }</span>
         </label>`
       )
       .join("");
-  }
-
-  function renderSurvey() {
-    const S = M.survey || {};
-    if ($("qCategories")) $("qCategories").innerHTML = chips("want", S.categories || []);
-    if ($("qFlavors")) $("qFlavors").innerHTML = chips("flavors", S.flavors || []);
   }
 
   /* -------------------------------------------------------------
@@ -351,22 +484,34 @@
       name: name,
       hasMenuItem: items
     });
-    const item = (n, desc, price) => ({
+    const item = (n, desc, price, soon = false) => ({
       "@type": "MenuItem",
       name: n,
       description: desc || undefined,
-      offers: { "@type": "Offer", price: price, priceCurrency: "USD" }
+      offers: price && !soon ? { "@type": "Offer", price: price, priceCurrency: "USD" } : undefined
     });
 
     const sections = [
       section(
-        "Premium Bingsu",
-        FLAV.map((f) => item(f.name + " Bingsu", f.ing, f.price || base))
+        BING.title || "Shaved Milk",
+        FLAV.map(f => item(/bingsu$/i.test(f.name) ? f.name : f.name + " Bingsu", f.ing, f.price || base, f.soon || f.badge === "COMING SOON"))
       ),
+      ...(ICE.filter((f) => !f.hint).length
+        ? [section(
+            BING.iceTitle || "Shaved Ice",
+            ICE.filter((f) => !f.hint).map((f) => item(f.name, f.ing, f.price || base))
+          )]
+        : []),
+      ...(M.cupBingsu?.enabled === false ? [] : [section(
+        (M.cupBingsu || {}).title || "Cup Bingsu",
+        ((M.cupBingsu || {}).flavors || []).map((f) =>
+          item(f.name + " Cup", f.ing, f.price || (M.cupBingsu || {}).price, (M.cupBingsu || {}).soon)
+        )
+      )]),
       section(
         "Hot & Fresh",
         [M.taiyaki, M.taiyakiIce, M.dubaiTaiyaki, M.cookie]
-          .filter(Boolean)
+          .filter(x => x && x.enabled !== false)
           .map((x) => item(x.title, x.sub || x.note, x.price))
       )
     ];
@@ -376,7 +521,7 @@
     tag.textContent = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Menu",
-      "@id": "https://sweetsnow.org/#menu",
+      "@id": "https://www.sweetsnow.org/#menu",
       name: "Sweet Snow Menu",
       inLanguage: "en",
       hasMenuSection: sections
@@ -496,11 +641,12 @@
       if (!stock.length) return;
       document.querySelectorAll(".item[data-name]").forEach((el) => {
         const name = el.getAttribute("data-name") || "";
+        const inventoryName = el.getAttribute("data-inventory-name") || name;
         const kind = el.getAttribute("data-kind") || "bingsu";
         let best = null;
         let bestScore = 50;
         stock.forEach((sq) => {
-          const n = stockScore(name, kind, sq);
+          const n = Math.max(stockScore(name, kind, sq), stockScore(inventoryName, kind, sq));
           if (n > bestScore) {
             bestScore = n;
             best = sq;
@@ -517,6 +663,8 @@
     renderMastArt();
     renderIndex();
     renderBingsu();
+    renderCups();
+    renderExtraFruit();
     renderToppings();
     renderHot();
     renderSurvey();
