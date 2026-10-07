@@ -1,13 +1,15 @@
-/* Sweet Snow — "gallery" theme (HEYTEA-inspired direction, 2026-10).
-   One white page, two type voices, lowercase hand-lettering, cut-out photos, air.
-   Sky blue is an accent stroke, not a surface. See docs/heytea-design-direction.md. */
+/* Sweet Snow — "gallery" theme · Design sample A (HEYTEA-led, 2026-10).
+   Pastel sky blue read the HEYTEA way: an airy near-white page, calm pale-blue
+   fields for the hero, visit and footer bands, a white gallery band for the
+   products, navy ink, sky-blue accent strokes. Two type voices, lowercase
+   hand-lettering, cut-out photos, generous air. See docs/design-samples/sample-a-heytea.md. */
 
 @font-face{font-family:'Sweet Snow Soft';src:url('./fonts/SweetSnowSoft-Regular.ttf?v=bold-20261006') format('truetype');font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:'Figtree';src:url('./fonts/Figtree-latin.woff2') format('woff2');font-weight:300 700;font-style:normal;font-display:swap}
 
 .theme-gallery{
-  --paper:#fff;--ink:#16202a;--ink-2:#4a5a68;--ink-3:#62727f;
-  --sky:#7bbef0;--sky-ink:#2a6a99;--line:#e4e8ec;--open:#1f7a3f;--closed:#b3362f;
+  --paper:#f4f9fd;--field:#e3f1fc;--field-2:#d7ebf9;--white:#fff;--ink:#1e3a52;--ink-2:#3f5d76;--ink-3:#52708a;
+  --sky:#86c9f1;--sky-ink:#24648f;--line:#c9e2f4;--open:#1f7a3f;--closed:#b3362f;
   --display:'Sweet Snow Soft',Figtree,Arial,sans-serif;--text:Figtree,'Avenir Next',Avenir,'Helvetica Neue',Arial,sans-serif;
   --gap:160px;--header:72px;
   background:var(--paper);color:var(--ink);font-family:var(--text);font-weight:400;font-size:17px;line-height:1.6;letter-spacing:.01em;
@@ -26,17 +28,17 @@
 .theme-gallery .footnote,.theme-gallery small{font-size:14px;color:var(--ink-3);line-height:1.55}
 .theme-gallery .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .theme-gallery a:focus-visible,.theme-gallery button:focus-visible,.theme-gallery input:focus-visible,.theme-gallery textarea:focus-visible{outline:3px solid var(--sky);outline-offset:4px}
-.theme-gallery .skip-link{background:var(--ink);color:#fff}
+.theme-gallery .skip-link{background:var(--ink);color:var(--white)}
 
 /* Hand-drawn strokes: arrows, checks, chevron. Ink by default, sky where the design calls for one highlight. */
 .theme-gallery .stroke{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.theme-gallery .arrow{display:inline-block;height:1em;width:auto;vertical-align:-.1em;color:var(--ink)}
+.theme-gallery .arrow{display:inline-block;height:1em;width:auto;vertical-align:-.1em;color:var(--sky-ink)}
 .theme-gallery .arrow-link{display:inline-flex;align-items:center;gap:14px;font-size:16px;letter-spacing:.06em;text-transform:lowercase}
 .theme-gallery .arrow-link .arrow{height:18px;color:var(--sky-ink)}
 .theme-gallery .arrow-link:hover{opacity:1;text-decoration:underline;text-underline-offset:6px;text-decoration-color:var(--sky)}
 
 /* Header: mark + lowercase links; drawer on phones. */
-.theme-gallery .site-header{position:sticky;top:0;z-index:30;background:var(--paper);box-shadow:0 1px 0 var(--line)}
+.theme-gallery .site-header{position:sticky;top:0;z-index:30;background:var(--white);box-shadow:0 1px 0 var(--line)}
 .theme-gallery .header-inner{display:flex;align-items:center;justify-content:space-between;gap:32px;min-height:var(--header)}
 .theme-gallery .brand{display:flex;align-items:center;gap:12px}
 .theme-gallery .mark{display:block;width:62px;height:54px;overflow:hidden;flex:0 0 auto}
@@ -50,7 +52,7 @@
 .theme-gallery .nav-toggle span:first-child{top:16px}.theme-gallery .nav-toggle span:last-child{top:26px}
 .theme-gallery .drawer{position:fixed;inset:0;z-index:40}
 .theme-gallery .drawer-backdrop{position:absolute;inset:0;background:rgba(22,32,42,.45);border:0;width:100%;padding:0}
-.theme-gallery .drawer-nav{position:absolute;top:0;right:0;bottom:0;width:min(62%,320px);background:var(--paper);padding:96px 40px 40px;display:flex;flex-direction:column;gap:28px;font-size:20px;letter-spacing:.06em;text-transform:lowercase;box-shadow:-1px 0 0 var(--line)}
+.theme-gallery .drawer-nav{position:absolute;top:0;right:0;bottom:0;width:min(62%,320px);background:var(--field);padding:96px 40px 40px;display:flex;flex-direction:column;gap:28px;font-size:20px;letter-spacing:.06em;text-transform:lowercase;box-shadow:-1px 0 0 var(--line)}
 .theme-gallery .drawer-nav a{color:var(--ink-2)}
 .theme-gallery .drawer-nav a[aria-current]{color:var(--ink);font-weight:600}
 .theme-gallery .drawer-close{position:absolute;top:14px;right:22px;width:44px;height:44px;border:0;background:transparent;font-size:30px;line-height:1;color:var(--ink);padding:0}
@@ -74,7 +76,7 @@
 .theme-gallery .principles{padding-block:calc(var(--gap) * .55) 0}
 .theme-gallery .principles ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px}
 .theme-gallery .principles li{display:grid;grid-template-columns:34px 1fr;column-gap:16px;align-items:start}
-.theme-gallery .principles svg{width:32px;height:32px;color:var(--ink);grid-row:span 2;margin-top:-2px}
+.theme-gallery .principles svg{width:32px;height:32px;color:var(--sky-ink);grid-row:span 2;margin-top:-2px}
 .theme-gallery .principles strong{display:block;font-weight:600;font-size:17px;letter-spacing:.02em;text-transform:lowercase}
 .theme-gallery .principles span{display:block;font-size:15px;color:var(--ink-2);line-height:1.5}
 .theme-gallery .principles .footnote{margin:36px 0 0}
@@ -84,7 +86,7 @@
 .theme-gallery .menu-group{margin-bottom:calc(var(--gap) * .75)}
 .theme-gallery .category{display:flex;align-items:flex-end;gap:22px;margin-bottom:56px;min-height:64px}
 .theme-gallery .category h3{margin:0}
-.theme-gallery .category .arrow{height:46px;color:var(--ink);margin-bottom:6px}
+.theme-gallery .category .arrow{height:46px;color:var(--sky-ink);margin-bottom:6px}
 .theme-gallery .category.alt{justify-content:flex-end;flex-direction:row-reverse}
 .theme-gallery .product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:96px 56px}
 .theme-gallery .product-card{display:grid;grid-template-areas:"photo" "head" "body";row-gap:0}
@@ -127,11 +129,11 @@
 .theme-gallery .soon-picks{display:grid;gap:4px}
 .theme-gallery .soon-pick{display:flex;align-items:center;gap:14px;padding:10px 0;font-size:17px}
 .theme-gallery .soon-pick input{width:20px;height:20px;margin:0;accent-color:var(--sky-ink)}
-.theme-gallery .ballot textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:0;background:var(--paper);padding:16px;font:inherit;font-size:16px;line-height:1.55;color:var(--ink);resize:vertical}
+.theme-gallery .ballot textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:0;background:var(--white);padding:16px;font:inherit;font-size:16px;line-height:1.55;color:var(--ink);resize:vertical}
 .theme-gallery .ballot textarea:focus{border-color:var(--ink);outline:0}
 .theme-gallery .ballot textarea::placeholder{color:var(--ink-3);opacity:1}
 .theme-gallery .btn,.theme-gallery .button{display:inline-flex;align-items:center;gap:12px;background:transparent;color:var(--ink);border:1.5px solid var(--ink);border-radius:0;padding:13px 22px;font:inherit;font-size:15px;letter-spacing:.08em;text-transform:lowercase;font-weight:500;box-shadow:none;cursor:pointer}
-.theme-gallery .btn:hover,.theme-gallery .button:hover{background:var(--ink);color:#fff;opacity:1}
+.theme-gallery .btn:hover,.theme-gallery .button:hover{background:var(--ink);color:var(--white);opacity:1}
 .theme-gallery .btn::after,.theme-gallery .button::after{content:'→'}
 
 /* Our story: the bunny is the drawing. */
@@ -162,7 +164,7 @@
 
 /* Footer */
 .theme-gallery .site-footer{border:0;background:transparent;border-radius:0;padding:0}
-.theme-gallery .footer-inner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px 40px;padding-block:36px 44px;box-shadow:0 -1px 0 var(--line);font-size:14px;color:var(--ink-3)}
+.theme-gallery .footer-inner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px 40px;padding-block:36px 44px;font-size:14px;color:var(--ink-2)}
 .theme-gallery .footer-inner .brand-word{font-size:22px}
 .theme-gallery .footer-inner p{margin:0;max-width:46ch}
 .theme-gallery .footer-inner nav{display:flex;gap:28px;letter-spacing:.08em;text-transform:lowercase}
@@ -176,8 +178,19 @@
 .theme-gallery .page-main .updated{font-size:14px;letter-spacing:.08em;color:var(--ink-3);margin-bottom:32px}
 .theme-gallery .page-main a:not(.button){text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--sky)}
 .theme-gallery .page-main .button{margin-top:28px}
+.theme-gallery .page-main+.site-footer{margin-top:0}
 .theme-gallery .page-art{width:120px;height:120px;color:var(--sky);margin:0 0 32px}
 .theme-gallery .page-art svg{width:100%;height:100%}
+
+/* Full-bleed colour bands without wrappers: the shadow paints the field past the
+   column, the clip keeps it to the section's own height, and nothing can overflow. */
+.theme-gallery .band{position:relative;clip-path:inset(0 -100vmax);box-shadow:0 0 0 100vmax var(--band)}
+.theme-gallery .hero{--band:var(--field);background:var(--band);margin-top:0}
+.theme-gallery .menu-section{--band:var(--white);background:var(--band);padding-bottom:calc(var(--gap) * .25)}
+.theme-gallery .menu-section .menu-group:last-child{margin-bottom:0}
+.theme-gallery .visit-section{--band:var(--field);background:var(--band);margin-top:var(--gap)}
+.theme-gallery .site-footer{--band:var(--field-2);background:var(--band)}
+.theme-gallery .page-main{--band:var(--paper)}
 
 /* Dialog remnants keep the ink palette if ever opened. */
 .theme-gallery .product-dialog{border:1px solid var(--line);border-radius:0}
