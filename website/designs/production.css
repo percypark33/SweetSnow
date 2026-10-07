@@ -1,0 +1,35 @@
+
+.location-bar{display:flex;justify-content:space-between;gap:16px;padding-block:13px;border-bottom:1px solid #e6e6e6;font-size:12px;line-height:1.5}.location-bar a{text-decoration:none}.location-bar #status{margin:0}.location-bar .is-open{font-weight:700}.product-meta .tape{display:block;font-size:11px;font-weight:700;letter-spacing:.05em;margin-top:8px}.product-meta .soldout{color:#873d2e}.product-meta .few{color:#795d19}.is-soldout .product-photo img{opacity:.6}.coming-section,.vote-section{padding-block:64px;border-top:1px solid #ddd}.coming-grid,.vote-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px}.coming-grid article{padding:28px;background:#f8f7f5}.coming-grid h3{font-size:24px;margin:14px 0}.coming-grid p{font-size:14px;line-height:1.6;margin-bottom:0}.coming-tag{font-size:11px;text-transform:uppercase;letter-spacing:.1em}.vote-say{max-width:700px}.vote-say h2{font-size:40px;letter-spacing:-1.5px}.vote-say>p{line-height:1.6;color:#555}.vote-pair{margin-top:30px}.ballot{border:1px solid #ddd;padding:28px}.ballot-kicker{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}.hp-field{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}.q{padding:0;border:0;margin:0 0 20px}.q legend,.q-label{font-weight:700;margin-bottom:14px;display:block}.q-label i{font-style:normal;font-weight:400;font-size:12px;color:#666}.soon-pick{display:flex;align-items:center;gap:10px;padding:13px 0}.soon-pick input{width:18px;height:18px;accent-color:#191919}.ballot textarea{width:100%;min-height:130px;border:1px solid #ccc;padding:12px;resize:vertical;font:inherit;font-size:14px}.btn-vote{background:#191919;color:white;border:1px solid #191919;padding:15px 23px;font-size:14px;font-weight:600}.btn-vote:focus-visible,.ballot textarea:focus-visible{outline:3px solid #477a9e;outline-offset:4px}.coming-section h2{font-size:48px;letter-spacing:-2px}@media(max-width:700px){.location-bar{font-size:10px;gap:8px}.location-bar span{max-width:45%;text-align:right}.coming-grid,.vote-pair{grid-template-columns:1fr;gap:18px}.coming-section,.vote-section{padding-block:40px}.vote-say h2,.coming-section h2{font-size:32px}.ballot,.coming-grid article{padding:22px}}
+
+.theme-showcase .coming-section,.theme-showcase .vote-section{border-top:2px dashed #b9def8}
+.theme-showcase .coming-grid article,.theme-showcase .ballot{background:#eaf6ff;border:2px solid #b9def8;border-radius:28px}
+.theme-showcase .btn-vote{background:#7bbef0;color:#123d5d;border:2px solid #62a9dd;border-radius:999px;font-family:'Sweet Snow Soft',Arial,sans-serif;font-size:20px;font-weight:400}
+.theme-showcase .ballot textarea{border:1px solid #b9def8;border-radius:18px;background:white}
+.theme-showcase .soon-pick input{accent-color:#28618a}
+.theme-showcase .location-bar{border-color:#b9def8;color:#215b85}
+.theme-showcase .coming-section h2,.theme-showcase .vote-say h2{letter-spacing:0}
+
+/* A soft, consistent pastel sky-blue palette throughout Sweet Snow. */
+body.theme-showcase{--sky:#b8def7;--sky-pale:#e2f2fd;--sky-line:#b1d6ef;--sky-ink:#285d80;--ink:#21445e;--muted:#42667f;--line:#b1d6ef;background:#edf7fe;color:var(--ink)}
+.theme-showcase .site-header,.theme-showcase .location-bar{border-color:var(--sky-line)}
+.theme-showcase h1 em{color:#3c789f}
+.theme-showcase .main-nav a{background:#d7edfc;border-color:#b1d6ef;color:var(--sky-ink)}
+.theme-showcase .main-nav a:hover{background:#c5e4fa}
+.theme-showcase .button,.theme-showcase .btn-vote{background:#b8def7;border-color:#98c9ea;color:#214e70;box-shadow:0 4px 0 #d1eafa}
+.theme-showcase .button:hover,.theme-showcase .btn-vote:hover{background:#a8d5f3}
+.theme-showcase .product-card,.theme-showcase .product-photo,.theme-showcase .hero-image{background:transparent;box-shadow:none;border:0}
+.theme-showcase .brand-tag{background:#d5ebfa;color:var(--sky-ink)}
+.theme-showcase .brand-story-art,.theme-showcase .visit-details,.theme-showcase .coming-grid article,.theme-showcase .ballot{background:#dff0fc;border-color:#b1d6ef}
+.theme-showcase .catering-card{background:#d5ecfc;border-color:#acd3ef;box-shadow:0 6px 0 #dceffb}
+.theme-showcase .coming-soon{background:#b8def7;border-color:#edf7fe;outline-color:#86b9dc;box-shadow:0 6px 0 #c5e4f8;color:#214e70}
+.theme-showcase .ballot textarea{background:#f4faff;border-color:#a8cee8;color:#21445e}
+.theme-showcase .ballot textarea::placeholder{color:#56758c}
+.theme-showcase .site-footer{background:#dff0fc;border-color:#b1d6ef}
+.theme-showcase .site-footer p,.theme-showcase .visit-section p,.theme-showcase .vote-say>p,.theme-showcase .coming-grid p{color:#42667f}
+.theme-showcase .menu-category-title{color:#285d80}
+.theme-showcase .menu-category-title::before,.theme-showcase .menu-category-title::after{background:#b1d6ef}
+.theme-showcase .brand-loader{background:#edf7fe}
+.theme-showcase .brand-loader .loader-logo{mix-blend-mode:multiply}
+.theme-showcase .brand-loader .loader-dots{background:#d8edfc;border-color:#acd3ef}
+.theme-showcase .brand-loader .loader-dots i{background:#78afd5}
+.theme-showcase a:focus-visible,.theme-showcase button:focus-visible{outline:3px solid #477fA7;outline-offset:4px}

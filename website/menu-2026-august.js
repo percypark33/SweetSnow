@@ -460,11 +460,11 @@ window.MENU = {
   /* ---- HOT & FRESH SIDES ---------------------------------- */
   taiyaki: {
     title: "Taiyaki",
-    price: "3.00",
+    price: "5.00",
     fillings: "Nutella · Red Bean · Custard · Sweet Potato & Cheese · Cheese",
     note: "",
     deals: [
-      { qty: "1 piece", price: "3.00" },
+      { qty: "2 pieces", price: "5.00" },
       { qty: "5 pieces", price: "12.00" }
     ],
     dealNote: "mix any fillings"
@@ -480,7 +480,7 @@ window.MENU = {
   dubaiTaiyaki: {
     title: "Dubai Taiyaki",
     price: "5.00",
-    note: "Dubai chocolate filling · cacao powder"
+    note: "Dubai chocolate filling"
   },
 
   cookie: {

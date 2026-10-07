@@ -1,55 +1,57 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="Soft milk snow, fresh fruit and layers worth sharing. Explore Sweet Snow's Korean bingsu menu in Garden Grove, inside QT Golden Market Place.">
-  <meta name="robots" content="index,follow">
-  <meta name="sweet-snow-design" content="01-photo-studio">
-  <title>Sweet Snow — Korean Bingsu & Desserts · Garden Grove</title>
-  <link rel="canonical" href="https://www.sweetsnow.org/">
+<!DOCTYPE html>
+<html lang="en"><head>
+<script defer="" src="/analytics-config.js?v=google-tags-sept24"></script>
+<script defer="" src="/analytics.js?v=google-tags-sept24"></script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Sweet Snow — Menu · Korean Shaved Ice · Garden Grove, CA</title>
+<meta content="The Sweet Snow menu: real milk shaved into soft snow, one size made to share, plus hot taiyaki and Dubai chewy cookies. Inside QT Golden Market Place, 9772 Garden Grove Blvd, Garden Grove, CA. Vote on what we make next." name="description"/>
+<meta content="Sweet Snow" name="author"/>
+<meta content="index, follow" name="robots"/>
+<link href="https://www.sweetsnow.org/" rel="canonical"/>
+<!-- Open Graph -->
+<meta content="website" property="og:type"/>
+<meta content="Sweet Snow" property="og:site_name"/>
+<meta content="https://www.sweetsnow.org/" property="og:url"/>
+<meta content="Sweet Snow — Menu · Korean Shaved Ice" property="og:title"/>
+<meta content="Real milk shaved into soft snow — creamy, never watery. See the full menu and vote on what we make next." property="og:description"/>
+<!-- The card people see when the link is shared. Drawn, not photographed,
+       to match the site — rebuild it with website/share-card/export.sh. -->
+<meta content="https://www.sweetsnow.org/assets/share-card.png" property="og:image"/>
+<meta content="1200" property="og:image:width"/>
+<meta content="630" property="og:image:height"/>
+<meta content="Sweet Snow — real milk shaved into soft snow. Inside QT Golden Market Place, Garden Grove, CA." property="og:image:alt"/>
+<meta content="en_US" property="og:locale"/>
+<!-- Twitter -->
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="Sweet Snow — Menu" name="twitter:title"/>
+<meta content="Korean milk snow · taiyaki · Dubai cookies · QT Golden Market Place, Garden Grove." name="twitter:description"/>
+<meta content="https://www.sweetsnow.org/assets/share-card.png" name="twitter:image"/>
+<meta content="Sweet Snow — Korean shaved ice, Garden Grove, CA." name="twitter:image:alt"/>
+<meta content="#ffffff" name="theme-color"/>
+<meta content="US-CA" name="geo.region"/>
+<meta content="Garden Grove" name="geo.placename"/>
+<meta content="33.7739;-117.9414" name="geo.position"/>
+<link href="assets/logo-icon.png" rel="icon" type="image/png"/>
+<link href="assets/logo-icon.png" rel="apple-touch-icon"/>
+<link href="site.webmanifest" rel="manifest"/>
 
-  <!-- Link preview. The hero photo is square; the share card at
-       /assets/share-card.png is the older drawn 1200×630 version. -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Sweet Snow">
-  <meta property="og:locale" content="en_US">
-  <meta property="og:title" content="Sweet Snow — A little snow. A lot of joy.">
-  <meta property="og:description" content="Korean shaved ice, real fruit, layers worth sharing. Visit Sweet Snow in Garden Grove.">
-  <meta property="og:url" content="https://www.sweetsnow.org/">
-  <meta property="og:image" content="https://www.sweetsnow.org/designs/photos/mango-special-1200.webp">
-  <meta property="og:image:type" content="image/webp">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="1200">
-  <meta property="og:image:alt" content="Mango Special bingsu — mango, toasted coconut, popping boba and yogurt ice cream on milk snow.">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Sweet Snow — Korean Bingsu · Garden Grove">
-  <meta name="twitter:description" content="Korean shaved ice, real fruit, layers worth sharing. Inside QT Golden Market Place, Garden Grove.">
-  <meta name="twitter:image" content="https://www.sweetsnow.org/designs/photos/mango-special-1200.webp">
-  <meta name="geo.region" content="US-CA">
-  <meta name="geo.placename" content="Garden Grove">
-  <meta name="geo.position" content="33.7739;-117.9414">
 
-  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icon-32.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
-  <link rel="manifest" href="/site.webmanifest">
-  <link rel="stylesheet" href="/designs/base.css">
-  <link rel="stylesheet" href="/designs/showcase.css">
-  <link rel="stylesheet" href="/launch.css">
 
-  <!-- Local business data for Google. Hours here must match `schedule` in
-       menu-2026-august.js, which drives the hours shown on the page. -->
-  <script type="application/ld+json">
+
+<!-- Local business data for Google. Hours and address change rarely, so they
+       live here; the menu itself is injected from menu-2026-august.js by app.js so a
+       price is never listed in two places. -->
+<script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "IceCreamShop",
     "@id": "https://www.sweetsnow.org/#business",
     "name": "Sweet Snow",
-    "url": "https://www.sweetsnow.org/",
-    "image": "https://www.sweetsnow.org/designs/photos/mango-special-1200.webp",
+    "url": "https://www.sweetsnow.org",
+    "image": "https://www.sweetsnow.org/assets/sweet-snow-arched-logo.png",
     "description": "Premium Korean milk bingsu, taiyaki, and Dubai chewy cookies inside QT Golden Market Place, Garden Grove, CA.",
+    "servesCuisine": ["Korean", "Dessert"],
     "priceRange": "$$",
     "address": {
       "@type": "PostalAddress",
@@ -60,32 +62,48 @@
       "addressCountry": "US"
     },
     "geo": { "@type": "GeoCoordinates", "latitude": 33.7739, "longitude": -117.9414 },
-    "servesCuisine": ["Korean", "Dessert"],
-    "sameAs": ["https://www.instagram.com/sweetsnow_oc/"],
-    "hasMenu": "https://www.sweetsnow.org/#menu",
     "openingHoursSpecification": [
       { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday"], "opens": "17:00", "closes": "22:00" },
       { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Friday", "Saturday", "Sunday"], "opens": "13:00", "closes": "22:00" }
-    ]
+    ],
+    "sameAs": [
+      "https://www.instagram.com/sweetsnow_oc/",
+      "https://www.yelp.com/biz/sweet-snow-garden-grove"
+    ],
+    "hasMenu": "https://www.sweetsnow.org/#menu"
   }
   </script>
-
-  <script defer src="/analytics-config.js"></script>
-  <script defer src="/analytics.js"></script>
-  <script defer src="/menu-2026-august.js"></script>
-  <script defer src="/designs/production.js"></script>
-  <script defer src="/live.js"></script>
-</head>
-<body class="theme-showcase" data-theme="showcase">
-  <div id="app"></div>
-  <noscript>
-    <main>
-      <h1>Sweet Snow</h1>
-      <p>Korean shaved ice · Inside QT Golden Market Place</p>
-      <p>9772 Garden Grove Blvd, Garden Grove, CA 92844</p>
-      <p>Monday–Thursday: 5–10 pm. Friday–Sunday: 1–10 pm.</p>
-      <p>Please enable JavaScript to browse menu photos and ingredients.</p>
-    </main>
-  </noscript>
-</body>
-</html>
+<link href="/designs/base.css" rel="stylesheet"/><link href="/designs/showcase.css?v=opening-status-20261006" rel="stylesheet"/><link href="/designs/production.css?v=pastel-sky-20261006" rel="stylesheet"/><script defer="" src="/menu-2026-august.js?v=taiyaki-prices-20261006"></script><script defer="" src="/designs/production.js?v=opening-status-20261006"></script><link rel="stylesheet" href="/designs/loading.css?v=static-logo-dots-20261006"><link rel="preload" as="image" href="/assets/sweet-snow-arched-logo.png"><link rel="stylesheet" href="/designs/brand-story.css?v=20261006"><script defer src="/designs/brand-story.js?v=family-menu-20261006"></script></head><body class="theme-showcase" data-theme="showcase"><div class="brand-loader" id="brand-loader" role="status" aria-live="polite" aria-label="Loading Sweet Snow" hidden><div class="loader-content"><span class="loader-spark first" aria-hidden="true">✦</span><span class="loader-spark second" aria-hidden="true">✦</span><span class="loader-spark third" aria-hidden="true">✦</span><img class="loader-logo" src="/assets/sweet-snow-arched-logo.png" width="905" height="564" alt="" fetchpriority="high"><div class="loader-dots" aria-hidden="true"><i></i><i></i><i></i></div><p class="loader-label">Loading Sweet Snow…</p></div></div><div id="app"></div><script src="/designs/loading.js?v=static-logo-dots-20261006"></script><template id="community-template"><section class="vote-section shell" id="vote">
+<div class="vote-inner">
+<div class="vote-say">
+<h2>What should we make next?</h2>
+<p>Send a flavor idea we haven't listed — a taste from home, something you had on a trip, anything.</p>
+</div>
+<div class="vote-pair">
+<form action="/thanks" class="ballot" data-netlify="true" hidden="" id="voteForm" method="POST" name="coming-soon-vote" netlify-honeypot="bot-field">
+<input name="form-name" type="hidden" value="coming-soon-vote"/>
+<p aria-hidden="true" class="hp-field">
+<label>Don't fill this out: <input autocomplete="off" name="bot-field" tabindex="-1"/></label>
+</p>
+<p class="ballot-kicker">Coming soon</p>
+<fieldset class="q">
+<legend>Which one first?</legend>
+<div class="soon-picks" id="qSoon"></div>
+</fieldset>
+<button class="btn btn-vote" type="submit">Cast my vote</button>
+</form>
+<form action="/thanks" class="ballot" data-netlify="true" id="ideaForm" method="POST" name="menu-idea" netlify-honeypot="bot-field">
+<input name="form-name" type="hidden" value="menu-idea"/>
+<p aria-hidden="true" class="hp-field">
+<label>Don't fill this out: <input autocomplete="off" name="bot-field" tabindex="-1"/></label>
+</p>
+<p class="ballot-kicker">Your idea</p>
+<div class="q">
+<label class="q-label" for="voteIdea">Something we haven't thought of <i>optional</i></label>
+<textarea id="voteIdea" name="idea" placeholder="A flavor from home, something you had on a trip, anything" required="" rows="5"></textarea>
+</div>
+<button class="btn btn-vote" type="submit">Send idea</button>
+</form>
+</div>
+</div>
+</section></template><noscript><h1>Sweet Snow</h1><p>Korean shaved ice at 9772 Garden Grove Blvd, Garden Grove, CA 92844. Enable JavaScript to explore the menu.</p></noscript></body></html>
