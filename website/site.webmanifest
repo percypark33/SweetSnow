@@ -1,0 +1,15 @@
+{
+  "name": "Sweet Snow",
+  "short_name": "Sweet Snow",
+  "description": "Korean milk bingsu, taiyaki & Dubai cookies · QT Golden Market Place, Garden Grove",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "lang": "en-US",
+  "icons": [
+    { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

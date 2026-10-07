@@ -1,3 +1,10 @@
-Files Claude coded/edited on 2026-08-18 for the August menu update.
-Working copies live in ~/sweet-snow (the live tree that deploys + feeds the TVs).
-This folder is Claude's save — other AI tools' folders are untouched.
+Source of truth for sweetsnow.org.
+
+website/ mirrors the live Vercel deployment (synced 2026-10-06 from
+www.sweetsnow.org — the "01-photo-studio" home page plus /community, /thanks,
+/privacy, assets and serverless functions). Deploy from this repo; see
+website/DEPLOY.md for host settings and the environment variables the forms and
+Square inventory need.
+
+History: the original upload was Claude's save of the 2026-08-18 August menu
+update; the owner's local working tree was ~/sweet-snow.
