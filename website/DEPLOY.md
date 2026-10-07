@@ -1,8 +1,9 @@
 # Deploy sweetsnow.org
 
 This folder (`website/`) is the **source of truth** for the Sweet Snow website.
-It was synced from the live site on 2026-10-06 and is meant to be deployed by
-**Vercel** straight from this GitHub repo — no build step, no dependencies.
+It was synced from the live site on 2026-10-06/07 and is deployed by **Vercel**
+straight from this GitHub repo on every push to `main` — no build step, no
+dependencies.
 
 **Canonical URL: `https://www.sweetsnow.org/`** (`www`). The bare domain
 `sweetsnow.org` 308-redirects to it (`vercel.json`), `http://` → `https://`.
@@ -33,16 +34,37 @@ design system), `designs/loading.css`, `designs/brand-story.css`,
 
 ## Publishing an update
 
-1. Edit files in `website/`, preview locally (below), commit, push to `main`.
-2. Vercel builds and publishes automatically within a minute. There is nothing
-   to drag-and-drop any more.
+**Standing rule (Percy, 2026-10-07): edits are published automatically.**
+The GitHub repo `percypark33/SweetSnow` is connected to the Vercel project
+`sweet-snow`; Vercel's production branch is `main`.
 
-### Vercel project settings (one-time)
+- **Push or merge to `main` → production deploy** of `www.sweetsnow.org`.
+  Verified 2026-10-07: merge `9088fde` at 05:24:13 UTC → GitHub "Production"
+  deployment created 05:24:26 → live `Last-Modified` 05:25:37 (about a minute).
+- **Open a pull request → preview deploy.** The Vercel bot comments on the PR
+  with a `*.vercel.app` preview URL and a "Vercel" status check. Previews run
+  the same functions, but do not share production environment variables unless
+  you add them for the Preview environment too.
+- Nothing is deployed by hand any more. Do **not** run `vercel --prod` from a
+  local folder: it would publish files that are not in the repo and the next
+  push to `main` would overwrite it again. The old drag-and-drop Netlify flow
+  is retired.
 
-- Import the GitHub repo; set **Root Directory** to `website`. Framework preset:
-  **Other**. No build command, no output directory.
-- Domains: `www.sweetsnow.org` (primary) and `sweetsnow.org` (redirect).
-- Environment variables (Project → Settings → Environment Variables):
+So the day-to-day flow is: edit in `website/` → preview locally (below) →
+commit → push to `main` (or merge the PR) → hard-refresh the live site after
+about a minute. Deploy logs: Vercel dashboard → `sweet-snow` → Deployments.
+
+### Vercel project settings (one-time, already in place)
+
+- Git: repository `percypark33/SweetSnow`, **Production Branch `main`**,
+  **Root Directory `website`**. Framework preset **Other**; no build command,
+  no output directory, no install command (there is no `package.json`).
+- Domains: `www.sweetsnow.org` (primary) and `sweetsnow.org` (redirects to
+  `www`, also enforced by `vercel.json`).
+- Environment variables (Project → Settings → Environment Variables; tick
+  **Production**, and **Preview** if you want PR previews to send mail too).
+  Changing a variable needs a redeploy to take effect (Deployments → ⋯ →
+  Redeploy, or push any commit).
 
 | Variable | Needed for | Notes |
 |---|---|---|
