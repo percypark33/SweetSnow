@@ -32,8 +32,9 @@
 <meta content="US-CA" name="geo.region"/>
 <meta content="Garden Grove" name="geo.placename"/>
 <meta content="33.7739;-117.9414" name="geo.position"/>
-<link href="assets/logo-icon.png" rel="icon" type="image/png"/>
-<link href="assets/logo-icon.png" rel="apple-touch-icon"/>
+<link href="/assets/icon-32.png" rel="icon" type="image/png" sizes="32x32"/>
+<link href="/assets/icon-192.png" rel="icon" type="image/png" sizes="192x192"/>
+<link href="/assets/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
 <link href="site.webmanifest" rel="manifest"/>
 
 
@@ -80,7 +81,7 @@
 <p>Send a flavor idea we haven't listed — a taste from home, something you had on a trip, anything.</p>
 </div>
 <div class="vote-pair">
-<form action="/thanks" class="ballot" data-netlify="true" hidden="" id="voteForm" method="POST" name="coming-soon-vote" netlify-honeypot="bot-field">
+<form action="/api/form" class="ballot" hidden="" id="voteForm" method="POST" name="coming-soon-vote">
 <input name="form-name" type="hidden" value="coming-soon-vote"/>
 <p aria-hidden="true" class="hp-field">
 <label>Don't fill this out: <input autocomplete="off" name="bot-field" tabindex="-1"/></label>
@@ -92,15 +93,15 @@
 </fieldset>
 <button class="btn btn-vote" type="submit">Cast my vote</button>
 </form>
-<form action="/thanks" class="ballot" data-netlify="true" id="ideaForm" method="POST" name="menu-idea" netlify-honeypot="bot-field">
+<form action="/api/form" class="ballot" id="ideaForm" method="POST" name="menu-idea">
 <input name="form-name" type="hidden" value="menu-idea"/>
 <p aria-hidden="true" class="hp-field">
 <label>Don't fill this out: <input autocomplete="off" name="bot-field" tabindex="-1"/></label>
 </p>
 <p class="ballot-kicker">Your idea</p>
 <div class="q">
-<label class="q-label" for="voteIdea">Something we haven't thought of <i>optional</i></label>
-<textarea id="voteIdea" name="idea" placeholder="A flavor from home, something you had on a trip, anything" required="" rows="5"></textarea>
+<label class="q-label" for="voteIdea">Something we haven't thought of</label>
+<textarea id="voteIdea" name="idea" placeholder="A flavor from home, something you had on a trip, anything" required="" rows="5" maxlength="2000"></textarea>
 </div>
 <button class="btn btn-vote" type="submit">Send idea</button>
 </form>

@@ -3,6 +3,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
+    { "source": "/community", "destination": "/#vote", "permanent": true },
     {
       "source": "/(.*)",
       "has": [{ "type": "host", "value": "sweetsnow.org" }],

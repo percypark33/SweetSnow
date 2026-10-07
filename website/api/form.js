@@ -1,4 +1,4 @@
-/* POST /api/form — receives the two ballots on /community (menu-idea, coming-soon-vote).
+/* POST /api/form — receives the two ballots in the Vote section of the home page (menu-idea, coming-soon-vote).
  *
  * The site runs on Vercel, which does not have Netlify Forms, so this function
  * is the form backend. It delivers each submission to whichever of these is
@@ -57,7 +57,7 @@ function wantsJson(req) {
 function page(res, status, title, text) {
   res.statusCode = status;
   res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.end(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${title} — Sweet Snow</title><link rel="icon" href="/assets/icon-32.png"><link rel="stylesheet" href="/designs/base.css"><link rel="stylesheet" href="/designs/showcase.css"></head><body class="theme-showcase"><main class="shell" style="padding-block:80px 60px;max-width:620px"><p class="eyebrow">Sweet Snow</p><h1 style="font-size:clamp(34px,5vw,52px);letter-spacing:-2px;line-height:1.05">${title}</h1><p style="font-size:16px;line-height:1.7;color:#656565">${text}</p><p style="margin-top:28px"><a class="button" href="/community#vote">Back to the idea box</a></p></main></body></html>`);
+  res.end(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${title} — Sweet Snow</title><link rel="icon" href="/assets/icon-32.png"><link rel="stylesheet" href="/designs/base.css"><link rel="stylesheet" href="/designs/showcase.css"></head><body class="theme-showcase"><main class="shell" style="padding-block:80px 60px;max-width:620px"><p class="eyebrow">Sweet Snow</p><h1 style="font-size:clamp(34px,5vw,52px);letter-spacing:-2px;line-height:1.05">${title}</h1><p style="font-size:16px;line-height:1.7;color:#656565">${text}</p><p style="margin-top:28px"><a class="button" href="/#vote">Back to the idea box</a></p></main></body></html>`);
 }
 
 async function sendResend(subject, text) {

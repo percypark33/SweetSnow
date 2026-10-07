@@ -13,10 +13,10 @@ use `www` — keep it that way or the site will fight itself.
 
 | URL | File | What it is |
 |---|---|---|
-| `/` | `index.html` + `designs/production.js` | The new photo-studio home page ("01-photo-studio"). The HTML is a shell; `designs/production.js` renders the page into `#app` from `menu-2026-august.js`. `live.js` adds the address bar, Coming-soon / Cup Bingsu / idea sections and the Square stock badges. |
-| `/community` | `community.html` + `app.js` + `menu-art.js` + `styles.css` | The previous illustrated menu page, kept for the **Vote / idea ballots** (linked from the home footer as "Share an idea"). Same data file. |
+| `/` | `index.html` + `designs/production.js` | The home page ("01-photo-studio", pastel-sky palette). The HTML is a shell with the `<head>`, a `<template id="community-template">` holding the two Vote ballots, and a loader overlay; `designs/production.js` renders everything else into `#app` from `menu-2026-august.js` (menu grid, Catering, Coming soon, Visit, live Open/Closed status, Menu JSON-LD, Square stock badges). `designs/brand-story.js` appends the "Our story" section + nav link; `designs/loading.js` shows the logo loader for a second on each click. |
 | `/thanks` | `thanks.html` | Form success page (`noindex`). |
 | `/privacy` | `privacy.html` | Privacy notice for the Google tags. |
+| `/community` | — | Retired 2026-10-07; `vercel.json` redirects it to `/#vote`. |
 | any unknown URL | `404.html` | Branded not-found page (Vercel serves it automatically with status 404). |
 | `/api/inventory` | `api/inventory.js` | Serverless function: live stock from Square → SOLD OUT / FEW LEFT badges. |
 | `/api/form` | `api/form.js` | Serverless function: receives the two ballots and emails / forwards them. |
@@ -24,12 +24,12 @@ use `www` — keep it that way or the site will fight itself.
 Other files: `menu-2026-august.js` (**all menu content, prices, hours — the only
 file to edit for a price change**; the in-store TV boards read the same file),
 `analytics.js` + `analytics-config.js` (GA4 + Google Ads, honours DNT/GPC),
-`launch.css` (styles for the `live.js` sections), `designs/base.css` +
-`designs/showcase.css` (home design system), `designs/page.css` (thanks /
-privacy / 404), `designs/photos/*.webp` (640 and 1200 px product photos),
-`assets/` (logos, icon set, share card, QR), `robots.txt`, `sitemap.xml`,
-`site.webmanifest`, `vercel.json`. `cup-bingsu-saved.js` is an archive and is
-not loaded by any page.
+`designs/base.css` + `designs/showcase.css` + `designs/production.css` (home
+design system), `designs/loading.css`, `designs/brand-story.css`,
+`designs/page.css` (thanks / privacy / 404), `designs/photos/*.webp` (640 and
+1200 px product photos), `assets/` (logos, icon set, share card, QR),
+`robots.txt`, `sitemap.xml`, `site.webmanifest`, `vercel.json`.
+`cup-bingsu-saved.js` is an archive and is not loaded by any page.
 
 ## Publishing an update
 
@@ -61,28 +61,26 @@ they arrive.
 cd website && python3 -m http.server 8099
 ```
 
-Then open http://localhost:8099. Clean URLs (`/community`, `/thanks`) and the
-`/api/*` functions only work on Vercel; use `/community.html` etc. locally, or
-run `npx vercel dev` from `website/` for the full behaviour.
+Then open http://localhost:8099. Clean URLs (`/thanks`, `/privacy`) and the
+`/api/*` functions only work on Vercel; use `/thanks.html` etc. locally, or run
+`npx vercel dev` from `website/` for the full behaviour.
 
 ## Hours and address — keep in step
 
 Hours live in `menu-2026-august.js` as `hours` (display strings, used by the
-TVs) and `schedule` (24-hour, drives the hours shown on `/` and the Open/Closed
-pill on `/community`). The same hours are repeated in the JSON-LD and the
-`<noscript>` block of `index.html` and in the JSON-LD of `community.html` —
-update those three spots too when hours change. Currently Mon–Thu 5–10 pm,
-Fri–Sun 1–10 pm.
+TVs) and `schedule` (24-hour, drives the hours shown in the Visit section and
+the live Open/Closed status on `/`). The same hours are repeated in the JSON-LD
+of `index.html` — update that too when hours change. Currently Mon–Thu
+5–10 pm, Fri–Sun 1–10 pm.
 
-Address and Instagram handle are read from `brand` in the data file on `/` and
-`/community`; they are hard-coded in the footers of `thanks.html`,
-`privacy.html` and `404.html`.
+Address and Instagram handle are read from `brand` in the data file on `/`;
+they are hard-coded in the footers of `thanks.html`, `privacy.html` and
+`404.html`.
 
 ## The link preview picture
 
-`/` uses the Mango Special hero photo (`designs/photos/mango-special-1200.webp`,
-square) as its `og:image`; `/community` still uses the drawn
-`assets/share-card.png` (1200×630). iMessage / Facebook / WhatsApp cache
+`/` uses the drawn `assets/share-card.png` (1200×630) as its `og:image`
+(built from `share-card/card.html` in the owner's tree). iMessage / Facebook / WhatsApp cache
 previews for days — use the [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/)
 → **Scrape Again** after changing either.
 
@@ -91,15 +89,16 @@ previews for days — use the [Facebook Sharing Debugger](https://developers.fac
 - Favicon / app icons: `assets/icon-32.png`, `icon-192.png`, `icon-512.png`,
   `icon-512-maskable.png`, `apple-touch-icon.png` — generated from
   `assets/logo-icon.png` (the yellow 달빙 badge, kept as the master).
-- Header logo: `assets/sweet-snow-arched-logo-240.png` on `/`, `/thanks`,
-  `/privacy`, `404`; `-320.png` on `/community`; `sweet-snow-arched-logo.png`
-  (905×564) is the master. `sweet-snow-stacked-logo.png` is the `/community`
-  footer logo. `logo-primary.png` (old wordmark) is no longer used by any page.
+- Header logo: `/` uses the master `assets/sweet-snow-arched-logo.png`
+  (905×564) because the loader and brand-story section load it at full size
+  anyway; `/thanks`, `/privacy` and `404` use the 3 KB `-240.png`. `-320.png`,
+  `sweet-snow-stacked-logo.png` and `logo-primary.png` are no longer used by
+  any page.
 
 ## Brand notes
 
 - Canonical URL: `https://www.sweetsnow.org/`
 - No phone number on the site by choice — Instagram `@sweetsnow_oc` only.
-- Design system for `/`: Arial/Helvetica, near-black `#181818`, `--muted #656565`,
-  hairline `#e3e3e3`, square black buttons. `/community` keeps the illustrated
-  sky-blue / navy / yellow "menu board" look (`styles.css :root`).
+- Design system for `/`: Arial/Helvetica, navy text on white and pastel sky
+  panels (`designs/production.css`), square dark buttons; `#747474` is the
+  lightest text colour that still passes AA on white.
