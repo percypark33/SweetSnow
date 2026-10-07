@@ -10,40 +10,54 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/icon-32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/designs/base.css">
-  <link rel="stylesheet" href="/designs/showcase.css">
-  <link rel="stylesheet" href="/designs/page.css">
+  <link rel="stylesheet" href="/designs/gallery.css?v=gallery-20261007">
 </head>
-<body class="theme-showcase" data-theme="showcase">
-  <a class="skip-link" href="#main">Skip to content</a>
-  <header class="site-header shell">
-    <a class="brand" href="/" aria-label="Sweet Snow home">
-      <img class="logo" src="/assets/sweet-snow-arched-logo-240.png" alt="Sweet Snow" width="240" height="150">
-      <span class="brand-word" aria-hidden="true">Sweet Snow</span>
-    </a>
-    <nav class="main-nav" aria-label="Main navigation">
-      <a href="/#menu">Menu</a>
-      <a href="/#catering">Catering</a>
-      <a href="/#visit">Visit us ↗</a>
-      <a href="/#brand-story">Our story</a>
-    </nav>
+<body class="theme-gallery" data-theme="gallery">
+  <a class="skip-link" href="#main">skip to content</a>
+  <header class="site-header" id="top">
+    <div class="shell header-inner">
+      <a class="brand" href="/" aria-label="Sweet Snow home">
+        <span class="mark"><img src="/assets/sweet-snow-stacked-logo.png" alt="" width="419" height="526"></span>
+        <span class="brand-word" aria-hidden="true">sweet snow</span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="/#menu">menu</a>
+        <a href="/#catering">catering</a>
+        <a href="/#visit">visit</a>
+        <a href="/#brand-story">our story</a>
+      </nav>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open menu"><span></span><span></span></button>
+    </div>
   </header>
-
+  <div class="drawer" id="drawer" hidden>
+    <button class="drawer-backdrop" type="button" tabindex="-1" aria-label="Close menu"></button>
+    <nav class="drawer-nav" aria-label="Main navigation">
+      <a href="/#menu">menu</a>
+      <a href="/#catering">catering</a>
+      <a href="/#visit">visit</a>
+      <a href="/#brand-story">our story</a>
+      <button class="drawer-close" type="button" aria-label="Close menu">×</button>
+    </nav>
+  </div>
   <main class="page-main shell" id="main">
-    <p class="eyebrow">Sweet Snow</p>
-    <h1>Website privacy</h1>
+    <p class="eyebrow">sweet snow</p>
+    <h1>website privacy</h1>
     <p class="updated">Updated September 24, 2026</p>
     <p>Sweet Snow uses Google Analytics and the Google Ads tag to understand website visits, menu engagement, and advertising performance. These services may use cookies and online identifiers and receive technical information about your browser and device.</p>
     <p>Our website tracking records page visits, viewed menu sections, navigation, Instagram link clicks, and form submission attempts. An attempt does not confirm that a message was received. Our tracking code does not send the text you enter in forms or count in-store and kiosk purchases as website sales.</p>
     <p>Google signals and advertising personalization are disabled in our website tag configuration. The tags do not load when your browser sends Global Privacy Control or Do Not Track. You can also control cookies in your browser or use <a href="https://tools.google.com/dlpage/gaoptout" rel="noopener">Google’s Analytics opt-out browser add-on</a>.</p>
     <p>Learn <a href="https://policies.google.com/technologies/partner-sites" rel="noopener">how Google uses information from sites that use its services</a>. Links to external sites, including Instagram, are subject to those sites’ privacy practices.</p>
     <p>For questions, contact Sweet Snow in-store or through <a href="https://www.instagram.com/sweetsnow_oc/" rel="noopener">our Instagram account</a>.</p>
-    <a class="button" href="/">Back to the menu</a>
+    <a class="button" href="/">back to the menu</a>
   </main>
 
-  <footer class="site-footer shell">
-    <a class="brand-word" href="/">Sweet Snow</a>
-    <p>9772 Garden Grove Blvd · Garden Grove, CA 92844 · Inside QT Golden Market Place</p>
-    <div><a href="/#vote">Share an idea</a><a href="/privacy">Privacy</a></div>
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <a class="brand-word" href="/">sweet snow</a>
+      <p>9772 Garden Grove Blvd · Garden Grove, CA 92844 · Inside QT Golden Market Place</p>
+      <nav aria-label="Footer"><a href="/#vote">share an idea</a><a href="/privacy">privacy</a></nav>
+    </div>
   </footer>
+  <script defer src="/designs/gallery.js?v=gallery-20261007"></script>
 </body>
 </html>
