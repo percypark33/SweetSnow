@@ -4,8 +4,8 @@
   "description": "Korean milk bingsu, taiyaki & Dubai cookies · QT Golden Market Place, Garden Grove",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#f4f1e8",
+  "theme_color": "#8ec8ee",
   "lang": "en-US",
   "icons": [
     { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

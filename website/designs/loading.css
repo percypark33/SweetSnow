@@ -1,4 +1,4 @@
-.brand-loader{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;background:#fff;opacity:1;transition:opacity .18s ease;overflow:hidden;pointer-events:none}
+.brand-loader{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;background:#f4f1e8;opacity:1;transition:opacity .18s ease;overflow:hidden;pointer-events:none}
 .brand-loader[hidden]{display:none}
 .brand-loader.is-finished{opacity:0}
 .loader-content{text-align:center;padding:32px;width:min(420px,90vw)}
