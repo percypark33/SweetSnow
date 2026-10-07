@@ -1,6 +1,9 @@
-/* Sweet Snow brand story — layout only; the theme stylesheet supplies colour, borders and spacing. */
-.brand-story{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:center;gap:64px;padding-block:72px}
-.brand-story-art img{display:block;width:100%;height:auto}
-.brand-story-copy h2{line-height:1.12}
-.brand-story-copy>p:not(.eyebrow){font-size:16px;line-height:1.8;max-width:48ch}
-@media(max-width:700px){.brand-story{grid-template-columns:1fr;gap:30px;padding-block:50px}.brand-story-art{max-width:320px;margin-inline:auto}.brand-story-copy>p:not(.eyebrow){font-size:15px}}
+/* Sweet Snow brand story */
+.brand-story{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:center;gap:64px;padding-block:72px;border-top:2px dashed #b9def8}
+.brand-story-art{padding:32px;background:#eaf6ff;border-radius:32px;border:1px solid #b9def8}
+.brand-story-art img{display:block;width:100%;height:auto;mix-blend-mode:multiply}
+.brand-story-copy .eyebrow{color:#28618a}.brand-story-copy h2{line-height:1.12}
+.brand-story-copy>p:not(.eyebrow){color:#416074;font-size:16px;line-height:1.8;max-width:48ch}
+.brand-story-copy .text-link{display:inline-block;margin-top:10px;color:#215b85}
+.theme-showcase .main-nav{flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:700px){.brand-story{grid-template-columns:1fr;gap:30px;padding-block:50px}.brand-story-art{max-width:320px;padding:26px;margin-inline:auto}.brand-story-copy>p:not(.eyebrow){font-size:15px}}
