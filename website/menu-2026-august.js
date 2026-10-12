@@ -434,7 +434,7 @@ window.MENU = {
     ]
   },
 
-  creamTop: { title: "Add house-made cream top", price: "3" },
+  creamTop: { title: "Add house-made cream top", price: "2" },
 
   /* Extra fruit sits under the bowls (website + left TV),
      not with the topping boxes. */
