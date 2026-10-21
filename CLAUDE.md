@@ -41,6 +41,15 @@ Korean bingsu shop in Garden Grove, CA. This repo is the source of truth for swe
 - Run independent agents in parallel.
 - Never write to QuickBooks. Never delete in Square (archive). Never send email or post without approval.
 
+## HQ board (live status page)
+
+https://claude.ai/artifact/2Jw4xWBi6k1yT4bsgCS6hM shows every agent's status live. Whoever runs an agent (the main session or `ops-manager`) updates it with the `ArtifactData` tool on that URL:
+
+- **When an agent starts:** write `agents/<agent-name>` with `status: "running"`, `title` (a few words), `startedAt` (ISO time), `finishedAt: null`.
+- **When it finishes:** set `status` to `done`, `needs_ok` or `failed`, plus `title`, a one-line `summary`, `finishedAt`, `link` (the Drive report, if any), `needsOk` (a list of what's waiting for approval, otherwise `[]`). Add the run to the front of `history` (`{status, title, summary, at, link}`) and keep only the 8 most recent.
+- **Routines:** do the same on `routines/<daily|weekly|payroll|monthend>` with `status`, `startedAt`, `finishedAt` and `link`.
+- Read the document first and pass its `version` as `if_version`. Never put customer or staff personal details in a summary.
+
 ## Connectors
 
 | Connector | Used by |
