@@ -1,0 +1,8 @@
+# Large media, raw account exports and business reports stay out of this public repo
+content/references/
+content/footage/
+content/out/
+marketing/exports/
+marketing/reports/
+reports/
+.DS_Store
