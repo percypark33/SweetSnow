@@ -1,0 +1,2422 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Family Health Guide</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232f7d5b'/%3E%3Cpath d='M32 46s-14-8.5-14-18a8 8 0 0 1 14-5.3A8 8 0 0 1 46 28c0 9.5-14 18-14 18z' fill='%23fff'/%3E%3C/svg%3E">
+  <style>
+:root {
+  --bg: #f6f5f1;
+  --surface: #ffffff;
+  --surface-2: #f0efe9;
+  --text: #1f2421;
+  --muted: #5f6762;
+  --line: #e2e0d8;
+  --brand: #2f7d5b;
+  --brand-ink: #ffffff;
+  --brand-soft: #e3f1ea;
+  --danger: #b3261e;
+  --danger-soft: #fbe9e7;
+  --warn: #8a5a00;
+  --warn-soft: #fdf3dc;
+  --ok: #2f7d5b;
+  --ok-soft: #e3f1ea;
+  --info: #285a8f;
+  --info-soft: #e6eef8;
+  --radius: 14px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .05), 0 4px 14px rgba(0, 0, 0, .04);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141715;
+    --surface: #1d211f;
+    --surface-2: #252a27;
+    --text: #e8ece9;
+    --muted: #a3aca6;
+    --line: #333a36;
+    --brand: #5fbf91;
+    --brand-ink: #0f1a14;
+    --brand-soft: #1f3a2d;
+    --danger: #ff8a80;
+    --danger-soft: #3d1f1d;
+    --warn: #f2c35b;
+    --warn-soft: #3a3020;
+    --ok: #5fbf91;
+    --ok-soft: #1f3a2d;
+    --info: #8fbaf0;
+    --info-soft: #1e2b3b;
+    --shadow: none;
+  }
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1; width: 100%; max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; outline: none; }
+a { color: var(--brand); }
+h1, h2, h3 { line-height: 1.25; margin: 0 0 .5em; }
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.15rem; }
+h3 { font-size: 1rem; }
+p { margin: 0 0 .75em; }
+ul { margin: 0; padding-left: 1.2em; }
+li { margin: .25em 0; }
+.muted { color: var(--muted); }
+.small { font-size: .875rem; }
+
+/* ---------- top bar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 700; }
+.brand svg { width: 30px; height: 30px; }
+.brand svg circle { fill: var(--brand); }
+.brand svg path { fill: var(--brand-ink); }
+.tabs { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+.tabs a { padding: 8px 14px; border-radius: 999px; text-decoration: none; color: var(--muted); font-weight: 600; font-size: .95rem; }
+.tabs a:hover { background: var(--surface-2); color: var(--text); }
+.tabs a.active { background: var(--brand-soft); color: var(--brand); }
+
+.footnote { text-align: center; color: var(--muted); font-size: .8rem; padding: 16px; border-top: 1px solid var(--line); }
+
+/* ---------- building blocks ---------- */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+.card + .card { margin-top: 16px; }
+.grid > .card + .card { margin-top: 0; }
+.grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.stack > * + * { margin-top: 16px; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.spread { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--text);
+  font: inherit; font-weight: 600; font-size: .92rem; cursor: pointer; text-decoration: none;
+}
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+.btn.primary:hover { filter: brightness(1.07); }
+.btn.danger { color: var(--danger); border-color: var(--danger); }
+.btn.small { padding: 5px 10px; font-size: .82rem; }
+.btn.ghost { border-color: transparent; background: transparent; }
+
+.badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .78rem; font-weight: 600; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+.badge.danger { background: var(--danger-soft); color: var(--danger); }
+.badge.warn { background: var(--warn-soft); color: var(--warn); }
+.badge.ok { background: var(--ok-soft); color: var(--ok); }
+.badge.info { background: var(--info-soft); color: var(--info); }
+
+.alert { padding: 12px 14px; border-radius: 10px; border-left: 4px solid; margin: 0 0 10px; display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
+.alert.danger { background: var(--danger-soft); border-color: var(--danger); }
+.alert.warn { background: var(--warn-soft); border-color: var(--warn); }
+.alert.info { background: var(--info-soft); border-color: var(--info); }
+
+/* ---------- family ---------- */
+.member-card { display: flex; gap: 14px; text-decoration: none; color: inherit; align-items: flex-start; }
+.member-card:hover { border-color: var(--brand); }
+.avatar { flex: none; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 1.2rem; color: #fff; }
+.avatar.lg { width: 64px; height: 64px; font-size: 1.6rem; }
+.member-card > div { min-width: 0; }
+.member-card .badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+.member-card .badge { white-space: normal; }
+.add-card { display: grid; place-items: center; border-style: dashed; color: var(--muted); text-decoration: none; min-height: 110px; font-weight: 600; }
+.add-card:hover { color: var(--brand); border-color: var(--brand); }
+
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: .82rem; text-transform: uppercase; letter-spacing: .03em; }
+.table-wrap { overflow-x: auto; }
+.matrix td, .matrix th { text-align: center; }
+.matrix td:first-child, .matrix th:first-child { text-align: left; }
+
+/* ---------- guide ---------- */
+.guide-head { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.guide-head .meta { flex: 1; min-width: 200px; }
+.food-list { list-style: none; padding: 0; }
+.food-list li { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.food-list li:last-child { border-bottom: 0; }
+.food-list .why { display: block; color: var(--muted); font-size: .8rem; }
+.food-list li.conflict .text { text-decoration: line-through; color: var(--muted); }
+.food-list li.conflict .why { color: var(--danger); }
+.card.avoid { border-top: 4px solid var(--danger); }
+.card.limit { border-top: 4px solid var(--warn); }
+.card.more { border-top: 4px solid var(--ok); }
+.targets td:first-child { color: var(--muted); }
+.targets td:last-child { font-weight: 600; text-align: right; }
+.emergency { border: 2px solid var(--danger); }
+.emergency dt { font-size: .75rem; text-transform: uppercase; color: var(--muted); letter-spacing: .04em; margin-top: 8px; }
+.emergency dd { margin: 0; font-weight: 600; }
+.words { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+
+/* ---------- forms ---------- */
+form .section { margin-bottom: 20px; }
+fieldset { border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin: 0 0 16px; background: var(--surface); }
+legend { font-weight: 700; padding: 0 6px; }
+label { display: block; font-weight: 600; font-size: .88rem; margin-bottom: 4px; }
+.hint { font-weight: 400; color: var(--muted); font-size: .8rem; }
+input[type=text], input[type=date], input[type=number], select, textarea {
+  width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px;
+  background: var(--bg); color: var(--text); font: inherit; font-size: .95rem;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--brand); outline-offset: 1px; border-color: transparent; }
+textarea { min-height: 76px; resize: vertical; }
+.fields { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.checks { display: grid; gap: 6px 14px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.checks label { font-weight: 400; display: flex; gap: 8px; align-items: center; font-size: .92rem; margin: 0; }
+.checks input { width: 18px; height: 18px; accent-color: var(--brand); }
+.allergen-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.inline { display: flex; gap: 6px; }
+.inline input { min-width: 0; }
+.form-actions { position: sticky; bottom: 0; background: var(--bg); padding: 12px 0; display: flex; gap: 8px; justify-content: flex-end; border-top: 1px solid var(--line); }
+
+/* ---------- plan ---------- */
+.plan-day { display: grid; grid-template-columns: 110px repeat(3, 1fr); gap: 10px; align-items: stretch; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.plan-day .day { font-weight: 700; }
+.plan-day .day small { display: block; font-weight: 400; color: var(--muted); }
+.meal { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; font-size: .9rem; position: relative; }
+.meal .label { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.meal .name { font-weight: 600; margin: 2px 26px 4px 0; }
+.meal .reroll { position: absolute; top: 6px; right: 6px; }
+.meal details { margin-top: 4px; }
+.meal summary { cursor: pointer; font-size: .82rem; }
+.meal ul { font-size: .82rem; padding-left: 1em; }
+.status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+.status-ok { background: var(--ok); }
+.status-caution { background: var(--warn); }
+.status-swap { background: var(--info); }
+.status-no { background: var(--danger); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .82rem; color: var(--muted); }
+.grocery { columns: 3 200px; }
+.grocery li { break-inside: avoid; }
+.chip-check { display: inline-flex; gap: 6px; align-items: center; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-weight: 600; font-size: .88rem; cursor: pointer; }
+.chip-check input { accent-color: var(--brand); }
+
+.empty { text-align: center; padding: 48px 20px; }
+.empty h1 { font-size: 1.6rem; }
+
+#toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(120%); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 600; font-size: .9rem; transition: transform .25s; z-index: 20; pointer-events: none; }
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 720px) {
+  .plan-day { grid-template-columns: 1fr; }
+  .tabs { margin-left: 0; width: 100%; }
+  h1 { font-size: 1.4rem; }
+}
+
+@media print {
+  .topbar, .footnote, .no-print, .btn, #toast, .reroll { display: none !important; }
+  body { background: #fff; }
+  main { max-width: none; padding: 0; }
+  .card { box-shadow: none; break-inside: avoid; }
+  :root { --bg: #fff; --surface: #fff; --text: #000; }
+}
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/">
+      <svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true"><circle cx="32" cy="32" r="30"/><path d="M32 46s-14-8.5-14-18a8 8 0 0 1 14-5.3A8 8 0 0 1 46 28c0 9.5-14 18-14 18z"/></svg>
+      <span>Family Health Guide</span>
+    </a>
+    <nav class="tabs" aria-label="Main">
+      <a href="#/" data-tab="family">Family</a>
+      <a href="#/plan" data-tab="plan">Meal plan</a>
+      <a href="#/recipes" data-tab="recipes">Recipes</a>
+      <a href="#/data" data-tab="data">Data</a>
+    </nav>
+  </header>
+
+  <main id="app" tabindex="-1">
+    <p style="max-width:560px;margin:40px auto;font-family:-apple-system,sans-serif;line-height:1.5">
+      <strong>The app's files didn't load.</strong> Keep <code>index.html</code> in the same folder as the
+      <code>css</code>, <code>js</code> and <code>sample</code> folders, then open it again, or use the single-file
+      version, <code>Family-Health-Guide.html</code>, which works on its own.
+    </p>
+  </main>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <footer class="footnote">
+    General guidance only — not a substitute for advice from your doctor, pharmacist or dietitian.
+    Your data stays on this device.
+  </footer>
+
+  <script>
+/*
+ * Family Health Guide — knowledge base.
+ *
+ * Everything the guide "knows" lives here as plain data, so it can be reviewed,
+ * corrected and extended without touching the engine. Guidance is general and
+ * drawn from mainstream sources (Dietary Guidelines for Americans, AHA, ADA,
+ * DASH, NKF, FDA food-safety advice). It is not medical advice.
+ *
+ * Tags connect the pieces: an allergy, condition, diet or medication "blocks"
+ * or "cautions" tags, and recipes / emphasised foods carry tags. The engine
+ * (engine.js) matches them up.
+ */
+(function (root) {
+  'use strict';
+
+  // ---------------------------------------------------------------- allergens
+  // Top-9 US allergens. `avoid` = foods to skip, `labelWords` = ingredient-list
+  // names that hide the allergen.
+  var ALLERGENS = {
+    peanut: {
+      label: 'Peanut',
+      avoid: ['Peanuts & peanut butter', 'Peanut oil (cold-pressed / gourmet)', 'Satay & many Thai / West African sauces', 'Many baked goods, candy & granola bars (check "may contain")'],
+      labelWords: ['arachis oil', 'groundnut', 'beer nuts', 'monkey nuts', 'mandelonas', 'hydrolyzed peanut protein']
+    },
+    treenut: {
+      label: 'Tree nuts',
+      avoid: ['Almonds, cashews, walnuts, pecans, pistachios, hazelnuts, macadamias, Brazil nuts, pine nuts', 'Nut butters, nut milks & nut oils', 'Pesto, marzipan, praline, nougat, gianduja', 'Many granolas, cereals & baked goods'],
+      labelWords: ['marzipan', 'praline', 'nougat', 'gianduja', 'nut meal', 'nut paste', 'pignoli', 'amaretto', 'frangipane']
+    },
+    milk: {
+      label: 'Milk (dairy)',
+      avoid: ['Milk, cream, butter, ghee, cheese, yogurt, ice cream', 'Many breads, baked goods & creamy sauces', '"Non-dairy" creamers that contain casein'],
+      labelWords: ['casein', 'caseinate', 'whey', 'lactalbumin', 'lactoglobulin', 'lactose', 'curds', 'ghee', 'milk solids', 'recaldent']
+    },
+    egg: {
+      label: 'Egg',
+      avoid: ['Eggs in any form', 'Mayonnaise, aioli, meringue, custard, hollandaise', 'Many baked goods, fresh pasta, breaded foods & some foam toppings'],
+      labelWords: ['albumin', 'albumen', 'globulin', 'lysozyme', 'ovalbumin', 'ovomucoid', 'ovovitellin', 'surimi (sometimes)', 'livetin']
+    },
+    wheat: {
+      label: 'Wheat',
+      avoid: ['Bread, pasta, couscous, crackers, most cereals & baked goods', 'Soy sauce (brewed with wheat)', 'Breaded / battered foods, many gravies & sauces'],
+      labelWords: ['flour', 'semolina', 'durum', 'spelt', 'farro', 'einkorn', 'kamut', 'farina', 'bulgur', 'seitan', 'triticale', 'graham']
+    },
+    soy: {
+      label: 'Soy',
+      avoid: ['Tofu, tempeh, edamame, miso, natto, soy milk', 'Soy sauce, tamari, teriyaki', 'Many processed foods, veggie burgers & protein bars'],
+      labelWords: ['soya', 'shoyu', 'textured vegetable protein (TVP)', 'hydrolyzed soy protein', 'soy lecithin (ask your allergist)', 'edamame', 'yuba', 'okara']
+    },
+    fish: {
+      label: 'Fish',
+      avoid: ['All finned fish (salmon, tuna, cod, tilapia, anchovy …)', 'Fish sauce, Worcestershire sauce, Caesar dressing', 'Imitation crab (surimi), fish stock'],
+      labelWords: ['anchovy', 'surimi', 'fish sauce', 'nam pla', 'fish gelatin', 'fish oil', 'bonito', 'dashi']
+    },
+    shellfish: {
+      label: 'Shellfish',
+      avoid: ['Shrimp, crab, lobster, crawfish, prawns', 'Bouillabaisse, cioppino, seafood stocks', 'Many fried-seafood restaurants (shared fryers)'],
+      labelWords: ['crustacean', 'krill', 'langoustine', 'scampi', 'ecrevisse', 'seafood flavoring', 'glucosamine (some sources)']
+    },
+    sesame: {
+      label: 'Sesame',
+      avoid: ['Sesame seeds & sesame oil', 'Tahini, hummus, halva, baba ghanoush', 'Many breads, bagels, buns, crackers & Asian sauces'],
+      labelWords: ['benne', 'gingelly', 'gomasio', 'tahini', 'tahina', 'sesamol', 'til', "za'atar"]
+    }
+  };
+
+  // ------------------------------------------------------------- intolerances
+  var INTOLERANCES = {
+    lactose: {
+      label: 'Lactose intolerance',
+      caution: ['milk'],
+      limit: ['Large servings of milk, ice cream & soft cheeses'],
+      emphasize: [{ text: 'Lactose-free milk, hard aged cheeses & yogurt (often well tolerated)', tag: 'milk' }],
+      tips: ['Small amounts of dairy with a meal are often fine — find your own threshold.', 'Lactase tablets taken with the first bite of dairy can help.']
+    },
+    fructose: {
+      label: 'Fructose malabsorption',
+      caution: ['high-fodmap'],
+      limit: ['Apples, pears, mango, watermelon, honey, agave', 'Fruit juice & high-fructose corn syrup'],
+      emphasize: [{ text: 'Berries, citrus, kiwi, banana (firm)' }],
+      tips: ['Spread fruit through the day instead of eating a lot at once.']
+    }
+  };
+
+  // --------------------------------------------------------------- conditions
+  var CONDITIONS = {
+    diabetes2: {
+      label: 'Type 2 diabetes',
+      group: 'Metabolic',
+      caution: ['added-sugar', 'refined-carb'],
+      avoid: ['Sugary drinks: soda, sweet tea, juice, energy drinks'],
+      limit: ['White bread, white rice, pastries & sweets', 'Large portions of starchy foods at one meal'],
+      emphasize: [
+        { text: 'Non-starchy vegetables (half the plate)' },
+        { text: 'Beans, lentils & whole grains for fiber' },
+        { text: 'Nuts & seeds as snacks', tag: 'treenut' },
+        { text: 'Lean protein with every meal' }
+      ],
+      tips: ['Plate method: ½ non-starchy veg, ¼ lean protein, ¼ carbohydrate.', 'Keep carbohydrate amounts roughly consistent meal to meal.', 'Pair carbs with protein or fat to soften blood-sugar spikes.', 'A 10–15 minute walk after meals helps lower post-meal glucose.']
+    },
+    prediabetes: {
+      label: 'Prediabetes / insulin resistance',
+      group: 'Metabolic',
+      caution: ['added-sugar', 'refined-carb'],
+      avoid: ['Sugary drinks'],
+      limit: ['Refined grains, sweets & large starchy portions'],
+      emphasize: [{ text: 'High-fiber foods: vegetables, beans, whole grains' }, { text: 'Lean protein at each meal' }],
+      tips: ['Losing 5–7% of body weight (if overweight) and ~150 min/week of activity cut diabetes risk substantially.']
+    },
+    diabetes1: {
+      label: 'Type 1 diabetes',
+      group: 'Metabolic',
+      caution: ['added-sugar'],
+      avoid: [],
+      limit: ['Sugary drinks except when treating a low'],
+      emphasize: [{ text: 'Consistent, counted carbohydrates matched to the insulin plan' }],
+      tips: ['Follow the carb-counting / insulin-to-carb ratios set by the care team.', 'Always carry fast-acting sugar (glucose tabs, juice box) for lows.', 'Alcohol can cause delayed lows — eat with it and check glucose.']
+    },
+    hypertension: {
+      label: 'High blood pressure',
+      group: 'Heart',
+      caution: ['high-sodium'],
+      avoid: ['Salt-heavy processed foods: deli meats, canned soups, instant noodles, salty snacks'],
+      limit: ['Sodium — aim under 1,500–2,300 mg/day', 'Soy sauce, pickles, cheese, restaurant & fast food', 'Alcohol'],
+      emphasize: [
+        { text: 'DASH pattern: vegetables, fruit, low-fat dairy, whole grains', tag: 'milk' },
+        { text: 'Potassium-rich produce: bananas, potatoes, beans, leafy greens', tag: 'high-potassium' }
+      ],
+      tips: ['Cook at home more — most sodium comes from packaged and restaurant food.', 'Season with herbs, citrus, garlic & vinegar instead of salt.', 'Check labels: 5% DV sodium or less is low, 20% or more is high.']
+    },
+    cholesterol: {
+      label: 'High cholesterol',
+      group: 'Heart',
+      caution: ['high-satfat', 'fried'],
+      avoid: ['Trans fats (partially hydrogenated oils)'],
+      limit: ['Fatty red & processed meats, butter, full-fat cheese, coconut & palm oil', 'Fried foods & pastries'],
+      emphasize: [
+        { text: 'Soluble fiber: oats, barley, beans, lentils, apples' },
+        { text: 'Fatty fish twice a week (salmon, sardines, trout)', tag: 'fish' },
+        { text: 'Olive oil, avocado & nuts for fats', tag: 'treenut' }
+      ],
+      tips: ['Keep saturated fat under ~6% of calories when lowering LDL.', 'Plant sterols/stanols (2 g/day) can lower LDL further — ask the doctor.']
+    },
+    heart: {
+      label: 'Heart disease / heart failure',
+      group: 'Heart',
+      caution: ['high-sodium', 'high-satfat', 'fried'],
+      avoid: ['Very salty foods'],
+      limit: ['Sodium', 'Saturated fat', 'Alcohol'],
+      emphasize: [{ text: 'Mediterranean-style eating: vegetables, legumes, fish, olive oil', tag: 'fish' }],
+      tips: ['With heart failure, the care team may also set a fluid limit — follow it.', 'Weigh daily if advised; sudden gain can mean fluid build-up.']
+    },
+    celiac: {
+      label: 'Celiac disease',
+      group: 'Digestive',
+      block: ['gluten'],
+      caution: ['oats'],
+      avoid: ['Wheat, barley, rye, triticale, spelt, malt, brewer\'s yeast', 'Regular bread, pasta, beer, most cereals', 'Soy sauce (use certified GF tamari)'],
+      limit: ['Oats unless labeled certified gluten-free'],
+      emphasize: [{ text: 'Naturally GF grains: rice, quinoa, buckwheat, millet, corn, certified GF oats' }],
+      tips: ['Strict, lifelong avoidance — even crumbs matter.', 'Use separate toaster, colander & cutting board.', 'Look for "certified gluten-free" (<20 ppm).']
+    },
+    gout: {
+      label: 'Gout / high uric acid',
+      group: 'Metabolic',
+      caution: ['high-purine', 'alcohol', 'added-sugar'],
+      avoid: ['Organ meats (liver, kidney)', 'Beer & spirits', 'Sugary drinks with high-fructose corn syrup'],
+      limit: ['Red meat', 'Anchovies, sardines, mussels, scallops, shellfish'],
+      emphasize: [{ text: 'Low-fat dairy', tag: 'milk' }, { text: 'Cherries, vegetables, whole grains' }, { text: 'Plenty of water' }],
+      tips: ['Stay well hydrated, especially in hot weather.']
+    },
+    ckd: {
+      label: 'Chronic kidney disease',
+      group: 'Kidney',
+      caution: ['high-potassium', 'high-sodium', 'high-phosphorus'],
+      avoid: ['Salt substitutes (potassium chloride)', 'Dark colas & foods with "phos" additives'],
+      limit: ['Sodium', 'Potassium & phosphorus — limits depend on stage and labs', 'Protein amount — set by the care team'],
+      emphasize: [{ text: 'Plan with a renal dietitian — limits are individual' }],
+      tips: ['Kidney diets differ by stage and dialysis status; lab results decide the limits.']
+    },
+    gerd: {
+      label: 'Acid reflux (GERD)',
+      group: 'Digestive',
+      caution: ['spicy', 'acidic', 'fried', 'caffeine'],
+      avoid: [],
+      limit: ['Fried & fatty meals', 'Chocolate, peppermint, coffee, alcohol', 'Tomato sauce, citrus & spicy food'],
+      emphasize: [{ text: 'Smaller meals; oatmeal, bananas, lean proteins, vegetables' }],
+      tips: ['Finish eating 3 hours before lying down.', 'Raising the head of the bed can help night symptoms.']
+    },
+    ibs: {
+      label: 'IBS',
+      group: 'Digestive',
+      caution: ['high-fodmap'],
+      avoid: [],
+      limit: ['Common triggers: onion, garlic, wheat, beans, apples, pears, sugar alcohols'],
+      emphasize: [{ text: 'Regular meals, soluble fiber (oats, psyllium), enough water' }],
+      tips: ['A short low-FODMAP trial with a dietitian can identify personal triggers.', 'Keep a symptom diary alongside meals.']
+    },
+    anemia: {
+      label: 'Iron-deficiency anemia',
+      group: 'Blood',
+      caution: [],
+      avoid: [],
+      limit: ['Tea & coffee with iron-rich meals (blocks absorption)'],
+      emphasize: [
+        { text: 'Iron-rich foods: lean red meat, poultry, beans, lentils, fortified cereals, spinach', tag: 'meat' },
+        { text: 'Vitamin C with iron foods (citrus, peppers, strawberries)' }
+      ],
+      tips: ['Separate calcium supplements / dairy from iron supplements by ~2 hours.']
+    },
+    osteoporosis: {
+      label: 'Osteoporosis / low bone density',
+      group: 'Bone',
+      caution: [],
+      avoid: [],
+      limit: ['Excess alcohol', 'Very high sodium'],
+      emphasize: [
+        { text: 'Calcium: dairy, fortified plant milk, tofu set with calcium, canned salmon with bones', tag: 'milk' },
+        { text: 'Vitamin D sources & adequate protein' }
+      ],
+      tips: ['Weight-bearing and balance exercise matter as much as food.']
+    },
+    fattyliver: {
+      label: 'Fatty liver (MASLD)',
+      group: 'Metabolic',
+      caution: ['added-sugar', 'alcohol', 'fried'],
+      avoid: ['Sugary drinks', 'Alcohol (ask the doctor)'],
+      limit: ['Refined carbs & fried foods'],
+      emphasize: [{ text: 'Mediterranean pattern, vegetables, legumes, olive oil' }, { text: 'Coffee (unsweetened) may be protective', tag: 'caffeine' }],
+      tips: ['Gradual weight loss of 7–10% (if overweight) improves liver fat.']
+    },
+    hypothyroid: {
+      label: 'Hypothyroidism',
+      group: 'Hormonal',
+      caution: [],
+      avoid: [],
+      limit: [],
+      emphasize: [{ text: 'Balanced diet with iodized salt in normal amounts' }],
+      tips: ['If on levothyroxine, timing around food matters — see medication notes.']
+    },
+    pcos: {
+      label: 'PCOS',
+      group: 'Hormonal',
+      caution: ['added-sugar', 'refined-carb'],
+      avoid: ['Sugary drinks'],
+      limit: ['Refined carbohydrates'],
+      emphasize: [{ text: 'High-fiber, lower-glycemic foods with protein at each meal' }],
+      tips: ['Regular activity improves insulin sensitivity.']
+    },
+    pregnancy: {
+      label: 'Pregnant',
+      group: 'Life stage',
+      block: ['alcohol', 'raw-fish', 'high-mercury-fish', 'unpasteurized'],
+      caution: ['deli-meat', 'caffeine'],
+      avoid: ['Alcohol (no safe amount)', 'High-mercury fish: shark, swordfish, king mackerel, tilefish, bigeye tuna, marlin, orange roughy', 'Raw or undercooked meat, eggs, fish & sprouts', 'Unpasteurized milk, cheese & juice'],
+      limit: ['Caffeine under 200 mg/day (~one 12 oz coffee)', 'Deli meats & hot dogs unless heated until steaming', 'Albacore tuna to 1 serving/week'],
+      emphasize: [
+        { text: 'Folate: leafy greens, beans, fortified grains' },
+        { text: 'Low-mercury fish 2–3 servings/week (salmon, sardines, light tuna)', tag: 'fish' },
+        { text: 'Iron, calcium, choline (eggs) & iodine', tag: 'egg' }
+      ],
+      tips: ['Take a prenatal vitamin with folic acid as directed.', 'Extra calories mainly in 2nd (~340) and 3rd (~450) trimester.']
+    },
+    breastfeeding: {
+      label: 'Breastfeeding',
+      group: 'Life stage',
+      caution: ['caffeine', 'high-mercury-fish'],
+      avoid: ['High-mercury fish'],
+      limit: ['Caffeine (~200–300 mg/day)', 'Alcohol — wait at least 2 hours per drink before nursing'],
+      emphasize: [{ text: 'Extra fluids and ~330–400 extra calories/day' }, { text: 'Low-mercury fish for DHA', tag: 'fish' }],
+      tips: ['Continue a prenatal or postnatal vitamin if advised.']
+    }
+  };
+
+  // ------------------------------------------------------------- medications
+  // Matched by keyword against what the user types (brand or generic).
+  var MEDICATIONS = [
+    {
+      id: 'warfarin', label: 'Warfarin (blood thinner)', match: ['warfarin', 'coumadin', 'jantoven'],
+      tips: ['Keep vitamin K intake CONSISTENT week to week (kale, spinach, broccoli, Brussels sprouts) — don\'t suddenly add or cut them.', 'Limit alcohol; avoid large amounts of cranberry or grapefruit juice.', 'Ask before starting fish oil, vitamin E, ginkgo, turmeric or other supplements.']
+    },
+    {
+      id: 'statin-cyp', label: 'Statin affected by grapefruit', match: ['simvastatin', 'zocor', 'lovastatin', 'mevacor', 'atorvastatin', 'lipitor'],
+      block: ['grapefruit'],
+      tips: ['Avoid grapefruit and grapefruit juice (raises drug levels and side-effect risk).']
+    },
+    {
+      id: 'ccb', label: 'Calcium-channel blocker', match: ['felodipine', 'nifedipine', 'nisoldipine', 'amlodipine', 'norvasc', 'procardia'],
+      block: ['grapefruit'],
+      tips: ['Avoid grapefruit (especially with felodipine / nifedipine).']
+    },
+    {
+      id: 'maoi', label: 'MAO inhibitor', match: ['phenelzine', 'nardil', 'tranylcypromine', 'parnate', 'isocarboxazid', 'marplan', 'selegiline', 'emsam'],
+      block: ['aged-cheese'],
+      avoidFoods: ['Aged cheeses, cured / fermented meats, tap beer, sauerkraut, soy sauce & fermented soy (tyramine)'],
+      tips: ['High-tyramine foods can trigger a dangerous blood-pressure spike — follow the full list from the pharmacist.']
+    },
+    {
+      id: 'levothyroxine', label: 'Levothyroxine (thyroid)', match: ['levothyroxine', 'synthroid', 'levoxyl', 'unithroid', 'euthyrox', 'tirosint'],
+      tips: ['Take on an empty stomach with water, 30–60 min before breakfast (or at bedtime, 3+ h after eating).', 'Separate from calcium, iron, antacids and multivitamins by 4 hours.', 'Coffee, soy and high-fiber meals right after the dose can reduce absorption — keep the routine consistent.']
+    },
+    {
+      id: 'ace-arb', label: 'ACE inhibitor / ARB / potassium-sparing diuretic', match: ['lisinopril', 'enalapril', 'ramipril', 'benazepril', 'losartan', 'valsartan', 'olmesartan', 'irbesartan', 'spironolactone', 'eplerenone', 'triamterene', 'pril', 'sartan'],
+      tips: ['Avoid potassium-based salt substitutes unless the doctor OKs them.', 'Ask before eating large amounts of high-potassium foods if kidney function is reduced.']
+    },
+    {
+      id: 'metformin', label: 'Metformin', match: ['metformin', 'glucophage', 'glumetza', 'fortamet'],
+      tips: ['Take with meals to reduce stomach upset.', 'Long-term use can lower vitamin B12 — ask about periodic checks.', 'Limit alcohol.']
+    },
+    {
+      id: 'insulin-su', label: 'Insulin / sulfonylurea (low-sugar risk)', match: ['insulin', 'glipizide', 'glyburide', 'glimepiride', 'humalog', 'novolog', 'lantus', 'basaglar', 'tresiba', 'levemir'],
+      tips: ['Don\'t skip meals after taking it — risk of low blood sugar.', 'Alcohol raises the risk of lows; always eat with it.']
+    },
+    {
+      id: 'antibiotic-chelate', label: 'Tetracycline / quinolone antibiotic', match: ['doxycycline', 'minocycline', 'tetracycline', 'ciprofloxacin', 'cipro', 'levofloxacin', 'moxifloxacin'],
+      tips: ['Separate from dairy, calcium, iron, zinc and antacids by at least 2 hours.']
+    },
+    {
+      id: 'no-alcohol', label: 'Must avoid alcohol', match: ['metronidazole', 'flagyl', 'tinidazole', 'disulfiram', 'antabuse'],
+      block: ['alcohol'],
+      tips: ['No alcohol during the course and for 3 days after (including sauces & mouthwash with alcohol).']
+    },
+    {
+      id: 'lithium', label: 'Lithium', match: ['lithium', 'lithobid'],
+      tips: ['Keep salt and fluid intake steady day to day — big changes alter lithium levels.', 'Drink extra water in heat or when exercising.']
+    },
+    {
+      id: 'bisphosphonate', label: 'Bisphosphonate (bone)', match: ['alendronate', 'fosamax', 'risedronate', 'actonel', 'ibandronate', 'boniva'],
+      tips: ['Take first thing with a full glass of plain water, then nothing else and stay upright for 30–60 min.']
+    },
+    {
+      id: 'glp1', label: 'GLP-1 medicine', match: ['semaglutide', 'ozempic', 'wegovy', 'rybelsus', 'tirzepatide', 'mounjaro', 'zepbound', 'liraglutide', 'victoza', 'saxenda', 'dulaglutide', 'trulicity'],
+      tips: ['Prioritise protein at each meal to protect muscle while appetite is low.', 'Smaller meals, less fat and slow eating reduce nausea.', 'Keep up fluids and fiber to prevent constipation.']
+    }
+  ];
+
+  // ------------------------------------------------------------------- diets
+  var DIETS = {
+    omnivore: { label: 'No restrictions', block: [], emphasize: [], supplements: [], tips: [] },
+    vegetarian: {
+      label: 'Vegetarian', block: ['meat', 'pork', 'poultry', 'fish', 'shellfish', 'gelatin'],
+      emphasize: [{ text: 'Protein at each meal: eggs, dairy, beans, lentils, tofu', tag: 'egg' }, { text: 'Iron + vitamin C pairing (beans with peppers, tomatoes)' }],
+      supplements: ['Vitamin B12 (check levels)'], tips: ['Watch for gelatin, rennet in some cheeses, and fish sauce / anchovy in sauces.']
+    },
+    vegan: {
+      label: 'Vegan', block: ['meat', 'pork', 'poultry', 'fish', 'shellfish', 'egg', 'milk', 'honey', 'gelatin'],
+      emphasize: [{ text: 'Beans, lentils, tofu, tempeh, seitan for protein', tag: 'soy' }, { text: 'Calcium-fortified plant milk & calcium-set tofu', tag: 'soy' }, { text: 'Ground flax, chia, walnuts for omega-3', tag: 'treenut' }],
+      supplements: ['Vitamin B12 (essential)', 'Vitamin D', 'Algae-based omega-3 (DHA/EPA)', 'Iodine (if not using iodized salt)'],
+      tips: ['B12 is not reliably available from plant foods — supplement or use fortified foods.']
+    },
+    pescatarian: {
+      label: 'Pescatarian', block: ['meat', 'pork', 'poultry'],
+      emphasize: [{ text: 'Fatty fish 2×/week for omega-3', tag: 'fish' }],
+      supplements: [], tips: []
+    },
+    mediterranean: {
+      label: 'Mediterranean', block: [],
+      emphasize: [{ text: 'Olive oil, vegetables, legumes, whole grains, fish', tag: 'fish' }, { text: 'Nuts a few times a week', tag: 'treenut' }],
+      supplements: [], tips: ['Red meat a few times a month rather than daily.']
+    },
+    lowcarb: {
+      label: 'Lower-carb', block: [], caution: ['refined-carb', 'added-sugar'],
+      emphasize: [{ text: 'Non-starchy vegetables, protein, healthy fats' }],
+      supplements: [], tips: ['Keep fiber up with vegetables, nuts, seeds and berries.']
+    }
+  };
+
+  var DIET_RULES = {
+    halal: { label: 'Halal', block: ['pork', 'alcohol', 'gelatin'], tips: ['Meat & poultry should be halal-certified; check gelatin and vanilla extract (alcohol).'] },
+    kosher: { label: 'Kosher', block: ['pork', 'shellfish', 'meat-with-dairy'], tips: ['Meat should be kosher-certified; keep meat and dairy separate.'] },
+    'no-pork': { label: 'No pork', block: ['pork'], tips: [] },
+    'no-beef': { label: 'No beef', block: ['meat'], tips: [] },
+    'no-alcohol': { label: 'No alcohol', block: ['alcohol'], tips: [] }
+  };
+
+  // --------------------------------------------------------------- life stage
+  // Age bands, in years. Checked in order; first match wins.
+  var AGE_BANDS = [
+    {
+      id: 'infant', label: 'Infant (under 1)', maxAge: 1,
+      block: ['honey', 'alcohol'], caution: ['choking', 'added-sugar', 'high-sodium'],
+      avoid: ['Honey (botulism risk)', 'Cow\'s milk as a main drink', 'Added sugar & salt', 'Whole nuts, grapes, popcorn, hard raw vegetables'],
+      tips: ['Breast milk or formula is the main food; start solids around 6 months as the pediatrician advises.', 'Introduce peanut and egg early (around 4–6 months) unless the pediatrician says otherwise — it lowers allergy risk.']
+    },
+    {
+      id: 'toddler', label: 'Toddler (1–3)', maxAge: 4,
+      block: ['alcohol'], caution: ['choking', 'caffeine'],
+      avoid: ['Choking hazards: whole grapes & cherry tomatoes (quarter them), whole nuts, popcorn, hot-dog coins, hard candy', 'Added sugar before age 2'],
+      tips: ['Whole milk from 1–2 years, then low-fat; about 16–24 oz/day max.', 'Offer new foods many times — it can take 10+ tries.']
+    },
+    {
+      id: 'child', label: 'Child (4–8)', maxAge: 9,
+      block: ['alcohol'], caution: ['caffeine'],
+      avoid: ['Sugary drinks as a habit'],
+      tips: ['Water and milk as the main drinks.', 'Kids eat better when they help shop and cook.']
+    },
+    {
+      id: 'preteen', label: 'Pre-teen (9–13)', maxAge: 14,
+      block: ['alcohol'], caution: ['caffeine'],
+      avoid: ['Energy drinks'],
+      tips: ['Calcium needs peak now (1,300 mg/day) — bones are building fast.']
+    },
+    {
+      id: 'teen', label: 'Teen (14–18)', maxAge: 19,
+      block: ['alcohol'], caution: [],
+      avoid: ['Energy drinks'],
+      tips: ['Calcium 1,300 mg/day; teen girls need extra iron (15 mg/day).', 'Watch for very restrictive eating — talk to the pediatrician if worried.']
+    },
+    {
+      id: 'adult', label: 'Adult (19–50)', maxAge: 51,
+      block: [], caution: [], avoid: [],
+      tips: []
+    },
+    {
+      id: 'older', label: 'Adult (51–64)', maxAge: 65,
+      block: [], caution: [], avoid: [],
+      tips: ['Vitamin B12 absorption drops with age — fortified foods or a supplement help.', 'Calcium 1,200 mg/day for women 51+.']
+    },
+    {
+      id: 'senior', label: 'Senior (65+)', maxAge: 200,
+      block: [], caution: [], avoid: [],
+      tips: ['Protein ~1.0–1.2 g/kg/day helps keep muscle strength.', 'Vitamin D (800 IU) and B12 often need supplementing — ask.', 'Thirst signals weaken with age; drink on a schedule.']
+    }
+  ];
+
+  // Dietary Guidelines estimated calorie needs, ages 2–18:
+  // [sedentary, moderately active, active] by sex.
+  var KID_CALORIES = {
+    male: { 2: [1000, 1000, 1000], 3: [1000, 1400, 1400], 4: [1200, 1400, 1600], 5: [1200, 1400, 1600], 6: [1400, 1600, 1800], 7: [1400, 1600, 1800], 8: [1400, 1600, 2000], 9: [1600, 1800, 2000], 10: [1600, 1800, 2200], 11: [1800, 2000, 2200], 12: [1800, 2200, 2400], 13: [2000, 2200, 2600], 14: [2000, 2400, 2800], 15: [2200, 2600, 3000], 16: [2400, 2800, 3200], 17: [2400, 2800, 3200], 18: [2400, 2800, 3200] },
+    female: { 2: [1000, 1000, 1000], 3: [1000, 1200, 1400], 4: [1200, 1400, 1400], 5: [1200, 1400, 1600], 6: [1200, 1400, 1600], 7: [1200, 1600, 1800], 8: [1400, 1600, 1800], 9: [1400, 1600, 1800], 10: [1400, 1800, 2000], 11: [1600, 1800, 2000], 12: [1600, 2000, 2200], 13: [1600, 2000, 2200], 14: [1800, 2000, 2400], 15: [1800, 2000, 2400], 16: [1800, 2000, 2400], 17: [1800, 2000, 2400], 18: [1800, 2000, 2400] }
+  };
+
+  var ACTIVITY = {
+    sedentary: { label: 'Sedentary (little exercise)', factor: 1.2, kid: 0 },
+    light: { label: 'Lightly active (1–3 days/week)', factor: 1.375, kid: 1 },
+    moderate: { label: 'Moderately active (3–5 days/week)', factor: 1.55, kid: 1 },
+    active: { label: 'Very active (6–7 days/week)', factor: 1.725, kid: 2 },
+    athlete: { label: 'Athlete / physical job', factor: 1.9, kid: 2 }
+  };
+
+  var GOALS = {
+    maintain: { label: 'Maintain weight', kcal: 0 },
+    lose: { label: 'Lose weight gradually', kcal: -500 },
+    gain: { label: 'Gain weight / build muscle', kcal: 300 }
+  };
+
+  var BLOOD_TYPES = ['', 'O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'Unknown'];
+
+  // Readable names for tags shown in the meal planner.
+  var TAG_LABELS = {
+    peanut: 'peanut', treenut: 'tree nuts', milk: 'dairy', egg: 'egg', wheat: 'wheat', soy: 'soy', fish: 'fish', shellfish: 'shellfish', sesame: 'sesame',
+    gluten: 'gluten', oats: 'non-certified oats', meat: 'beef / red meat', pork: 'pork', poultry: 'poultry', alcohol: 'alcohol', honey: 'honey', gelatin: 'gelatin',
+    'meat-with-dairy': 'meat with dairy', 'high-sodium': 'high sodium', 'high-satfat': 'high saturated fat', 'added-sugar': 'added sugar', 'refined-carb': 'refined carbs',
+    'high-purine': 'high purine', 'high-fodmap': 'high FODMAP', 'high-potassium': 'high potassium', 'high-phosphorus': 'high phosphorus', 'aged-cheese': 'aged cheese (tyramine)',
+    grapefruit: 'grapefruit', spicy: 'spicy', acidic: 'acidic (tomato / citrus)', fried: 'fried', 'high-mercury-fish': 'high-mercury fish', 'raw-fish': 'raw fish / meat',
+    unpasteurized: 'unpasteurized', 'deli-meat': 'deli meat', caffeine: 'caffeine', choking: 'choking hazard for small kids'
+  };
+
+  // ----------------------------------------------------------------- recipes
+  // `tags` = what the dish contains. `swaps` = ways to remove tags:
+  // removes: tags it takes away, adds: tags the substitute brings in.
+  // `wheat` automatically implies `gluten`; meat/poultry + milk implies
+  // `meat-with-dairy` (engine adds these).
+  var RECIPES = [
+    // Breakfast
+    { id: 'overnight-oats', name: 'Overnight oats with berries', meal: 'breakfast', ingredients: ['rolled oats', 'milk', 'chia seeds', 'mixed berries', 'maple syrup'], tags: ['milk', 'oats', 'added-sugar'],
+      swaps: [{ removes: ['milk'], text: 'Use fortified soy or oat milk', adds: ['soy'] }, { removes: ['milk'], text: 'Use fortified oat milk', adds: [] }, { removes: ['oats'], text: 'Use certified gluten-free oats', adds: [] }, { removes: ['added-sugar'], text: 'Skip the maple syrup; sweeten with mashed banana', adds: [] }] },
+    { id: 'veggie-eggs-toast', name: 'Veggie scrambled eggs on whole-grain toast', meal: 'breakfast', ingredients: ['eggs', 'spinach', 'tomato', 'whole-grain bread', 'olive oil'], tags: ['egg', 'wheat'],
+      swaps: [{ removes: ['wheat'], text: 'Serve on gluten-free toast or with potatoes', adds: [] }, { removes: ['egg'], text: 'Make a tofu scramble instead', adds: ['soy'] }] },
+    { id: 'yogurt-parfait', name: 'Yogurt parfait with berries & pumpkin seeds', meal: 'breakfast', ingredients: ['plain yogurt', 'mixed berries', 'pumpkin seeds', 'honey'], tags: ['milk', 'honey'],
+      swaps: [{ removes: ['milk'], text: 'Use coconut or soy yogurt', adds: [] }, { removes: ['honey'], text: 'Use maple syrup or no sweetener', adds: [] }] },
+    { id: 'pb-banana-toast', name: 'Peanut butter & banana toast', meal: 'breakfast', ingredients: ['whole-grain bread', 'peanut butter', 'banana'], tags: ['peanut', 'wheat', 'high-potassium'],
+      swaps: [{ removes: ['peanut'], text: 'Use sunflower-seed butter', adds: [] }, { removes: ['wheat'], text: 'Use gluten-free bread or rice cakes', adds: [] }] },
+    { id: 'tofu-scramble', name: 'Tofu veggie scramble with corn tortillas', meal: 'breakfast', ingredients: ['firm tofu', 'bell peppers', 'spinach', 'turmeric', 'corn tortillas'], tags: ['soy'],
+      swaps: [{ removes: ['soy'], text: 'Scramble eggs instead of tofu', adds: ['egg'] }] },
+    { id: 'congee', name: 'Ginger rice porridge (congee) with scallions', meal: 'breakfast', ingredients: ['white rice', 'chicken broth', 'ginger', 'scallions', 'soft-boiled egg'], tags: ['poultry', 'egg', 'high-sodium'],
+      swaps: [{ removes: ['poultry'], text: 'Use vegetable broth', adds: [] }, { removes: ['egg'], text: 'Leave off the egg', adds: [] }, { removes: ['high-sodium'], text: 'Use low-sodium broth', adds: [] }] },
+    { id: 'sweet-potato-hash', name: 'Sweet potato & black bean hash', meal: 'breakfast', ingredients: ['sweet potato', 'black beans', 'onion', 'bell peppers', 'eggs'], tags: ['egg', 'high-fodmap', 'high-potassium'],
+      swaps: [{ removes: ['egg'], text: 'Leave off the eggs; add avocado', adds: [] }, { removes: ['high-fodmap'], text: 'Skip onion & beans; use scallion greens', adds: [] }] },
+    { id: 'buckwheat-pancakes', name: 'Buckwheat banana pancakes (gluten-free)', meal: 'breakfast', ingredients: ['buckwheat flour', 'banana', 'eggs', 'milk', 'berries'], tags: ['egg', 'milk'],
+      swaps: [{ removes: ['egg'], text: 'Use flax eggs (1 Tbsp ground flax + 3 Tbsp water each)', adds: [] }, { removes: ['milk'], text: 'Use oat or rice milk', adds: [] }] },
+
+    // Lunch
+    { id: 'chicken-quinoa-bowl', name: 'Chicken & quinoa salad bowl', meal: 'lunch', ingredients: ['chicken breast', 'quinoa', 'cucumber', 'cherry tomatoes', 'chickpeas', 'olive oil', 'lemon'], tags: ['poultry', 'high-fodmap', 'acidic', 'choking'],
+      swaps: [{ removes: ['poultry'], text: 'Double the chickpeas instead of chicken', adds: [] }, { removes: ['choking'], text: 'Quarter the cherry tomatoes for little ones', adds: [] }, { removes: ['high-fodmap'], text: 'Skip chickpeas', adds: [] }] },
+    { id: 'lentil-soup', name: 'Hearty lentil & vegetable soup', meal: 'lunch', ingredients: ['lentils', 'carrots', 'celery', 'onion', 'garlic', 'canned tomatoes', 'vegetable broth'], tags: ['high-fodmap', 'high-potassium', 'acidic'],
+      swaps: [] },
+    { id: 'turkey-wrap', name: 'Turkey & avocado wrap', meal: 'lunch', ingredients: ['whole-wheat tortilla', 'sliced turkey', 'avocado', 'lettuce', 'tomato'], tags: ['wheat', 'poultry', 'high-sodium', 'deli-meat'],
+      swaps: [{ removes: ['wheat'], text: 'Use a corn tortilla or lettuce wrap', adds: [] }, { removes: ['deli-meat', 'high-sodium'], text: 'Use leftover roast turkey instead of deli slices', adds: [] }, { removes: ['poultry'], text: 'Fill with hummus & veggies', adds: ['sesame'] }] },
+    { id: 'tuna-sandwich', name: 'Tuna salad sandwich', meal: 'lunch', ingredients: ['canned light tuna', 'mayonnaise', 'celery', 'whole-grain bread'], tags: ['fish', 'egg', 'wheat'],
+      swaps: [{ removes: ['egg'], text: 'Bind with mashed avocado instead of mayo', adds: [] }, { removes: ['wheat'], text: 'Serve on gluten-free bread or lettuce', adds: [] }, { removes: ['fish'], text: 'Make it a chickpea "tuna" salad', adds: ['high-fodmap'] }] },
+    { id: 'hummus-plate', name: 'Hummus & veggie plate with pita', meal: 'lunch', ingredients: ['hummus', 'carrots', 'cucumber', 'bell peppers', 'pita bread'], tags: ['sesame', 'wheat', 'high-fodmap'],
+      swaps: [{ removes: ['sesame'], text: 'Use a white-bean dip without tahini', adds: [] }, { removes: ['wheat'], text: 'Use gluten-free crackers', adds: [] }] },
+    { id: 'burrito-bowl', name: 'Black bean & corn burrito bowl', meal: 'lunch', ingredients: ['brown rice', 'black beans', 'corn', 'salsa', 'avocado', 'shredded cheese'], tags: ['milk', 'high-fodmap', 'acidic'],
+      swaps: [{ removes: ['milk'], text: 'Skip the cheese', adds: [] }] },
+    { id: 'minestrone', name: 'Minestrone with parmesan', meal: 'lunch', ingredients: ['white beans', 'small pasta', 'canned tomatoes', 'zucchini', 'carrots', 'parmesan'], tags: ['wheat', 'milk', 'aged-cheese', 'high-fodmap', 'acidic'],
+      swaps: [{ removes: ['wheat'], text: 'Use gluten-free pasta or rice', adds: [] }, { removes: ['milk', 'aged-cheese'], text: 'Skip the parmesan', adds: [] }] },
+    { id: 'fried-rice', name: 'Vegetable egg fried rice', meal: 'lunch', ingredients: ['brown rice', 'eggs', 'peas', 'carrots', 'soy sauce', 'sesame oil', 'scallions'], tags: ['egg', 'soy', 'wheat', 'sesame', 'high-sodium'],
+      swaps: [{ removes: ['soy', 'wheat', 'high-sodium'], text: 'Use coconut aminos instead of soy sauce', adds: [] }, { removes: ['sesame'], text: 'Use avocado oil instead of sesame oil', adds: [] }, { removes: ['egg'], text: 'Leave out the egg', adds: [] }] },
+    { id: 'caprese-pasta', name: 'Caprese pasta salad', meal: 'lunch', ingredients: ['pasta', 'fresh mozzarella', 'cherry tomatoes', 'basil', 'olive oil'], tags: ['wheat', 'milk', 'acidic', 'choking'],
+      swaps: [{ removes: ['wheat'], text: 'Use gluten-free pasta', adds: [] }, { removes: ['milk'], text: 'Skip the mozzarella; add white beans', adds: [] }, { removes: ['choking'], text: 'Quarter the tomatoes for little ones', adds: [] }] },
+
+    // Dinner
+    { id: 'sheet-pan-salmon', name: 'Sheet-pan salmon, broccoli & potatoes', meal: 'dinner', ingredients: ['salmon fillets', 'broccoli', 'baby potatoes', 'olive oil', 'lemon'], tags: ['fish', 'high-potassium'],
+      swaps: [{ removes: ['fish'], text: 'Roast chicken thighs on the same pan', adds: ['poultry'] }, { removes: ['fish'], text: 'Roast extra-firm tofu on the same pan', adds: ['soy'] }] },
+    { id: 'chicken-stir-fry', name: 'Chicken & vegetable stir-fry with brown rice', meal: 'dinner', ingredients: ['chicken breast', 'broccoli', 'bell peppers', 'snap peas', 'garlic', 'ginger', 'low-sodium soy sauce', 'brown rice'], tags: ['poultry', 'soy', 'wheat', 'high-fodmap'],
+      swaps: [{ removes: ['soy', 'wheat'], text: 'Use coconut aminos instead of soy sauce', adds: [] }, { removes: ['poultry'], text: 'Use tofu instead of chicken', adds: ['soy'] }, { removes: ['high-fodmap'], text: 'Use garlic-infused oil; skip snap peas', adds: [] }] },
+    { id: 'turkey-chili', name: 'Turkey & bean chili', meal: 'dinner', ingredients: ['ground turkey', 'kidney beans', 'canned tomatoes', 'onion', 'chili powder', 'bell peppers'], tags: ['poultry', 'high-fodmap', 'spicy', 'acidic', 'high-potassium'],
+      swaps: [{ removes: ['poultry'], text: 'Make it all-bean with extra lentils', adds: [] }, { removes: ['spicy'], text: 'Make it mild; hot sauce at the table', adds: [] }] },
+    { id: 'beef-stew', name: 'Beef & vegetable stew', meal: 'dinner', ingredients: ['beef chuck', 'potatoes', 'carrots', 'onion', 'beef broth', 'thyme'], tags: ['meat', 'high-satfat', 'high-purine', 'high-potassium', 'high-sodium'],
+      swaps: [{ removes: ['meat', 'high-satfat', 'high-purine'], text: 'Use mushrooms & lentils instead of beef', adds: ['high-fodmap'] }, { removes: ['high-sodium'], text: 'Use low-sodium broth', adds: [] }] },
+    { id: 'baked-cod', name: 'Lemon baked cod with herbed quinoa & green beans', meal: 'dinner', ingredients: ['cod fillets', 'quinoa', 'green beans', 'lemon', 'olive oil', 'parsley'], tags: ['fish'],
+      swaps: [{ removes: ['fish'], text: 'Bake chicken breast instead', adds: ['poultry'] }] },
+    { id: 'shrimp-tacos', name: 'Shrimp tacos with cabbage slaw', meal: 'dinner', ingredients: ['shrimp', 'corn tortillas', 'cabbage', 'lime', 'Greek yogurt sauce'], tags: ['shellfish', 'milk', 'high-purine', 'acidic'],
+      swaps: [{ removes: ['shellfish', 'high-purine'], text: 'Use seasoned chicken instead of shrimp', adds: ['poultry'] }, { removes: ['shellfish', 'high-purine'], text: 'Use black beans instead of shrimp', adds: ['high-fodmap'] }, { removes: ['milk'], text: 'Use avocado crema', adds: [] }] },
+    { id: 'chickpea-curry', name: 'Chickpea & spinach coconut curry', meal: 'dinner', ingredients: ['chickpeas', 'coconut milk', 'canned tomatoes', 'spinach', 'curry spices', 'onion', 'garlic', 'basmati rice'], tags: ['high-fodmap', 'spicy', 'high-potassium', 'acidic'],
+      swaps: [{ removes: ['spicy'], text: 'Use mild curry powder', adds: [] }] },
+    { id: 'turkey-meatballs', name: 'Spaghetti & turkey meatballs', meal: 'dinner', ingredients: ['spaghetti', 'ground turkey', 'egg', 'breadcrumbs', 'marinara sauce', 'parmesan'], tags: ['wheat', 'egg', 'poultry', 'milk', 'aged-cheese', 'acidic', 'high-sodium'],
+      swaps: [{ removes: ['wheat'], text: 'Gluten-free pasta and GF breadcrumbs', adds: [] }, { removes: ['milk', 'aged-cheese'], text: 'Skip the parmesan', adds: [] }, { removes: ['egg'], text: 'Bind meatballs with a flax egg', adds: [] }, { removes: ['high-sodium'], text: 'Use no-salt-added marinara', adds: [] }] },
+    { id: 'pork-apples', name: 'Pork tenderloin with apples & sweet potato', meal: 'dinner', ingredients: ['pork tenderloin', 'apples', 'sweet potatoes', 'thyme', 'olive oil'], tags: ['pork', 'high-fodmap', 'high-potassium'],
+      swaps: [{ removes: ['pork'], text: 'Use chicken thighs instead of pork', adds: ['poultry'] }] },
+    { id: 'peanut-noodles', name: 'Tofu peanut noodles with crunchy veg', meal: 'dinner', ingredients: ['rice noodles', 'tofu', 'peanut butter', 'soy sauce', 'lime', 'cabbage', 'carrots'], tags: ['soy', 'peanut', 'wheat'],
+      swaps: [{ removes: ['peanut'], text: 'Use sunflower-seed butter in the sauce', adds: [] }, { removes: ['wheat'], text: 'Use certified GF tamari', adds: [] }] },
+    { id: 'chicken-rice-broccoli', name: 'Grilled chicken, brown rice & steamed broccoli', meal: 'dinner', ingredients: ['chicken breast', 'brown rice', 'broccoli', 'olive oil', 'lemon'], tags: ['poultry'],
+      swaps: [{ removes: ['poultry'], text: 'Grill tofu or serve with lentils', adds: [] }] },
+    { id: 'bean-burgers', name: 'Black bean burgers on whole-wheat buns', meal: 'dinner', ingredients: ['black beans', 'rolled oats', 'egg', 'whole-wheat buns', 'lettuce', 'tomato'], tags: ['egg', 'wheat', 'oats', 'high-fodmap'],
+      swaps: [{ removes: ['wheat', 'oats'], text: 'GF buns and certified GF oats', adds: [] }, { removes: ['egg'], text: 'Bind with a flax egg', adds: [] }] },
+    { id: 'med-chicken', name: 'Mediterranean baked chicken with olives & potatoes', meal: 'dinner', ingredients: ['chicken thighs', 'potatoes', 'olives', 'cherry tomatoes', 'oregano', 'olive oil'], tags: ['poultry', 'high-sodium', 'high-potassium', 'choking'],
+      swaps: [{ removes: ['high-sodium'], text: 'Halve the olives; no added salt', adds: [] }, { removes: ['choking'], text: 'Quarter the tomatoes & slice olives for little ones', adds: [] }] },
+    { id: 'steak-veg', name: 'Steak with roasted vegetables', meal: 'dinner', ingredients: ['sirloin steak', 'zucchini', 'bell peppers', 'red onion', 'olive oil'], tags: ['meat', 'high-satfat', 'high-purine'],
+      swaps: [{ removes: ['meat', 'high-satfat', 'high-purine'], text: 'Grill portobello mushrooms instead', adds: [] }] },
+    { id: 'homemade-pizza', name: 'Homemade veggie pizza night', meal: 'dinner', ingredients: ['pizza dough', 'tomato sauce', 'mozzarella', 'mushrooms', 'bell peppers'], tags: ['wheat', 'milk', 'high-sodium', 'high-satfat', 'acidic'],
+      swaps: [{ removes: ['wheat'], text: 'Use a gluten-free crust', adds: [] }, { removes: ['milk', 'high-satfat'], text: 'Dairy-free cheese or extra veg, no cheese', adds: [] }] },
+
+    // Snacks
+    { id: 'apple-sunbutter', name: 'Apple slices with sunflower-seed butter', meal: 'snack', ingredients: ['apple', 'sunflower-seed butter'], tags: ['high-fodmap'], swaps: [] },
+    { id: 'carrots-hummus', name: 'Carrot sticks & hummus', meal: 'snack', ingredients: ['carrots', 'hummus'], tags: ['sesame', 'high-fodmap', 'choking'],
+      swaps: [{ removes: ['sesame'], text: 'Use tahini-free bean dip', adds: [] }, { removes: ['choking'], text: 'Steam carrots soft for little ones', adds: [] }] },
+    { id: 'trail-mix', name: 'Trail mix', meal: 'snack', ingredients: ['almonds', 'cashews', 'raisins', 'dark chocolate chips'], tags: ['treenut', 'choking', 'added-sugar', 'caffeine'],
+      swaps: [{ removes: ['treenut'], text: 'Use pumpkin & sunflower seeds instead of nuts', adds: [] }] },
+    { id: 'cheese-crackers', name: 'Cheese & whole-grain crackers', meal: 'snack', ingredients: ['cheddar cheese', 'whole-grain crackers'], tags: ['milk', 'wheat', 'aged-cheese', 'high-sodium'],
+      swaps: [{ removes: ['wheat'], text: 'Use rice crackers', adds: [] }] },
+    { id: 'edamame', name: 'Steamed edamame', meal: 'snack', ingredients: ['edamame'], tags: ['soy'], swaps: [] },
+    { id: 'fruit-cup', name: 'Fresh fruit cup', meal: 'snack', ingredients: ['grapes', 'melon', 'berries', 'orange segments'], tags: ['choking', 'acidic'],
+      swaps: [{ removes: ['choking'], text: 'Quarter grapes lengthwise for little ones', adds: [] }] },
+    { id: 'hard-eggs', name: 'Hard-boiled eggs', meal: 'snack', ingredients: ['eggs'], tags: ['egg'], swaps: [] },
+    { id: 'popcorn', name: 'Air-popped popcorn', meal: 'snack', ingredients: ['popcorn kernels', 'olive oil'], tags: ['choking'], swaps: [] },
+    { id: 'yogurt-fruit', name: 'Yogurt with sliced banana', meal: 'snack', ingredients: ['plain yogurt', 'banana'], tags: ['milk', 'high-potassium'],
+      swaps: [{ removes: ['milk'], text: 'Use coconut or soy yogurt', adds: [] }] }
+  ];
+
+  var KB = {
+    ALLERGENS: ALLERGENS,
+    INTOLERANCES: INTOLERANCES,
+    CONDITIONS: CONDITIONS,
+    MEDICATIONS: MEDICATIONS,
+    DIETS: DIETS,
+    DIET_RULES: DIET_RULES,
+    AGE_BANDS: AGE_BANDS,
+    KID_CALORIES: KID_CALORIES,
+    ACTIVITY: ACTIVITY,
+    GOALS: GOALS,
+    BLOOD_TYPES: BLOOD_TYPES,
+    TAG_LABELS: TAG_LABELS,
+    RECIPES: RECIPES
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = KB;
+  else root.FHKnowledge = KB;
+})(this);
+</script>
+  <script>
+/*
+ * Family Health Guide — engine.
+ *
+ * Pure functions: profile in, guide out. No DOM, no storage, so the same code
+ * can run in the browser, in Node tests, or later inside a mobile app.
+ */
+(function (root) {
+  'use strict';
+
+  var KB = (typeof module !== 'undefined' && module.exports) ? require('./knowledge.js') : root.FHKnowledge;
+
+  var DAY_MS = 24 * 60 * 60 * 1000;
+  var MEALS = ['breakfast', 'lunch', 'dinner'];
+  var DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  var SEVERITY_RANK = { mild: 1, moderate: 2, severe: 3 };
+
+  // ------------------------------------------------------------------ dates
+
+  function parseDate(s) {
+    if (!s) return null;
+    var p = String(s).split('-');
+    if (p.length !== 3) return null;
+    var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function isoDate(d) {
+    var m = d.getMonth() + 1, day = d.getDate();
+    return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (day < 10 ? '0' : '') + day;
+  }
+
+  function ageYears(birthdate, today) {
+    var b = parseDate(birthdate);
+    if (!b) return null;
+    var age = today.getFullYear() - b.getFullYear();
+    if (today.getMonth() < b.getMonth() || (today.getMonth() === b.getMonth() && today.getDate() < b.getDate())) age--;
+    return Math.max(0, age);
+  }
+
+  function ageMonths(birthdate, today) {
+    var b = parseDate(birthdate);
+    if (!b) return null;
+    var m = (today.getFullYear() - b.getFullYear()) * 12 + today.getMonth() - b.getMonth();
+    if (today.getDate() < b.getDate()) m--;
+    return Math.max(0, m);
+  }
+
+  function ageBand(age) {
+    if (age === null) return null;
+    for (var i = 0; i < KB.AGE_BANDS.length; i++) if (age < KB.AGE_BANDS[i].maxAge) return KB.AGE_BANDS[i];
+    return KB.AGE_BANDS[KB.AGE_BANDS.length - 1];
+  }
+
+  // Monday of the week containing `d`.
+  function weekStart(d) {
+    var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    var dow = (x.getDay() + 6) % 7;
+    x.setDate(x.getDate() - dow);
+    return x;
+  }
+
+  // ---------------------------------------------------------------- helpers
+
+  function list(v) { return Array.isArray(v) ? v : []; }
+
+  function norm(s) { return String(s || '').toLowerCase().trim(); }
+
+  function stem(s) { return norm(s).replace(/(es|s)$/, ''); }
+
+  function ingredientMatches(ingredient, term) {
+    var i = norm(ingredient), t = stem(term);
+    return t.length > 1 && (i.indexOf(t) !== -1);
+  }
+
+  // Adds `reason` to a Map-like object of key -> [reasons].
+  function addReason(map, key, reason) {
+    if (!map[key]) map[key] = [];
+    if (map[key].indexOf(reason) === -1) map[key].push(reason);
+  }
+
+  // Merge list entries with the same text, keeping all reasons.
+  function addItem(listObj, text, reason, extra) {
+    var k = norm(text);
+    if (!listObj.index[k]) {
+      listObj.index[k] = { text: text, why: [] };
+      if (extra) for (var e in extra) listObj.index[k][e] = extra[e];
+      listObj.items.push(listObj.index[k]);
+    }
+    if (reason && listObj.index[k].why.indexOf(reason) === -1) listObj.index[k].why.push(reason);
+    return listObj.index[k];
+  }
+
+  function newList() { return { items: [], index: {} }; }
+
+  function latest(member, field) {
+    var log = list(member.log).filter(function (e) { return e[field] !== undefined && e[field] !== null && e[field] !== ''; });
+    log.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    return log.length ? { value: Number(log[0][field]), date: log[0].date, entry: log[0] } : null;
+  }
+
+  function currentWeightKg(member) {
+    var l = latest(member, 'weightKg');
+    return l ? l.value : (member.weightKg ? Number(member.weightKg) : null);
+  }
+
+  function round(n, step) { return Math.round(n / step) * step; }
+
+  function allergyEntries(member) {
+    var out = [];
+    var a = member.allergies || {};
+    Object.keys(a).forEach(function (k) {
+      if (a[k] && KB.ALLERGENS[k]) out.push({ key: k, name: KB.ALLERGENS[k].label, severity: a[k] });
+    });
+    list(member.otherAllergies).forEach(function (o) {
+      if (o && o.name) out.push({ key: null, name: o.name, severity: o.severity || 'moderate' });
+    });
+    return out;
+  }
+
+  function matchMedications(meds) {
+    return list(meds).filter(function (m) { return norm(m); }).map(function (m) {
+      var n = norm(m);
+      var hits = KB.MEDICATIONS.filter(function (rule) {
+        return rule.match.some(function (word) {
+          // Short suffix patterns ("pril", "sartan") match word endings only.
+          if (word.length <= 6 && (word === 'pril' || word === 'sartan')) return new RegExp('[a-z]' + word + '\\b').test(n);
+          return n.indexOf(word) !== -1;
+        });
+      });
+      return { name: m, rules: hits };
+    });
+  }
+
+  // -------------------------------------------------------------- the rules
+  // Collects every hard block and soft caution for one person, with reasons.
+
+  function profileRules(member, today) {
+    var age = ageYears(member.birthdate, today);
+    var band = ageBand(age);
+    var block = {}, caution = {};
+    var who = member.name || 'This person';
+
+    allergyEntries(member).forEach(function (a) {
+      if (a.key) addReason(block, a.key, a.name + ' allergy' + (a.severity ? ' (' + a.severity + ')' : ''));
+    });
+    list(member.intolerances).forEach(function (k) {
+      var it = KB.INTOLERANCES[k];
+      if (it) list(it.caution).forEach(function (t) { addReason(caution, t, it.label); });
+    });
+    list(member.conditions).forEach(function (k) {
+      var c = KB.CONDITIONS[k];
+      if (!c) return;
+      list(c.block).forEach(function (t) { addReason(block, t, c.label); });
+      list(c.caution).forEach(function (t) { addReason(caution, t, c.label); });
+    });
+    var diet = KB.DIETS[member.diet] || KB.DIETS.omnivore;
+    list(diet.block).forEach(function (t) { addReason(block, t, diet.label + ' diet'); });
+    list(diet.caution).forEach(function (t) { addReason(caution, t, diet.label + ' diet'); });
+    list(member.dietRules).forEach(function (k) {
+      var r = KB.DIET_RULES[k];
+      if (r) list(r.block).forEach(function (t) { addReason(block, t, r.label); });
+    });
+    matchMedications(member.medications).forEach(function (m) {
+      m.rules.forEach(function (r) { list(r.block).forEach(function (t) { addReason(block, t, m.name + ' (' + r.label + ')'); }); });
+    });
+    if (band) {
+      list(band.block).forEach(function (t) { addReason(block, t, band.label); });
+      list(band.caution).forEach(function (t) { addReason(caution, t, band.label); });
+    }
+    // Anything that's blocked doesn't also need a caution.
+    Object.keys(block).forEach(function (t) { delete caution[t]; });
+
+    return {
+      who: who,
+      age: age,
+      band: band,
+      block: block,
+      caution: caution,
+      avoidIngredients: list(member.avoidFoods).filter(Boolean),
+      dislikes: list(member.dislikes).filter(Boolean)
+    };
+  }
+
+  // ---------------------------------------------------------------- targets
+
+  function proteinRDA(age, sex) {
+    if (age < 1) return null;
+    if (age < 4) return 13;
+    if (age < 9) return 19;
+    if (age < 14) return 34;
+    if (age < 19) return sex === 'male' ? 52 : 46;
+    return null;
+  }
+
+  function calciumMg(age, sex) {
+    if (age < 1) return null;
+    if (age < 4) return 700;
+    if (age < 9) return 1000;
+    if (age < 19) return 1300;
+    if (age < 51) return 1000;
+    if (age < 71) return sex === 'male' ? 1000 : 1200;
+    return 1200;
+  }
+
+  function ironMg(age, sex, pregnant) {
+    if (age < 1) return null;
+    if (pregnant) return 27;
+    if (age < 4) return 7;
+    if (age < 9) return 10;
+    if (age < 14) return 8;
+    if (age < 19) return sex === 'male' ? 11 : 15;
+    if (age < 51) return sex === 'male' ? 8 : 18;
+    return 8;
+  }
+
+  function sodiumMg(age) {
+    if (age < 1) return null;
+    if (age < 4) return 1200;
+    if (age < 9) return 1500;
+    if (age < 14) return 1800;
+    return 2300;
+  }
+
+  function fluidsCups(age, sex) {
+    if (age < 1) return null;
+    if (age < 4) return '4';
+    if (age < 9) return '5';
+    if (age < 14) return '7–8';
+    if (age < 19) return sex === 'male' ? '11' : '8';
+    return sex === 'male' ? '13' : (sex === 'female' ? '9' : '9–13');
+  }
+
+  function targets(member, rules, today) {
+    var age = rules.age;
+    if (age === null) return { missing: 'Add a birth date to calculate daily targets.' };
+    var sex = member.sex;
+    var conds = list(member.conditions);
+    var has = function (c) { return conds.indexOf(c) !== -1; };
+    var pregnant = has('pregnancy');
+    var act = KB.ACTIVITY[member.activity] || KB.ACTIVITY.light;
+    var goal = KB.GOALS[member.goal] || KB.GOALS.maintain;
+    var weight = currentWeightKg(member);
+    var height = member.heightCm ? Number(member.heightCm) : null;
+    var t = { notes: [] };
+
+    // Calories
+    if (member.calorieOverride) {
+      t.kcal = Number(member.calorieOverride);
+      t.kcalSource = 'Set manually';
+    } else if (age < 2) {
+      t.kcal = null;
+      t.notes.push('Under 2: follow the pediatrician\'s feeding plan rather than a calorie number.');
+    } else if (age <= 18) {
+      var row = (KB.KID_CALORIES[sex === 'male' ? 'male' : 'female'] || {})[age];
+      if (row) {
+        t.kcal = row[act.kid];
+        t.kcalSource = 'Dietary Guidelines estimate for age ' + age;
+      }
+      if (goal.kcal) t.notes.push('Kids\' weight goals are best handled with the pediatrician — the calorie estimate isn\'t reduced.');
+    } else if (weight && height) {
+      var base = 10 * weight + 6.25 * height - 5 * age;
+      var bmr = sex === 'male' ? base + 5 : sex === 'female' ? base - 161 : base - 78;
+      var kcal = bmr * act.factor + goal.kcal;
+      if (goal.kcal < 0) kcal = Math.max(kcal, sex === 'male' ? 1500 : 1200);
+      t.kcal = round(kcal, 50);
+      t.kcalSource = 'Mifflin-St Jeor × ' + act.label.toLowerCase() + (goal.kcal ? ', ' + goal.label.toLowerCase() : '');
+    } else {
+      t.kcal = null;
+      t.notes.push('Add height and weight to estimate calories.');
+    }
+    if (pregnant) t.notes.push('Pregnancy: add ~340 kcal/day in the 2nd trimester and ~450 in the 3rd.');
+    if (has('breastfeeding')) t.notes.push('Breastfeeding: add ~330–400 kcal/day.');
+
+    // Protein
+    if (age >= 19 && weight) {
+      var lo = 0.8, hi = 0.8;
+      if (age >= 65) { lo = 1.0; hi = 1.2; }
+      if (member.goal === 'gain') { lo = 1.2; hi = 1.6; }
+      if (pregnant) { lo = Math.max(lo, 1.1); hi = Math.max(hi, 1.1); }
+      t.protein = lo === hi ? Math.round(weight * lo) + ' g' : Math.round(weight * lo) + '–' + Math.round(weight * hi) + ' g';
+      if (has('ckd')) t.protein += ' (CKD: amount set by care team)';
+    } else if (age < 19) {
+      var p = proteinRDA(age, sex);
+      if (p) t.protein = p + ' g';
+    }
+
+    if (t.kcal) {
+      t.fiber = Math.round(t.kcal / 1000 * 14) + ' g';
+      t.addedSugar = age < 2 ? 'None' : 'under ' + Math.round(t.kcal * 0.10 / 4) + ' g';
+      var satPct = (has('cholesterol') || has('heart')) ? 0.06 : 0.10;
+      t.satFat = 'under ' + Math.round(t.kcal * satPct / 9) + ' g';
+    }
+    var na = sodiumMg(age);
+    if (na) {
+      if (has('hypertension') || has('heart') || has('ckd')) na = Math.min(na, 1500);
+      t.sodium = 'under ' + na.toLocaleString('en-US') + ' mg';
+    }
+    var ca = calciumMg(age, sex);
+    if (ca) t.calcium = ca.toLocaleString('en-US') + ' mg';
+    var fe = ironMg(age, sex, pregnant);
+    if (fe) {
+      if (member.diet === 'vegetarian' || member.diet === 'vegan') fe = Math.round(fe * 1.8);
+      t.iron = fe + ' mg' + ((member.diet === 'vegetarian' || member.diet === 'vegan') ? ' (plant-based ×1.8)' : '');
+    }
+    var cups = fluidsCups(age, sex);
+    if (cups) t.fluids = cups + ' cups';
+    if (has('heart')) t.notes.push('Heart failure: the care team may set a fluid limit — it overrides the fluids guide.');
+    if (has('ckd')) t.notes.push('Kidney disease: fluid, potassium and phosphorus limits come from the care team.');
+    return t;
+  }
+
+  // ------------------------------------------------------------------ guide
+
+  function buildGuide(member, today) {
+    today = today || new Date();
+    var rules = profileRules(member, today);
+    var age = rules.age;
+    var band = rules.band;
+    var avoid = newList(), limit = newList(), emphasize = newList();
+    var conditionNotes = [], supplements = newList(), alerts = [], labelWords = [], dietTips = [];
+
+    // Allergies
+    var allergies = allergyEntries(member);
+    allergies.forEach(function (a) {
+      var why = a.name + ' allergy';
+      if (a.key) {
+        var info = KB.ALLERGENS[a.key];
+        info.avoid.forEach(function (f) { addItem(avoid, f, why); });
+        labelWords.push({ label: info.label, words: info.labelWords, severity: a.severity });
+      } else {
+        addItem(avoid, a.name, why);
+      }
+    });
+    var severe = allergies.filter(function (a) { return a.severity === 'severe'; });
+    if (severe.length) {
+      alerts.push({ level: 'danger', text: 'Severe allergy: ' + severe.map(function (a) { return a.name; }).join(', ') + '. Keep epinephrine auto-injectors (if prescribed) on hand and make sure caregivers know the emergency plan.' });
+    }
+
+    // Intolerances
+    list(member.intolerances).forEach(function (k) {
+      var it = KB.INTOLERANCES[k];
+      if (!it) return;
+      it.limit.forEach(function (f) { addItem(limit, f, it.label); });
+      it.emphasize.forEach(function (e) { addItem(emphasize, e.text, it.label, { tag: e.tag }); });
+      conditionNotes.push({ title: it.label, tips: it.tips });
+    });
+
+    // Conditions
+    list(member.conditions).forEach(function (k) {
+      var c = KB.CONDITIONS[k];
+      if (!c) return;
+      c.avoid.forEach(function (f) { addItem(avoid, f, c.label); });
+      c.limit.forEach(function (f) { addItem(limit, f, c.label); });
+      c.emphasize.forEach(function (e) { addItem(emphasize, e.text, c.label, { tag: e.tag }); });
+      conditionNotes.push({ title: c.label, tips: c.tips });
+    });
+    list(member.otherConditions).forEach(function (oc) {
+      if (oc) conditionNotes.push({ title: oc, tips: ['No built-in rules for this condition — add your doctor\'s guidance in "Must avoid" or Notes.'] });
+    });
+
+    // Diet & religious rules
+    var diet = KB.DIETS[member.diet] || KB.DIETS.omnivore;
+    if (member.diet && member.diet !== 'omnivore') {
+      list(diet.emphasize).forEach(function (e) { addItem(emphasize, e.text, diet.label + ' diet', { tag: e.tag }); });
+      list(diet.supplements).forEach(function (s) { addItem(supplements, s, diet.label + ' diet'); });
+      if (diet.tips.length) dietTips.push({ title: diet.label + ' diet', tips: diet.tips });
+    }
+    list(member.dietRules).forEach(function (k) {
+      var r = KB.DIET_RULES[k];
+      if (r && r.tips.length) dietTips.push({ title: r.label, tips: r.tips });
+    });
+
+    // Medications
+    var meds = matchMedications(member.medications);
+    meds.forEach(function (m) {
+      m.rules.forEach(function (r) {
+        list(r.avoidFoods).forEach(function (f) { addItem(avoid, f, m.name); });
+        if (r.block && r.block.indexOf('grapefruit') !== -1) addItem(avoid, 'Grapefruit, grapefruit juice, pomelo & Seville orange', m.name);
+        if (r.block && r.block.indexOf('alcohol') !== -1) addItem(avoid, 'Alcohol', m.name);
+      });
+    });
+
+    // Life stage
+    if (band) band.avoid.forEach(function (f) { addItem(avoid, f, band.label); });
+    if (age !== null && age >= 19 && age < 51 && member.sex === 'female' && list(member.conditions).indexOf('pregnancy') === -1) {
+      addItem(supplements, 'Folic acid 400 mcg/day if pregnancy is possible', 'Women of reproductive age');
+    }
+    if (age !== null && age >= 51) addItem(supplements, 'Vitamin B12 from fortified foods or a supplement', band.label);
+    if (age !== null && age >= 65) addItem(supplements, 'Vitamin D — ask about a daily supplement', band.label);
+    if (age !== null && age < 1) addItem(supplements, 'Vitamin D drops for breastfed infants (ask the pediatrician)', band.label);
+    if (list(member.conditions).indexOf('pregnancy') !== -1) addItem(supplements, 'Prenatal vitamin with folic acid, iron & iodine', 'Pregnancy');
+
+    // Custom rules typed by the family
+    list(member.avoidFoods).forEach(function (f) { if (f) addItem(avoid, f, 'Added by family'); });
+    list(member.limitFoods).forEach(function (f) { if (f) addItem(limit, f, 'Added by family'); });
+    list(member.favoriteFoods).forEach(function (f) { if (f) addItem(emphasize, f, 'Favorite', { favorite: true }); });
+
+    // Emphasised foods that clash with this person's own restrictions.
+    emphasize.items.forEach(function (e) {
+      if (!e.tag) return;
+      // A rule doesn't conflict with its own advice (lactose intolerance → lactose-free milk).
+      var others = (rules.caution[e.tag] || []).filter(function (r) { return e.why.indexOf(r) === -1; });
+      if (rules.block[e.tag]) e.conflict = 'Not for ' + rules.who + ': ' + rules.block[e.tag].join(', ');
+      else if (others.length) e.conflict = 'Check with the care team — also limited for ' + others.join(', ');
+    });
+    var clashes = emphasize.items.filter(function (e) { return e.conflict && e.conflict.indexOf('Check') === 0; });
+    clashes.forEach(function (e) {
+      alerts.push({ level: 'warn', text: 'Conflicting advice: "' + e.text + '" is recommended for ' + e.why.join(', ') + ' but limited for another condition. Ask the doctor or dietitian which comes first.' });
+    });
+    // Remove items from "limit" that are already a full "avoid".
+    limit.items = limit.items.filter(function (l) { return !avoid.index[norm(l.text)]; });
+
+    // Measurements → alerts
+    var bmi = null, weight = currentWeightKg(member);
+    if (age !== null && age >= 20 && weight && member.heightCm) {
+      var h = Number(member.heightCm) / 100;
+      bmi = Math.round(weight / (h * h) * 10) / 10;
+    }
+    var sys = latest(member, 'bpSys'), dia = latest(member, 'bpDia');
+    if (sys && dia) {
+      if (sys.value >= 180 || dia.value >= 120) alerts.push({ level: 'danger', text: 'Last blood pressure ' + sys.value + '/' + dia.value + ' (' + sys.date + ') is in the crisis range. If it is still this high, seek care right away.' });
+      else if ((sys.value >= 130 || dia.value >= 80) && list(member.conditions).indexOf('hypertension') === -1) alerts.push({ level: 'warn', text: 'Last blood pressure ' + sys.value + '/' + dia.value + ' is above 130/80. Worth mentioning to the doctor; consider adding "High blood pressure" if diagnosed.' });
+    }
+    var a1c = latest(member, 'a1c');
+    if (a1c) {
+      var diab = list(member.conditions).some(function (c) { return c === 'diabetes1' || c === 'diabetes2'; });
+      if (!diab && a1c.value >= 6.5) alerts.push({ level: 'warn', text: 'Last A1C ' + a1c.value + '% is in the diabetes range (6.5%+). Discuss with the doctor.' });
+      else if (!diab && a1c.value >= 5.7 && list(member.conditions).indexOf('prediabetes') === -1) alerts.push({ level: 'info', text: 'Last A1C ' + a1c.value + '% is in the prediabetes range (5.7–6.4%).' });
+    }
+    var ldl = latest(member, 'ldl');
+    if (ldl && ldl.value >= 160 && list(member.conditions).indexOf('cholesterol') === -1) {
+      alerts.push({ level: 'warn', text: 'Last LDL ' + ldl.value + ' mg/dL is high (160+). Discuss with the doctor; consider adding "High cholesterol".' });
+    }
+
+    // Unrecognised medications
+    var unknownMeds = meds.filter(function (m) { return !m.rules.length; }).map(function (m) { return m.name; });
+
+    // Self-updating reminders
+    var reviewed = parseDate(member.reviewedAt);
+    if (!reviewed || (today - reviewed) / DAY_MS > 182) {
+      alerts.push({ level: 'info', text: reviewed ? 'Profile last reviewed ' + member.reviewedAt + ' — over 6 months ago. Check allergies, medications and conditions are still current.' : 'This profile has not been marked as reviewed yet.' , action: 'review' });
+    }
+    var hasChronic = list(member.conditions).some(function (c) { return KB.CONDITIONS[c] && KB.CONDITIONS[c].group !== 'Life stage'; });
+    var lastLog = list(member.log).map(function (e) { return e.date; }).sort().pop();
+    if (hasChronic && (!lastLog || (today - parseDate(lastLog)) / DAY_MS > 365)) {
+      alerts.push({ level: 'info', text: lastLog ? 'No measurements logged since ' + lastLog + '. Add recent labs or readings so the guide stays current.' : 'Log blood pressure, weight or lab results to get alerts when numbers change.' });
+    }
+    var nextBand = nextBandChange(member, today);
+    if (nextBand && nextBand.days <= 45) {
+      alerts.push({ level: 'info', text: 'On ' + nextBand.date + ' this guide will update automatically to "' + nextBand.band.label + '" guidance.' });
+    }
+
+    return {
+      member: member,
+      today: isoDate(today),
+      age: age,
+      ageMonths: age !== null && age < 2 ? ageMonths(member.birthdate, today) : null,
+      band: band,
+      bmi: bmi,
+      weightKg: weight,
+      alerts: alerts,
+      targets: targets(member, rules, today),
+      avoid: avoid.items,
+      limit: limit.items,
+      emphasize: emphasize.items,
+      supplements: supplements.items,
+      medications: meds,
+      unknownMeds: unknownMeds,
+      conditionNotes: conditionNotes,
+      dietTips: dietTips,
+      lifeStageTips: band ? band.tips : [],
+      labelWords: labelWords,
+      allergies: allergies,
+      rules: rules
+    };
+  }
+
+  function nextBandChange(member, today) {
+    var b = parseDate(member.birthdate);
+    var age = ageYears(member.birthdate, today);
+    if (!b || age === null) return null;
+    var band = ageBand(age);
+    var target = band.maxAge;
+    if (target >= 200) return null;
+    var d = new Date(b.getFullYear() + target, b.getMonth(), b.getDate());
+    return { date: isoDate(d), days: Math.ceil((d - today) / DAY_MS), band: ageBand(target) };
+  }
+
+  // ----------------------------------------------------------- meal planner
+
+  function recipeTags(recipe) {
+    var tags = list(recipe.tags).slice();
+    if (tags.indexOf('wheat') !== -1 && tags.indexOf('gluten') === -1) tags.push('gluten');
+    var hasMeat = tags.indexOf('meat') !== -1 || tags.indexOf('poultry') !== -1 || tags.indexOf('pork') !== -1;
+    if (hasMeat && tags.indexOf('milk') !== -1) tags.push('meat-with-dairy');
+    return tags;
+  }
+
+  function swapRemoves(swap) {
+    var r = list(swap.removes).slice();
+    if (r.indexOf('wheat') !== -1 && r.indexOf('gluten') === -1) r.push('gluten');
+    if (r.indexOf('milk') !== -1) r.push('meat-with-dairy');
+    if (r.indexOf('meat') !== -1 || r.indexOf('poultry') !== -1 || r.indexOf('pork') !== -1) r.push('meat-with-dairy');
+    return r;
+  }
+
+  // How one recipe works for one person: ok | caution | swap | no.
+  function evaluateRecipe(recipe, rules) {
+    var tags = recipeTags(recipe);
+    var hard = tags.filter(function (t) { return rules.block[t]; });
+    var soft = tags.filter(function (t) { return rules.caution[t]; });
+    var ingredients = list(recipe.ingredients);
+    var avoidHits = [], dislikeHits = [];
+    rules.avoidIngredients.forEach(function (term) {
+      ingredients.forEach(function (ing) { if (ingredientMatches(ing, term) && avoidHits.indexOf(ing) === -1) avoidHits.push(ing); });
+    });
+    rules.dislikes.forEach(function (term) {
+      ingredients.forEach(function (ing) { if (ingredientMatches(ing, term) && dislikeHits.indexOf(ing) === -1) dislikeHits.push(ing); });
+    });
+
+    var remaining = hard.slice();
+    var swaps = [];
+    list(recipe.swaps).forEach(function (s) {
+      var removes = swapRemoves(s);
+      var helps = remaining.some(function (t) { return removes.indexOf(t) !== -1; });
+      var safe = !list(s.adds).some(function (t) { return rules.block[t]; });
+      if (helps && safe) {
+        // Severe allergy: a per-plate swap risks cross-contact, so the whole dish changes.
+        var severe = remaining.some(function (t) {
+          return removes.indexOf(t) !== -1 && rules.block[t].some(function (why) { return /\(severe\)$/.test(why); });
+        });
+        swaps.push(severe ? 'Whole dish (severe allergy — avoid cross-contact): ' + s.text : s.text);
+        remaining = remaining.filter(function (t) { return removes.indexOf(t) === -1; });
+        soft = soft.filter(function (t) { return removes.indexOf(t) === -1; });
+      }
+    });
+    // Optional swaps that ease a caution.
+    var tips = [];
+    list(recipe.swaps).forEach(function (s) {
+      if (swaps.indexOf(s.text) !== -1) return;
+      var removes = swapRemoves(s);
+      var helps = soft.some(function (t) { return removes.indexOf(t) !== -1; });
+      var safe = !list(s.adds).some(function (t) { return rules.block[t]; });
+      if (helps && safe) tips.push(s.text);
+    });
+
+    var status;
+    if (remaining.length || avoidHits.length) status = 'no';
+    else if (swaps.length) status = 'swap';
+    else if (soft.length || dislikeHits.length) status = 'caution';
+    else status = 'ok';
+
+    return {
+      status: status,
+      blockedBy: remaining.map(function (t) { return { tag: t, why: rules.block[t] }; }),
+      avoidHits: avoidHits,
+      swaps: swaps,
+      cautions: soft.map(function (t) { return { tag: t, why: rules.caution[t] }; }),
+      dislikes: dislikeHits,
+      tips: tips
+    };
+  }
+
+  // Small deterministic PRNG so a week's plan is stable until something changes.
+  function seeded(seedStr) {
+    var h = 2166136261;
+    for (var i = 0; i < seedStr.length; i++) { h ^= seedStr.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return function () {
+      h += 0x6D2B79F5;
+      var t = h;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var STATUS_WEIGHT = { ok: 1, caution: 0.45, swap: 0.6 };
+
+  function familyFit(recipe, eaters) {
+    var per = eaters.map(function (e) { return { member: e.member, result: evaluateRecipe(recipe, e.rules) }; });
+    var noCount = per.filter(function (p) { return p.result.status === 'no'; }).length;
+    var weight = per.reduce(function (w, p) {
+      var severeSwap = p.result.swaps.some(function (s) { return s.indexOf('Whole dish') === 0; });
+      return w * (STATUS_WEIGHT[p.result.status] || 0) * (severeSwap ? 0.3 : 1);
+    }, 1);
+    var worst = per.reduce(function (w, p) {
+      var r = { ok: 0, caution: 1, swap: 2, no: 3 }[p.result.status];
+      return Math.max(w, r);
+    }, 0);
+    return { recipe: recipe, per: per, noCount: noCount, weight: weight, worst: ['ok', 'caution', 'swap', 'no'][worst] };
+  }
+
+  /*
+   * Builds a 7-day breakfast/lunch/dinner plan for the chosen eaters.
+   * opts: { today, recipes, overrides: { 'dayIndex-meal': recipeId }, seed }
+   */
+  function buildPlan(members, opts) {
+    opts = opts || {};
+    var today = opts.today || new Date();
+    var recipes = opts.recipes || KB.RECIPES;
+    var overrides = opts.overrides || {};
+    var ws = weekStart(today);
+    var eaters = members.map(function (m) { return { member: m, rules: profileRules(m, today) }; });
+    var rand = seeded(isoDate(ws) + '|' + (opts.seed || '') + '|' + members.map(function (m) { return m.id; }).join(','));
+    var notices = [];
+
+    var fits = {};
+    recipes.forEach(function (r) { fits[r.id] = familyFit(r, eaters); });
+
+    var days = DAYS.map(function (name, i) {
+      var d = new Date(ws); d.setDate(ws.getDate() + i);
+      return { name: name, date: isoDate(d), meals: {} };
+    });
+
+    MEALS.forEach(function (meal) {
+      var pool = recipes.filter(function (r) { return r.meal === meal; }).map(function (r) { return fits[r.id]; });
+      var safe = pool.filter(function (f) { return f.noCount === 0; });
+      var used = {};
+
+      days.forEach(function (day, i) {
+        var key = i + '-' + meal;
+        var chosen = null;
+
+        if (overrides[key]) {
+          var o = fits[overrides[key]];
+          if (o && o.noCount === 0) chosen = o;
+          else if (o) notices.push(day.name + ' ' + meal + ': "' + o.recipe.name + '" was replaced — it no longer works for ' + o.per.filter(function (p) { return p.result.status === 'no'; }).map(function (p) { return p.member.name; }).join(', ') + '.');
+        }
+        if (!chosen && safe.length) {
+          var fresh = safe.filter(function (f) { return !used[f.recipe.id]; });
+          var candidates = fresh.length ? fresh : safe;
+          var total = candidates.reduce(function (s, f) { return s + f.weight; }, 0);
+          var pick = rand() * total;
+          for (var c = 0; c < candidates.length; c++) {
+            pick -= candidates[c].weight;
+            if (pick <= 0) { chosen = candidates[c]; break; }
+          }
+          if (!chosen) chosen = candidates[candidates.length - 1];
+        }
+        if (!chosen && pool.length) {
+          // Nothing fits everyone: take the dish that leaves out the fewest people.
+          chosen = pool.slice().sort(function (a, b) { return a.noCount - b.noCount || b.weight - a.weight; })[0];
+        }
+        if (chosen) used[chosen.recipe.id] = true;
+        day.meals[meal] = chosen;
+      });
+    });
+
+    var snacks = recipes.filter(function (r) { return r.meal === 'snack'; }).map(function (r) { return fits[r.id]; })
+      .filter(function (f) { return f.noCount === 0; })
+      .sort(function (a, b) { return b.weight - a.weight; });
+
+    return { weekStart: isoDate(ws), days: days, snacks: snacks, eaters: eaters, notices: notices, fits: fits };
+  }
+
+  function groceryList(plan) {
+    var counts = {};
+    plan.days.forEach(function (d) {
+      MEALS.forEach(function (m) {
+        var f = d.meals[m];
+        if (!f) return;
+        list(f.recipe.ingredients).forEach(function (ing) {
+          var k = stem(ing.replace(/^(soft|hard)-boiled /, ''));
+          counts[k] = counts[k] || { name: ing, meals: 0 };
+          counts[k].meals++;
+        });
+      });
+    });
+    return Object.keys(counts).sort().map(function (k) { return counts[k]; });
+  }
+
+  // Kitchen allergy matrix: which family members react to which allergen.
+  function allergyMatrix(members) {
+    var keys = Object.keys(KB.ALLERGENS);
+    var rows = keys.map(function (k) {
+      return {
+        key: k,
+        label: KB.ALLERGENS[k].label,
+        cells: members.map(function (m) { return (m.allergies || {})[k] || ''; })
+      };
+    }).filter(function (r) { return r.cells.some(Boolean); });
+    var other = {};
+    members.forEach(function (m, i) {
+      list(m.otherAllergies).forEach(function (o) {
+        var k = norm(o.name);
+        if (!other[k]) other[k] = { key: k, label: o.name, cells: members.map(function () { return ''; }) };
+        other[k].cells[i] = o.severity || 'moderate';
+      });
+    });
+    return rows.concat(Object.keys(other).map(function (k) { return other[k]; }));
+  }
+
+  var Engine = {
+    MEALS: MEALS,
+    DAYS: DAYS,
+    SEVERITY_RANK: SEVERITY_RANK,
+    parseDate: parseDate,
+    isoDate: isoDate,
+    ageYears: ageYears,
+    ageMonths: ageMonths,
+    ageBand: ageBand,
+    weekStart: weekStart,
+    profileRules: profileRules,
+    matchMedications: matchMedications,
+    buildGuide: buildGuide,
+    evaluateRecipe: evaluateRecipe,
+    recipeTags: recipeTags,
+    buildPlan: buildPlan,
+    groceryList: groceryList,
+    allergyMatrix: allergyMatrix,
+    allergyEntries: allergyEntries,
+    currentWeightKg: currentWeightKg,
+    nextBandChange: nextBandChange
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
+  else root.FHEngine = Engine;
+})(this);
+</script>
+  <script>
+/*
+ * Family Health Guide — storage.
+ *
+ * Data stays on this device (browser localStorage). Nothing is sent anywhere.
+ * Export / import a JSON backup to move it between browsers or computers.
+ */
+(function (root) {
+  'use strict';
+
+  var KEY = 'family-health-guide-v1';
+  var VERSION = 1;
+
+  function empty() {
+    return { version: VERSION, settings: { units: 'us' }, members: [], customRecipes: [], plan: { overrides: {}, eaters: null, seed: '' }, savedAt: null };
+  }
+
+  function migrate(data) {
+    var base = empty();
+    if (!data || typeof data !== 'object') return base;
+    var out = {
+      version: VERSION,
+      settings: Object.assign({}, base.settings, data.settings || {}),
+      members: Array.isArray(data.members) ? data.members.map(normalizeMember) : [],
+      customRecipes: Array.isArray(data.customRecipes) ? data.customRecipes : [],
+      plan: Object.assign({}, base.plan, data.plan || {}),
+      savedAt: data.savedAt || null
+    };
+    if (!out.plan.overrides || typeof out.plan.overrides !== 'object') out.plan.overrides = {};
+    return out;
+  }
+
+  function normalizeMember(m) {
+    var arr = function (v) { return Array.isArray(v) ? v : []; };
+    return Object.assign({
+      id: newId(), name: '', relation: '', birthdate: '', sex: '', heightCm: null, weightKg: null,
+      activity: 'light', goal: 'maintain', bloodType: '', allergies: {}, otherAllergies: [], intolerances: [],
+      conditions: [], otherConditions: [], medications: [], diet: 'omnivore', dietRules: [], dislikes: [],
+      avoidFoods: [], limitFoods: [], favoriteFoods: [], calorieOverride: null, doctor: '', emergencyContact: '',
+      notes: '', log: [], reviewedAt: '', createdAt: '', updatedAt: ''
+    }, m, {
+      allergies: (m && typeof m.allergies === 'object' && !Array.isArray(m.allergies)) ? m.allergies : {},
+      otherAllergies: arr(m && m.otherAllergies), intolerances: arr(m && m.intolerances), conditions: arr(m && m.conditions),
+      otherConditions: arr(m && m.otherConditions), medications: arr(m && m.medications), dietRules: arr(m && m.dietRules),
+      dislikes: arr(m && m.dislikes), avoidFoods: arr(m && m.avoidFoods), limitFoods: arr(m && m.limitFoods),
+      favoriteFoods: arr(m && m.favoriteFoods), log: arr(m && m.log)
+    });
+  }
+
+  function newId() {
+    return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  function load() {
+    try {
+      var raw = root.localStorage && root.localStorage.getItem(KEY);
+      return migrate(raw ? JSON.parse(raw) : null);
+    } catch (e) {
+      return migrate(null);
+    }
+  }
+
+  // Returns true on success so the UI can warn if the browser blocks storage.
+  function save(state) {
+    try {
+      state.savedAt = new Date().toISOString();
+      root.localStorage.setItem(KEY, JSON.stringify(state));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function exportJSON(state) {
+    return JSON.stringify(Object.assign({ app: 'family-health-guide', exportedAt: new Date().toISOString() }, state), null, 2);
+  }
+
+  function importJSON(text) {
+    var data = JSON.parse(text);
+    if (!data || !Array.isArray(data.members)) throw new Error('This file is not a Family Health Guide backup.');
+    return migrate(data);
+  }
+
+  var Store = { KEY: KEY, load: load, save: save, empty: empty, migrate: migrate, normalizeMember: normalizeMember, newId: newId, exportJSON: exportJSON, importJSON: importJSON };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = Store;
+  else root.FHStore = Store;
+})(this);
+</script>
+  <script>
+/*
+ * A made-up family for trying the app (Data → Load demo family).
+ * None of these people are real.
+ */
+(function (root) {
+  'use strict';
+
+  var DEMO = {
+    version: 1,
+    settings: { units: 'us' },
+    members: [
+      {
+        id: 'demo-alex', name: 'Alex', relation: 'Dad', birthdate: '1981-03-14', sex: 'male',
+        heightCm: 178, weightKg: 95, activity: 'light', goal: 'lose', bloodType: 'O+',
+        allergies: {}, otherAllergies: [], intolerances: [],
+        conditions: ['hypertension', 'cholesterol'], otherConditions: [],
+        medications: ['Lisinopril 10 mg', 'Atorvastatin 20 mg'],
+        diet: 'omnivore', dietRules: [], dislikes: ['mushroom'], avoidFoods: [], limitFoods: [], favoriteFoods: ['Grilled fish', 'Spicy food'],
+        doctor: 'Dr. Example, Family Medicine', emergencyContact: 'Sam — (555) 010-0000', notes: '',
+        log: [{ date: '2026-08-02', weightKg: 96, bpSys: 136, bpDia: 86, ldl: 148 }],
+        reviewedAt: '2026-09-01'
+      },
+      {
+        id: 'demo-sam', name: 'Sam', relation: 'Mom', birthdate: '1985-07-02', sex: 'female',
+        heightCm: 165, weightKg: 62, activity: 'moderate', goal: 'maintain', bloodType: 'A-',
+        allergies: {}, otherAllergies: [], intolerances: ['lactose'],
+        conditions: ['celiac', 'hypothyroid'], otherConditions: [],
+        medications: ['Levothyroxine 75 mcg'],
+        diet: 'pescatarian', dietRules: [], dislikes: [], avoidFoods: [], limitFoods: [], favoriteFoods: ['Salmon', 'Quinoa'],
+        doctor: '', emergencyContact: 'Alex — (555) 010-0001', notes: 'Uses a separate toaster for gluten-free bread.',
+        log: [], reviewedAt: '2026-09-01'
+      },
+      {
+        id: 'demo-mia', name: 'Mia', relation: 'Daughter', birthdate: '2017-05-20', sex: 'female',
+        heightCm: 132, weightKg: 28, activity: 'active', goal: 'maintain', bloodType: '',
+        allergies: { peanut: 'severe', treenut: 'moderate' }, otherAllergies: [{ name: 'Kiwi', severity: 'mild' }], intolerances: [],
+        conditions: [], otherConditions: [],
+        medications: ['EpiPen Jr (carry always)'],
+        diet: 'omnivore', dietRules: [], dislikes: ['olives'], avoidFoods: [], limitFoods: [], favoriteFoods: ['Pasta', 'Strawberries'],
+        doctor: 'Dr. Example, Pediatrics', emergencyContact: 'Sam — (555) 010-0001', notes: 'School has her allergy action plan.',
+        log: [], reviewedAt: '2026-09-01'
+      },
+      {
+        id: 'demo-leo', name: 'Leo', relation: 'Son', birthdate: '2024-06-11', sex: 'male',
+        heightCm: 88, weightKg: 12.5, activity: 'active', goal: 'maintain', bloodType: '',
+        allergies: { milk: 'moderate' }, otherAllergies: [], intolerances: [],
+        conditions: [], otherConditions: [],
+        medications: [],
+        diet: 'omnivore', dietRules: [], dislikes: [], avoidFoods: [], limitFoods: [], favoriteFoods: ['Bananas'],
+        doctor: 'Dr. Example, Pediatrics', emergencyContact: 'Sam — (555) 010-0001', notes: '',
+        log: [], reviewedAt: '2026-09-01'
+      },
+      {
+        id: 'demo-june', name: 'June', relation: 'Grandma', birthdate: '1954-01-30', sex: 'female',
+        heightCm: 160, weightKg: 70, activity: 'sedentary', goal: 'maintain', bloodType: 'B+',
+        allergies: { shellfish: 'severe' }, otherAllergies: [], intolerances: [],
+        conditions: ['diabetes2', 'osteoporosis', 'gerd'], otherConditions: [],
+        medications: ['Metformin 500 mg twice daily', 'Warfarin 5 mg', 'Alendronate weekly'],
+        diet: 'omnivore', dietRules: [], dislikes: [], avoidFoods: [], limitFoods: [], favoriteFoods: ['Oatmeal', 'Tea'],
+        doctor: 'Dr. Example, Internal Medicine', emergencyContact: 'Alex — (555) 010-0000', notes: 'INR checked monthly.',
+        log: [{ date: '2026-07-15', weightKg: 70, bpSys: 128, bpDia: 76, a1c: 7.1 }],
+        reviewedAt: '2026-03-10'
+      }
+    ],
+    customRecipes: [],
+    plan: { overrides: {}, eaters: null }
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = DEMO;
+  else root.FHDemo = DEMO;
+})(this);
+</script>
+  <script>
+/*
+ * Family Health Guide — user interface.
+ * Plain JavaScript, no build step: open index.html in any browser.
+ */
+(function () {
+  'use strict';
+
+  var KB = window.FHKnowledge;
+  var E = window.FHEngine;
+  var Store = window.FHStore;
+
+  var state = Store.load();
+  var app = document.getElementById('app');
+  var AVATAR_COLORS = ['#2f7d5b', '#c0603a', '#3d6fb4', '#8a4fb0', '#b0842a', '#2a8a8a', '#b04a6e', '#5a6b2f'];
+  var MEAL_LABELS = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack' };
+  var STATUS_TEXT = { ok: 'Good to go', caution: 'OK — note', swap: 'Needs a swap', no: 'Can\'t eat' };
+  var recipeFilter = 'all';
+
+  // ---------------------------------------------------------------- helpers
+
+  function esc(s) {
+    return String(s === undefined || s === null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function today() { return new Date(); }
+
+  function persist(message) {
+    if (!Store.save(state)) toast('Could not save — this browser is blocking storage. Export a backup!');
+    else if (message) toast(message);
+  }
+
+  var toastTimer;
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
+  }
+
+  function member(id) { return state.members.filter(function (m) { return m.id === id; })[0]; }
+
+  function avatar(m, size) {
+    var i = Math.max(0, state.members.indexOf(m));
+    return '<span class="avatar ' + (size || '') + '" style="background:' + AVATAR_COLORS[i % AVATAR_COLORS.length] + '">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</span>';
+  }
+
+  function ageText(g) {
+    if (g.age === null) return 'Age unknown';
+    if (g.ageMonths !== null && g.age < 2) return g.ageMonths + ' months';
+    return g.age + ' yrs';
+  }
+
+  function splitList(s) {
+    return String(s || '').split(/[,\n]/).map(function (x) { return x.trim(); }).filter(Boolean);
+  }
+
+  function splitLines(s) {
+    return String(s || '').split(/\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+  }
+
+  function recipes() { return KB.RECIPES.concat(state.customRecipes); }
+
+  // Units
+  function us() { return state.settings.units !== 'metric'; }
+  function kgToLb(kg) { return Math.round(kg * 2.20462 * 10) / 10; }
+  function lbToKg(lb) { return Math.round(lb / 2.20462 * 100) / 100; }
+  function fmtWeight(kg) {
+    if (kg === null || kg === undefined || kg === '') return '—';
+    return us() ? kgToLb(kg) + ' lb' : Math.round(kg * 10) / 10 + ' kg';
+  }
+  function fmtHeight(cm) {
+    if (!cm) return '—';
+    if (!us()) return Math.round(cm) + ' cm';
+    var inches = Math.round(cm / 2.54);
+    return Math.floor(inches / 12) + '′ ' + (inches % 12) + '″';
+  }
+
+  function tagLabel(t) { return KB.TAG_LABELS[t] || t; }
+
+  // ---------------------------------------------------------------- routing
+
+  function route() {
+    var parts = (location.hash || '#/').replace(/^#\/?/, '').split('/');
+    var tab = 'family';
+    var html;
+    if (parts[0] === 'plan') { tab = 'plan'; html = viewPlan(); }
+    else if (parts[0] === 'recipes') { tab = 'recipes'; html = viewRecipes(); }
+    else if (parts[0] === 'data') { tab = 'data'; html = viewData(); }
+    else if (parts[0] === 'new') { html = viewEdit(null); }
+    else if (parts[0] === 'member' && member(parts[1])) {
+      var m = member(parts[1]);
+      if (parts[2] === 'edit') html = viewEdit(m);
+      else if (parts[2] === 'log') html = viewLog(m);
+      else html = viewGuide(m);
+    } else html = viewFamily();
+
+    app.innerHTML = html;
+    document.querySelectorAll('.tabs a').forEach(function (a) { a.classList.toggle('active', a.getAttribute('data-tab') === tab); });
+    window.scrollTo(0, 0);
+  }
+
+  function go(hash) {
+    if (location.hash === hash) route();
+    else location.hash = hash;
+  }
+
+  // ----------------------------------------------------------------- family
+
+  function viewFamily() {
+    if (!state.members.length) {
+      return '<section class="card empty">' +
+        '<h1>Your family\'s health guide</h1>' +
+        '<p class="muted">Add each person\'s allergies, health conditions, medications and food preferences. ' +
+        'The app builds a personal guide for everyone and a weekly meal plan the whole family can eat — and it updates itself whenever something changes.</p>' +
+        '<div class="row" style="justify-content:center;margin-top:20px">' +
+        '<a class="btn primary" href="#/new">Add the first person</a>' +
+        '<button class="btn" data-action="load-demo">Try a demo family</button>' +
+        '</div></section>';
+    }
+
+    var guides = state.members.map(function (m) { return E.buildGuide(m, today()); });
+    var cards = guides.map(function (g) {
+      var m = g.member;
+      var badges = g.allergies.map(function (a) {
+        return '<span class="badge ' + (a.severity === 'severe' ? 'danger' : 'warn') + '">' + esc(a.name) + '</span>';
+      });
+      m.conditions.forEach(function (c) { if (KB.CONDITIONS[c]) badges.push('<span class="badge info">' + esc(KB.CONDITIONS[c].label) + '</span>'); });
+      if (m.diet && m.diet !== 'omnivore') badges.push('<span class="badge ok">' + esc(KB.DIETS[m.diet].label) + '</span>');
+      var urgent = g.alerts.filter(function (a) { return a.level !== 'info'; }).length;
+      return '<a class="card member-card" href="#/member/' + esc(m.id) + '">' + avatar(m) +
+        '<div><h2 style="margin:0">' + esc(m.name) + '</h2>' +
+        '<div class="muted small">' + esc([m.relation, ageText(g), g.band ? g.band.label : ''].filter(Boolean).join(' · ')) + '</div>' +
+        '<div class="badges">' + badges.join('') + (urgent ? '<span class="badge danger">' + urgent + ' alert' + (urgent > 1 ? 's' : '') + '</span>' : '') + '</div>' +
+        '</div></a>';
+    }).join('');
+
+    var attention = [];
+    guides.forEach(function (g) {
+      g.alerts.forEach(function (a) {
+        if (a.level !== 'info') attention.push('<div class="alert ' + a.level + '"><div><strong>' + esc(g.member.name) + ':</strong> ' + esc(a.text) + '</div></div>');
+      });
+    });
+
+    var matrix = E.allergyMatrix(state.members);
+    var matrixHtml = matrix.length
+      ? '<div class="table-wrap"><table class="matrix"><thead><tr><th>Allergen</th>' +
+        state.members.map(function (m) { return '<th>' + esc(m.name) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        matrix.map(function (r) {
+          return '<tr><td>' + esc(r.label) + '</td>' + r.cells.map(function (c) {
+            return '<td>' + (c ? '<span class="badge ' + (c === 'severe' ? 'danger' : 'warn') + '">' + esc(c) + '</span>' : '<span class="muted">—</span>') + '</td>';
+          }).join('') + '</tr>';
+        }).join('') + '</tbody></table></div>'
+      : '<p class="muted">No food allergies recorded.</p>';
+
+    return '<div class="spread" style="margin-bottom:16px"><h1>Family</h1><a class="btn primary" href="#/new">+ Add person</a></div>' +
+      '<div class="grid grid-3">' + cards + '<a class="card add-card" href="#/new">+ Add family member</a></div>' +
+      (attention.length ? '<section class="card" style="margin-top:16px"><h2>Needs attention</h2>' + attention.join('') + '</section>' : '') +
+      '<section class="card" style="margin-top:16px"><h2>Kitchen allergy chart</h2>' +
+      '<p class="muted small">Post this on the fridge. Everything with a "severe" allergy should be kept out of shared dishes entirely.</p>' + matrixHtml + '</section>';
+  }
+
+  // ------------------------------------------------------------------ guide
+
+  function foodList(items, kind) {
+    if (!items.length) return '<p class="muted small">Nothing specific.</p>';
+    return '<ul class="food-list">' + items.map(function (i) {
+      var why = i.conflict ? i.conflict : i.why.join(' · ');
+      return '<li class="' + (i.conflict ? 'conflict' : '') + '"><span class="text">' + esc(i.text) + '</span><span class="why">' + esc(why) + '</span></li>';
+    }).join('') + '</ul>';
+  }
+
+  function tipsBlock(title, tips) {
+    if (!tips || !tips.length) return '';
+    return '<div style="margin-bottom:12px"><h3>' + esc(title) + '</h3><ul>' + tips.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>';
+  }
+
+  function viewGuide(m) {
+    var g = E.buildGuide(m, today());
+    var t = g.targets;
+
+    var alerts = g.alerts.map(function (a) {
+      return '<div class="alert ' + a.level + '"><div>' + esc(a.text) + '</div>' +
+        (a.action === 'review' ? '<button class="btn small no-print" data-action="mark-reviewed" data-id="' + esc(m.id) + '">Mark reviewed</button>' : '') + '</div>';
+    }).join('');
+
+    var targetRows = [
+      ['Calories', t.kcal ? t.kcal.toLocaleString('en-US') + ' kcal' : '—'],
+      ['Protein', t.protein], ['Fiber', t.fiber], ['Sodium', t.sodium], ['Added sugar', t.addedSugar],
+      ['Saturated fat', t.satFat], ['Calcium', t.calcium], ['Iron', t.iron], ['Fluids', t.fluids]
+    ].filter(function (r) { return r[1]; });
+    var targetsHtml = t.missing ? '<p class="muted">' + esc(t.missing) + '</p>' :
+      '<table class="targets"><tbody>' + targetRows.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</tbody></table>' +
+      (t.kcalSource ? '<p class="muted small" style="margin-top:8px">Calories: ' + esc(t.kcalSource) + '. Change in profile if your doctor gave you a number.</p>' : '') +
+      t.notes.map(function (n) { return '<p class="small muted">' + esc(n) + '</p>'; }).join('');
+
+    var stats = [];
+    if (g.weightKg) stats.push('Weight ' + fmtWeight(g.weightKg));
+    if (m.heightCm) stats.push('Height ' + fmtHeight(m.heightCm));
+    if (g.bmi) stats.push('BMI ' + g.bmi);
+
+    var meds = g.medications.filter(function (x) { return x.rules.length; }).map(function (x) {
+      return '<div style="margin-bottom:12px"><h3>' + esc(x.name) + ' <span class="badge">' + esc(x.rules.map(function (r) { return r.label; }).join(', ')) + '</span></h3><ul>' +
+        x.rules.reduce(function (all, r) { return all.concat(r.tips); }, []).map(function (tip) { return '<li>' + esc(tip) + '</li>'; }).join('') + '</ul></div>';
+    }).join('');
+    if (g.unknownMeds.length) meds += '<p class="small muted">No built-in food notes for: ' + esc(g.unknownMeds.join(', ')) + '. Ask the pharmacist about food timing and interactions.</p>';
+
+    var severeAllergies = g.allergies.map(function (a) { return a.name + (a.severity ? ' (' + a.severity + ')' : ''); });
+    var conditionNames = m.conditions.map(function (c) { return KB.CONDITIONS[c] ? KB.CONDITIONS[c].label : c; }).concat(m.otherConditions);
+    var emergency = '<section class="card emergency"><h2>Emergency card</h2><dl>' +
+      '<dt>Name</dt><dd>' + esc(m.name) + (m.birthdate ? ' · born ' + esc(m.birthdate) : '') + '</dd>' +
+      '<dt>Blood type</dt><dd>' + esc(m.bloodType || 'Not recorded') + '</dd>' +
+      '<dt>Allergies</dt><dd>' + esc(severeAllergies.join(', ') || 'None recorded') + '</dd>' +
+      '<dt>Conditions</dt><dd>' + esc(conditionNames.join(', ') || 'None recorded') + '</dd>' +
+      '<dt>Medications</dt><dd>' + esc(m.medications.join(', ') || 'None recorded') + '</dd>' +
+      '<dt>Doctor</dt><dd>' + esc(m.doctor || '—') + '</dd>' +
+      '<dt>Emergency contact</dt><dd>' + esc(m.emergencyContact || '—') + '</dd>' +
+      '</dl></section>';
+
+    var labels = g.labelWords.map(function (l) {
+      return '<div style="margin-bottom:10px"><strong>' + esc(l.label) + '</strong><div class="words">' +
+        l.words.map(function (w) { return '<span class="badge">' + esc(w) + '</span>'; }).join('') + '</div></div>';
+    }).join('');
+
+    var notes = tipsBlock('Life stage: ' + (g.band ? g.band.label : ''), g.lifeStageTips) +
+      g.conditionNotes.map(function (c) { return tipsBlock(c.title, c.tips); }).join('') +
+      g.dietTips.map(function (c) { return tipsBlock(c.title, c.tips); }).join('');
+
+    return '<div class="stack">' +
+      '<section class="card"><div class="guide-head">' + avatar(m, 'lg') +
+      '<div class="meta"><h1 style="margin:0">' + esc(m.name) + '\'s guide</h1>' +
+      '<div class="muted">' + esc([m.relation, ageText(g), g.band ? g.band.label : '', m.bloodType ? 'Blood ' + m.bloodType : ''].filter(Boolean).join(' · ')) + '</div>' +
+      (stats.length ? '<div class="muted small">' + esc(stats.join(' · ')) + '</div>' : '') + '</div>' +
+      '<div class="row no-print"><a class="btn primary" href="#/member/' + esc(m.id) + '/edit">Edit profile</a>' +
+      '<a class="btn" href="#/member/' + esc(m.id) + '/log">Log readings</a>' +
+      '<button class="btn" data-action="print">Print</button></div></div></section>' +
+      (alerts ? '<section>' + alerts + '</section>' : '') +
+      '<div class="grid grid-2"><section class="card"><h2>Daily targets</h2>' + targetsHtml + '</section>' + emergency + '</div>' +
+      '<div class="grid grid-3">' +
+      '<section class="card avoid"><h2>Avoid</h2>' + foodList(g.avoid) + '</section>' +
+      '<section class="card limit"><h2>Limit</h2>' + foodList(g.limit) + '</section>' +
+      '<section class="card more"><h2>Eat more of</h2>' + foodList(g.emphasize) + '</section></div>' +
+      (meds ? '<section class="card"><h2>Medications &amp; food</h2>' + meds + '</section>' : '') +
+      (notes ? '<section class="card"><h2>Notes for ' + esc(m.name) + '</h2>' + notes + '</section>' : '') +
+      (g.supplements.length ? '<section class="card"><h2>Supplements to ask about</h2>' + foodList(g.supplements) + '</section>' : '') +
+      (labels ? '<section class="card"><h2>Hidden names on food labels</h2><p class="muted small">These words on an ingredient list mean the allergen is inside.</p>' + labels + '</section>' : '') +
+      (m.notes ? '<section class="card"><h2>Family notes</h2><p style="white-space:pre-wrap">' + esc(m.notes) + '</p></section>' : '') +
+      '<p class="muted small">This guide rebuilds itself every time you open it from ' + esc(m.name) + '\'s profile, age and latest readings. ' +
+      'Profile saved ' + esc((m.updatedAt || '').slice(0, 10) || '—') + ' · last reviewed ' + esc(m.reviewedAt || 'never') + '.</p>' +
+      '</div>';
+  }
+
+  // ------------------------------------------------------------------- edit
+
+  function opt(value, label, selected) {
+    return '<option value="' + esc(value) + '"' + (String(selected) === String(value) ? ' selected' : '') + '>' + esc(label) + '</option>';
+  }
+
+  function check(name, value, label, checked) {
+    return '<label><input type="checkbox" name="' + esc(name) + '" value="' + esc(value) + '"' + (checked ? ' checked' : '') + '> ' + esc(label) + '</label>';
+  }
+
+  function viewEdit(m) {
+    var isNew = !m;
+    m = m || Store.normalizeMember({ id: '' });
+
+    var heightFields;
+    if (us()) {
+      var inches = m.heightCm ? Math.round(m.heightCm / 2.54) : '';
+      heightFields = '<div><label>Height <span class="hint">(ft / in)</span></label><div class="inline">' +
+        '<input type="number" name="heightFt" min="0" max="8" placeholder="ft" value="' + (inches !== '' ? Math.floor(inches / 12) : '') + '">' +
+        '<input type="number" name="heightIn" min="0" max="11" placeholder="in" value="' + (inches !== '' ? inches % 12 : '') + '"></div></div>' +
+        '<div><label>Weight <span class="hint">(lb)</span></label><input type="number" step="0.1" name="weight" value="' + (m.weightKg ? kgToLb(m.weightKg) : '') + '"></div>';
+    } else {
+      heightFields = '<div><label>Height <span class="hint">(cm)</span></label><input type="number" name="heightCm" value="' + esc(m.heightCm || '') + '"></div>' +
+        '<div><label>Weight <span class="hint">(kg)</span></label><input type="number" step="0.1" name="weight" value="' + esc(m.weightKg || '') + '"></div>';
+    }
+
+    var allergenGrid = Object.keys(KB.ALLERGENS).map(function (k) {
+      var v = m.allergies[k] || '';
+      return '<div><label>' + esc(KB.ALLERGENS[k].label) + '</label><select name="allergy-' + k + '">' +
+        opt('', 'No allergy', v) + opt('mild', 'Mild', v) + opt('moderate', 'Moderate', v) + opt('severe', 'Severe', v) + '</select></div>';
+    }).join('');
+
+    var groups = {};
+    Object.keys(KB.CONDITIONS).forEach(function (k) {
+      var g = KB.CONDITIONS[k].group;
+      (groups[g] = groups[g] || []).push(check('conditions', k, KB.CONDITIONS[k].label, m.conditions.indexOf(k) !== -1));
+    });
+    var conditionHtml = Object.keys(groups).map(function (g) {
+      return '<div style="margin-bottom:10px"><div class="hint" style="margin-bottom:4px">' + esc(g) + '</div><div class="checks">' + groups[g].join('') + '</div></div>';
+    }).join('');
+
+    var otherAllergyText = m.otherAllergies.map(function (o) { return o.name + (o.severity ? ', ' + o.severity : ''); }).join('\n');
+
+    return '<form id="member-form" data-id="' + esc(m.id) + '">' +
+      '<div class="spread" style="margin-bottom:16px"><h1>' + (isNew ? 'Add a family member' : 'Edit ' + esc(m.name)) + '</h1>' +
+      (!isNew ? '<a class="btn" href="#/member/' + esc(m.id) + '">Back to guide</a>' : '') + '</div>' +
+
+      '<fieldset><legend>About</legend><div class="fields">' +
+      '<div><label>Name *</label><input type="text" name="name" required value="' + esc(m.name) + '"></div>' +
+      '<div><label>Relationship</label><input type="text" name="relation" placeholder="Mom, Son, Grandpa…" value="' + esc(m.relation) + '"></div>' +
+      '<div><label>Birth date</label><input type="date" name="birthdate" value="' + esc(m.birthdate) + '"></div>' +
+      '<div><label>Sex <span class="hint">(for nutrition formulas)</span></label><select name="sex">' + opt('', 'Prefer not to say', m.sex) + opt('female', 'Female', m.sex) + opt('male', 'Male', m.sex) + '</select></div>' +
+      heightFields +
+      '<div><label>Activity</label><select name="activity">' + Object.keys(KB.ACTIVITY).map(function (k) { return opt(k, KB.ACTIVITY[k].label, m.activity); }).join('') + '</select></div>' +
+      '<div><label>Goal</label><select name="goal">' + Object.keys(KB.GOALS).map(function (k) { return opt(k, KB.GOALS[k].label, m.goal); }).join('') + '</select></div>' +
+      '<div><label>Blood type</label><select name="bloodType">' + KB.BLOOD_TYPES.map(function (b) { return opt(b, b || 'Not recorded', m.bloodType); }).join('') + '</select></div>' +
+      '</div><p class="hint" style="margin-top:10px">Blood type is kept for the emergency card. Research doesn\'t support "blood-type diets", so it doesn\'t change food advice.</p></fieldset>' +
+
+      '<fieldset><legend>Food allergies</legend><p class="hint" style="margin-top:0">Choose "Severe" for anything that has caused anaphylaxis or needs an epinephrine auto-injector.</p><div class="allergen-grid">' + allergenGrid + '</div>' +
+      '<div style="margin-top:14px"><label>Other allergies <span class="hint">— one per line, e.g. "Kiwi, mild" or "Strawberry, severe"</span></label>' +
+      '<textarea name="otherAllergies">' + esc(otherAllergyText) + '</textarea></div>' +
+      '<div style="margin-top:10px" class="checks">' + Object.keys(KB.INTOLERANCES).map(function (k) { return check('intolerances', k, KB.INTOLERANCES[k].label, m.intolerances.indexOf(k) !== -1); }).join('') + '</div></fieldset>' +
+
+      '<fieldset><legend>Health conditions</legend>' + conditionHtml +
+      '<label style="margin-top:8px">Other conditions <span class="hint">— one per line (shown on the emergency card)</span></label>' +
+      '<textarea name="otherConditions">' + esc(m.otherConditions.join('\n')) + '</textarea></fieldset>' +
+
+      '<fieldset><legend>Medications</legend>' +
+      '<label>One per line <span class="hint">— brand or generic name; the guide adds food-timing and interaction notes it recognises</span></label>' +
+      '<textarea name="medications" placeholder="Metformin 500 mg&#10;Lisinopril">' + esc(m.medications.join('\n')) + '</textarea></fieldset>' +
+
+      '<fieldset><legend>Eating style &amp; preferences</legend><div class="fields">' +
+      '<div><label>Diet</label><select name="diet">' + Object.keys(KB.DIETS).map(function (k) { return opt(k, KB.DIETS[k].label, m.diet); }).join('') + '</select></div>' +
+      '<div><label>Calorie target override <span class="hint">(optional)</span></label><input type="number" name="calorieOverride" placeholder="e.g. 1800" value="' + esc(m.calorieOverride || '') + '"></div>' +
+      '</div><div class="checks" style="margin-top:12px">' + Object.keys(KB.DIET_RULES).map(function (k) { return check('dietRules', k, KB.DIET_RULES[k].label, m.dietRules.indexOf(k) !== -1); }).join('') + '</div>' +
+      '<div class="fields" style="margin-top:12px">' +
+      '<div><label>Must avoid <span class="hint">— doctor\'s orders, comma separated</span></label><input type="text" name="avoidFoods" placeholder="e.g. avocado, licorice" value="' + esc(m.avoidFoods.join(', ')) + '"></div>' +
+      '<div><label>Limit <span class="hint">— comma separated</span></label><input type="text" name="limitFoods" value="' + esc(m.limitFoods.join(', ')) + '"></div>' +
+      '<div><label>Dislikes <span class="hint">— flagged in meal plans</span></label><input type="text" name="dislikes" placeholder="e.g. mushrooms, olives" value="' + esc(m.dislikes.join(', ')) + '"></div>' +
+      '<div><label>Favorites</label><input type="text" name="favoriteFoods" value="' + esc(m.favoriteFoods.join(', ')) + '"></div>' +
+      '</div></fieldset>' +
+
+      '<fieldset><legend>Care team &amp; notes</legend><div class="fields">' +
+      '<div><label>Doctor / clinic</label><input type="text" name="doctor" value="' + esc(m.doctor) + '"></div>' +
+      '<div><label>Emergency contact</label><input type="text" name="emergencyContact" value="' + esc(m.emergencyContact) + '"></div>' +
+      '</div><label style="margin-top:12px">Notes</label><textarea name="notes" placeholder="Anything the doctor or dietitian told you…">' + esc(m.notes) + '</textarea></fieldset>' +
+
+      '<div class="form-actions">' +
+      (!isNew ? '<button type="button" class="btn danger" data-action="delete-member" data-id="' + esc(m.id) + '" style="margin-right:auto">Delete</button>' : '') +
+      '<a class="btn" href="' + (isNew ? '#/' : '#/member/' + esc(m.id)) + '">Cancel</a>' +
+      '<button class="btn primary" type="submit">Save &amp; view guide</button></div></form>';
+  }
+
+  function readMemberForm(form, existing) {
+    var f = form.elements;
+    var val = function (n) { return f[n] ? f[n].value.trim() : ''; };
+    var checked = function (n) { return Array.prototype.slice.call(form.querySelectorAll('input[name="' + n + '"]:checked')).map(function (i) { return i.value; }); };
+
+    var allergies = {};
+    Object.keys(KB.ALLERGENS).forEach(function (k) { var v = val('allergy-' + k); if (v) allergies[k] = v; });
+
+    var otherAllergies = splitLines(val('otherAllergies')).map(function (line) {
+      var m = line.match(/^(.*?)[\s,–—-]+\(?(mild|moderate|severe)\)?\s*$/i);
+      return m ? { name: m[1].trim(), severity: m[2].toLowerCase() } : { name: line, severity: 'moderate' };
+    });
+
+    var heightCm = null;
+    if (us()) {
+      var ft = Number(val('heightFt')) || 0, inch = Number(val('heightIn')) || 0;
+      if (ft || inch) heightCm = Math.round((ft * 12 + inch) * 2.54 * 10) / 10;
+    } else if (val('heightCm')) heightCm = Number(val('heightCm'));
+    var weightKg = val('weight') ? (us() ? lbToKg(Number(val('weight'))) : Number(val('weight'))) : null;
+
+    var now = new Date().toISOString();
+    return Store.normalizeMember(Object.assign({}, existing || {}, {
+      id: (existing && existing.id) || Store.newId(),
+      name: val('name'), relation: val('relation'), birthdate: val('birthdate'), sex: val('sex'),
+      heightCm: heightCm, weightKg: weightKg, activity: val('activity'), goal: val('goal'), bloodType: val('bloodType'),
+      allergies: allergies, otherAllergies: otherAllergies, intolerances: checked('intolerances'),
+      conditions: checked('conditions'), otherConditions: splitLines(val('otherConditions')),
+      medications: splitLines(val('medications')), diet: val('diet'), dietRules: checked('dietRules'),
+      calorieOverride: val('calorieOverride') ? Number(val('calorieOverride')) : null,
+      avoidFoods: splitList(val('avoidFoods')), limitFoods: splitList(val('limitFoods')),
+      dislikes: splitList(val('dislikes')), favoriteFoods: splitList(val('favoriteFoods')),
+      doctor: val('doctor'), emergencyContact: val('emergencyContact'), notes: f.notes.value,
+      createdAt: (existing && existing.createdAt) || now, updatedAt: now,
+      reviewedAt: E.isoDate(new Date())
+    }));
+  }
+
+  // -------------------------------------------------------------------- log
+
+  function viewLog(m) {
+    var rows = m.log.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    var wUnit = us() ? 'lb' : 'kg';
+    return '<div class="spread" style="margin-bottom:16px"><h1>' + esc(m.name) + '\'s readings</h1><a class="btn" href="#/member/' + esc(m.id) + '">Back to guide</a></div>' +
+      '<form id="log-form" class="card" data-id="' + esc(m.id) + '"><h2>Add a reading</h2><div class="fields">' +
+      '<div><label>Date</label><input type="date" name="date" required value="' + E.isoDate(new Date()) + '"></div>' +
+      '<div><label>Weight <span class="hint">(' + wUnit + ')</span></label><input type="number" step="0.1" name="weight"></div>' +
+      '<div><label>Blood pressure</label><div class="inline"><input type="number" name="bpSys" placeholder="120"><input type="number" name="bpDia" placeholder="80"></div></div>' +
+      '<div><label>A1C <span class="hint">(%)</span></label><input type="number" step="0.1" name="a1c"></div>' +
+      '<div><label>LDL <span class="hint">(mg/dL)</span></label><input type="number" name="ldl"></div>' +
+      '<div><label>Note</label><input type="text" name="note"></div>' +
+      '</div><div class="row" style="margin-top:14px;justify-content:flex-end"><button class="btn primary" type="submit">Add reading</button></div>' +
+      '<p class="muted small">The guide uses the latest weight for calorie targets and raises alerts when blood pressure, A1C or LDL cross common thresholds.</p></form>' +
+      '<section class="card"><h2>History</h2>' + (rows.length ?
+        '<div class="table-wrap"><table><thead><tr><th>Date</th><th>Weight</th><th>BP</th><th>A1C</th><th>LDL</th><th>Note</th><th></th></tr></thead><tbody>' +
+        rows.map(function (r) {
+          return '<tr><td>' + esc(r.date) + '</td><td>' + (r.weightKg ? fmtWeight(r.weightKg) : '') + '</td><td>' + (r.bpSys ? esc(r.bpSys + '/' + r.bpDia) : '') +
+            '</td><td>' + esc(r.a1c ? r.a1c + '%' : '') + '</td><td>' + esc(r.ldl || '') + '</td><td>' + esc(r.note || '') + '</td>' +
+            '<td><button class="btn small ghost" data-action="delete-log" data-id="' + esc(m.id) + '" data-date="' + esc(r.date) + '" data-at="' + esc(r.at || '') + '">Remove</button></td></tr>';
+        }).join('') + '</tbody></table></div>' : '<p class="muted">No readings yet.</p>') + '</section>';
+  }
+
+  // ------------------------------------------------------------------- plan
+
+  function planEaters() {
+    var ids = state.plan.eaters;
+    var list = ids ? state.members.filter(function (m) { return ids.indexOf(m.id) !== -1; }) : state.members.slice();
+    return list.length ? list : state.members.slice();
+  }
+
+  function currentPlan() {
+    var eaters = planEaters();
+    var wk = E.isoDate(E.weekStart(today()));
+    return E.buildPlan(eaters, { today: today(), recipes: recipes(), overrides: state.plan.overrides[wk] || {}, seed: state.plan.seed || '' });
+  }
+
+  function fitDetails(fit) {
+    var notes = fit.per.filter(function (p) { return p.result.status !== 'ok'; }).map(function (p) {
+      var r = p.result, bits = [];
+      if (r.status === 'no') {
+        bits = r.blockedBy.map(function (b) { return 'contains ' + tagLabel(b.tag) + ' (' + b.why.join(', ') + ')'; })
+          .concat(r.avoidHits.map(function (h) { return 'contains ' + h + ' (must avoid)'; }));
+        bits.unshift('needs a separate meal');
+      } else {
+        bits = r.swaps.slice();
+        r.cautions.forEach(function (c) { bits.push('go easy: ' + tagLabel(c.tag) + ' (' + c.why.join(', ') + ')'); });
+        if (r.dislikes.length) bits.push('dislikes ' + r.dislikes.join(', '));
+        r.tips.forEach(function (tip) { bits.push('tip: ' + tip); });
+      }
+      return '<li><span class="status-dot status-' + r.status + '"></span><strong>' + esc(p.member.name) + ':</strong> ' + esc(bits.join('; ')) + '</li>';
+    });
+    return notes;
+  }
+
+  function mealCell(fit, key, meal) {
+    if (!fit) return '<div class="meal"><div class="label">' + MEAL_LABELS[meal] + '</div><div class="muted">No recipe available</div></div>';
+    var notes = fitDetails(fit);
+    var dots = fit.per.map(function (p) { return '<span class="status-dot status-' + p.result.status + '" title="' + esc(p.member.name + ': ' + STATUS_TEXT[p.result.status]) + '"></span>'; }).join('');
+    return '<div class="meal"><div class="label">' + MEAL_LABELS[meal] + '</div>' +
+      '<button class="btn small ghost reroll" title="Pick something else" data-action="reroll" data-key="' + key + '" data-current="' + esc(fit.recipe.id) + '">↻</button>' +
+      '<div class="name">' + esc(fit.recipe.name) + '</div><div>' + dots + '</div>' +
+      (notes.length ? '<details><summary>' + notes.length + ' note' + (notes.length > 1 ? 's' : '') + '</summary><ul>' + notes.join('') + '</ul></details>' : '<div class="small muted">Works for everyone as-is</div>') +
+      '</div>';
+  }
+
+  function viewPlan() {
+    if (!state.members.length) return '<section class="card empty"><h1>Meal plan</h1><p class="muted">Add family members first — the plan is built from their profiles.</p><a class="btn primary" href="#/new">Add a person</a></section>';
+    var plan = currentPlan();
+    var eaterIds = plan.eaters.map(function (e) { return e.member.id; });
+
+    var chips = state.members.map(function (m) {
+      return '<label class="chip-check"><input type="checkbox" data-action="toggle-eater" value="' + esc(m.id) + '"' + (eaterIds.indexOf(m.id) !== -1 ? ' checked' : '') + '> ' + esc(m.name) + '</label>';
+    }).join('');
+
+    var days = plan.days.map(function (d, i) {
+      return '<div class="plan-day"><div class="day">' + esc(d.name) + '<small>' + esc(d.date.slice(5)) + '</small></div>' +
+        E.MEALS.map(function (meal) { return mealCell(d.meals[meal], i + '-' + meal, meal); }).join('') + '</div>';
+    }).join('');
+
+    var snacks = plan.snacks.map(function (s) {
+      var notes = fitDetails(s);
+      return '<li>' + esc(s.recipe.name) + (notes.length ? ' <details style="display:inline"><summary class="small">notes</summary><ul>' + notes.join('') + '</ul></details>' : '') + '</li>';
+    }).join('');
+
+    var grocery = E.groceryList(plan).map(function (g) {
+      return '<li><label style="font-weight:400;display:flex;gap:8px;align-items:center"><input type="checkbox"> ' + esc(g.name) + (g.meals > 1 ? ' <span class="muted small">×' + g.meals + ' meals</span>' : '') + '</label></li>';
+    }).join('');
+
+    return '<div class="spread" style="margin-bottom:12px"><div><h1>This week\'s meals</h1><div class="muted">Week of ' + esc(plan.weekStart) + ' · rebuilds automatically each Monday and whenever a profile changes</div></div>' +
+      '<div class="row no-print"><button class="btn" data-action="shuffle">Shuffle week</button><button class="btn" data-action="print">Print</button></div></div>' +
+      '<section class="card no-print"><div class="row"><strong style="margin-right:6px">Who\'s eating:</strong>' + chips + '</div>' +
+      '<div class="legend" style="margin-top:10px"><span><span class="status-dot status-ok"></span>good as-is</span><span><span class="status-dot status-caution"></span>OK, with a note</span><span><span class="status-dot status-swap"></span>needs a swap</span><span><span class="status-dot status-no"></span>can\'t eat</span></div></section>' +
+      plan.notices.map(function (n) { return '<div class="alert warn" style="margin-top:12px"><div>' + esc(n) + '</div></div>'; }).join('') +
+      '<section class="card" style="margin-top:16px">' + days + '</section>' +
+      '<div class="grid grid-2" style="margin-top:16px">' +
+      '<section class="card"><h2>Snack ideas everyone can have</h2>' + (snacks ? '<ul>' + snacks + '</ul>' : '<p class="muted">None fit everyone — try adding a custom snack.</p>') + '</section>' +
+      '<section class="card"><h2>Grocery list</h2><p class="muted small">From this week\'s meals. Remember the swap ingredients (GF bread, oat milk…) noted in each meal.</p><ul class="grocery" style="list-style:none;padding:0">' + grocery + '</ul></section>' +
+      '</div>';
+  }
+
+  function reroll(key, current) {
+    var plan = currentPlan();
+    var meal = key.split('-')[1];
+    var used = plan.days.map(function (d) { return d.meals[meal] && d.meals[meal].recipe.id; });
+    var options = recipes().filter(function (r) { return r.meal === meal; })
+      .map(function (r) { return plan.fits[r.id]; })
+      .filter(function (f) { return f.noCount === 0; })
+      .sort(function (a, b) { return b.weight - a.weight; });
+    if (options.length < 2) { toast('No other dish fits everyone for ' + meal + '.'); return; }
+    var unused = options.filter(function (f) { return used.indexOf(f.recipe.id) === -1; });
+    var pool = unused.length ? unused : options;
+    var idx = pool.map(function (f) { return f.recipe.id; }).indexOf(current);
+    var next = pool[(idx + 1) % pool.length];
+    if (next.recipe.id === current) next = pool[(idx + 2) % pool.length];
+    var wk = E.isoDate(E.weekStart(today()));
+    state.plan.overrides[wk] = state.plan.overrides[wk] || {};
+    state.plan.overrides[wk][key] = next.recipe.id;
+    // Drop overrides from past weeks.
+    Object.keys(state.plan.overrides).forEach(function (k) { if (k < wk) delete state.plan.overrides[k]; });
+    persist();
+    route();
+  }
+
+  // ---------------------------------------------------------------- recipes
+
+  var CUSTOM_TAGS = ['peanut', 'treenut', 'milk', 'egg', 'wheat', 'soy', 'fish', 'shellfish', 'sesame', 'meat', 'pork', 'poultry', 'alcohol', 'honey', 'gelatin',
+    'oats', 'high-sodium', 'high-satfat', 'added-sugar', 'refined-carb', 'high-purine', 'high-fodmap', 'high-potassium', 'aged-cheese', 'grapefruit', 'spicy', 'acidic', 'fried', 'caffeine', 'choking', 'deli-meat', 'raw-fish'];
+
+  function viewRecipes() {
+    var all = recipes();
+    var shown = recipeFilter === 'all' ? all : all.filter(function (r) { return r.meal === recipeFilter; });
+    var rules = state.members.map(function (m) { return { member: m, rules: E.profileRules(m, today()) }; });
+
+    var filters = ['all', 'breakfast', 'lunch', 'dinner', 'snack'].map(function (f) {
+      return '<button class="btn small' + (recipeFilter === f ? ' primary' : '') + '" data-action="recipe-filter" data-filter="' + f + '">' + (f === 'all' ? 'All' : MEAL_LABELS[f]) + '</button>';
+    }).join('');
+
+    var rows = shown.map(function (r) {
+      var per = rules.map(function (x) { return { member: x.member, result: E.evaluateRecipe(r, x.rules) }; });
+      var fit = { per: per };
+      var notes = fitDetails(fit);
+      var custom = state.customRecipes.indexOf(r) !== -1;
+      return '<tr><td><strong>' + esc(r.name) + '</strong>' + (custom ? ' <span class="badge info">yours</span>' : '') +
+        '<div class="small muted">' + esc(r.ingredients.join(', ')) + '</div>' +
+        (notes.length ? '<details><summary class="small">' + notes.length + ' note' + (notes.length > 1 ? 's' : '') + '</summary><ul class="small">' + notes.join('') + '</ul></details>' : '') + '</td>' +
+        '<td>' + MEAL_LABELS[r.meal] + '</td>' +
+        per.map(function (p) { return '<td style="text-align:center"><span class="status-dot status-' + p.result.status + '" title="' + esc(STATUS_TEXT[p.result.status]) + '"></span></td>'; }).join('') +
+        '<td>' + (custom ? '<button class="btn small ghost" data-action="delete-recipe" data-id="' + esc(r.id) + '">Delete</button>' : '') + '</td></tr>';
+    }).join('');
+
+    var tagChecks = CUSTOM_TAGS.map(function (t) { return check('tags', t, tagLabel(t), false); }).join('');
+
+    return '<div class="spread" style="margin-bottom:12px"><h1>Recipes</h1><div class="row">' + filters + '</div></div>' +
+      '<section class="card"><div class="legend" style="margin-bottom:10px"><span><span class="status-dot status-ok"></span>good as-is</span><span><span class="status-dot status-caution"></span>OK, with a note</span><span><span class="status-dot status-swap"></span>needs a swap</span><span><span class="status-dot status-no"></span>can\'t eat</span></div>' +
+      '<div class="table-wrap"><table><thead><tr><th>Recipe</th><th>Meal</th>' + state.members.map(function (m) { return '<th style="text-align:center">' + esc(m.name) + '</th>'; }).join('') + '<th></th></tr></thead><tbody>' + rows + '</tbody></table></div></section>' +
+      '<form id="recipe-form" class="card"><h2>Add your own recipe</h2><p class="muted small">Family favorites go into the meal plan too. Tick what the dish contains so the app can check it against everyone\'s profile.</p>' +
+      '<div class="fields"><div><label>Name *</label><input type="text" name="name" required></div>' +
+      '<div><label>Meal</label><select name="meal">' + opt('dinner', 'Dinner', 'dinner') + opt('lunch', 'Lunch', '') + opt('breakfast', 'Breakfast', '') + opt('snack', 'Snack', '') + '</select></div></div>' +
+      '<label style="margin-top:12px">Ingredients <span class="hint">— comma separated</span></label><input type="text" name="ingredients" placeholder="chicken thighs, rice, garlic, soy sauce">' +
+      '<label style="margin-top:12px">Contains</label><div class="checks">' + tagChecks + '</div>' +
+      '<div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn primary" type="submit">Add recipe</button></div></form>';
+  }
+
+  // ------------------------------------------------------------------- data
+
+  function viewData() {
+    var count = state.members.length;
+    return '<h1>Your data</h1><div class="grid grid-2">' +
+      '<section class="card"><h2>Settings</h2><label>Units</label><select data-action="units">' + opt('us', 'US (lb, ft/in)', state.settings.units) + opt('metric', 'Metric (kg, cm)', state.settings.units) + '</select></section>' +
+      '<section class="card"><h2>Backup &amp; move</h2><p class="muted small">Your information is stored only in this browser on this computer. ' +
+      'Export a backup regularly, and use it to move everything to another computer or browser.</p>' +
+      '<div class="row"><button class="btn primary" data-action="export">Export backup</button>' +
+      '<label class="btn" style="margin:0">Import backup<input type="file" accept=".json,application/json" data-action="import" hidden></label></div>' +
+      '<p class="muted small" style="margin-top:10px">' + count + ' ' + (count === 1 ? 'person' : 'people') + ' · last saved ' + esc(state.savedAt ? state.savedAt.slice(0, 16).replace('T', ' ') : 'never') + '</p></section>' +
+      '<section class="card"><h2>Demo</h2><p class="muted small">Load a made-up family of five to see how everything works. This replaces what\'s here.</p><button class="btn" data-action="load-demo">Load demo family</button></section>' +
+      '<section class="card"><h2>Start over</h2><p class="muted small">Delete every profile and recipe from this browser. Export a backup first if you want to keep anything.</p><button class="btn danger" data-action="reset">Delete everything</button></section>' +
+      '</div>' +
+      '<section class="card" style="margin-top:16px"><h2>About this guide</h2>' +
+      '<p>Guidance comes from mainstream sources (Dietary Guidelines for Americans, American Heart Association, American Diabetes Association, DASH, National Kidney Foundation, FDA food-safety advice). ' +
+      'It is general information to help the family plan meals and remember what each person needs — it is <strong>not medical advice</strong>. ' +
+      'When your doctor, pharmacist or dietitian says something different, follow them and record it in the profile ("Must avoid", "Limit", calorie override or Notes).</p>' +
+      '<p class="muted small">Calories: Mifflin-St Jeor equation for adults; Dietary Guidelines estimates for ages 2–18. Medication notes cover common, well-documented food interactions only.</p></section>';
+  }
+
+  function download(filename, text) {
+    var blob = new Blob([text], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+
+  // ----------------------------------------------------------------- events
+
+  document.addEventListener('click', function (ev) {
+    var el = ev.target.closest('[data-action]');
+    if (!el || el.tagName === 'INPUT' || el.tagName === 'SELECT') return;
+    var action = el.getAttribute('data-action');
+    var id = el.getAttribute('data-id');
+
+    if (action === 'print') window.print();
+    else if (action === 'load-demo') {
+      if (state.members.length && !confirm('Replace your current family with the demo family?')) return;
+      state = Store.migrate(JSON.parse(JSON.stringify(window.FHDemo)));
+      persist('Demo family loaded');
+      go('#/');
+    } else if (action === 'mark-reviewed') {
+      member(id).reviewedAt = E.isoDate(new Date());
+      persist('Marked as reviewed');
+      route();
+    } else if (action === 'delete-member') {
+      var m = member(id);
+      if (!confirm('Delete ' + m.name + ' and all their readings? This can\'t be undone.')) return;
+      state.members = state.members.filter(function (x) { return x.id !== id; });
+      if (state.plan.eaters) state.plan.eaters = state.plan.eaters.filter(function (x) { return x !== id; });
+      persist('Deleted');
+      go('#/');
+    } else if (action === 'delete-log') {
+      var mm = member(id), date = el.getAttribute('data-date'), at = el.getAttribute('data-at');
+      var idx = -1;
+      mm.log.forEach(function (r, i) { if (idx === -1 && r.date === date && String(r.at || '') === at) idx = i; });
+      if (idx !== -1) mm.log.splice(idx, 1);
+      persist('Removed');
+      route();
+    } else if (action === 'shuffle') {
+      state.plan.seed = Math.random().toString(36).slice(2, 8);
+      var wk = E.isoDate(E.weekStart(today()));
+      delete state.plan.overrides[wk];
+      persist();
+      route();
+    } else if (action === 'reroll') {
+      reroll(el.getAttribute('data-key'), el.getAttribute('data-current'));
+    } else if (action === 'recipe-filter') {
+      recipeFilter = el.getAttribute('data-filter');
+      route();
+    } else if (action === 'delete-recipe') {
+      state.customRecipes = state.customRecipes.filter(function (r) { return r.id !== id; });
+      persist('Recipe deleted');
+      route();
+    } else if (action === 'export') {
+      download('family-health-backup-' + E.isoDate(new Date()) + '.json', Store.exportJSON(state));
+      toast('Backup downloaded');
+    } else if (action === 'reset') {
+      if (!confirm('Delete every profile, reading and custom recipe from this browser?')) return;
+      state = Store.empty();
+      persist('Everything deleted');
+      go('#/');
+    }
+  });
+
+  document.addEventListener('change', function (ev) {
+    var el = ev.target;
+    var action = el.getAttribute('data-action');
+    if (action === 'units') {
+      state.settings.units = el.value;
+      persist('Units updated');
+    } else if (action === 'toggle-eater') {
+      var ids = Array.prototype.slice.call(document.querySelectorAll('[data-action="toggle-eater"]:checked')).map(function (i) { return i.value; });
+      if (!ids.length) { el.checked = true; toast('At least one person has to be eating!'); return; }
+      state.plan.eaters = ids.length === state.members.length ? null : ids;
+      persist();
+      route();
+    } else if (action === 'import') {
+      var file = el.files && el.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var data = Store.importJSON(String(reader.result));
+          if (state.members.length && !confirm('Replace what\'s here with the backup (' + data.members.length + ' people)?')) return;
+          state = data;
+          persist('Backup imported');
+          go('#/');
+        } catch (e) {
+          alert('Could not import: ' + e.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+  });
+
+  document.addEventListener('submit', function (ev) {
+    var form = ev.target;
+    ev.preventDefault();
+    if (form.id === 'member-form') {
+      var existing = member(form.getAttribute('data-id'));
+      var m = readMemberForm(form, existing);
+      if (existing) state.members[state.members.indexOf(existing)] = m;
+      else state.members.push(m);
+      persist('Saved — guide updated');
+      go('#/member/' + m.id);
+    } else if (form.id === 'log-form') {
+      var who = member(form.getAttribute('data-id'));
+      var f = form.elements;
+      var num = function (n) { return f[n].value === '' ? undefined : Number(f[n].value); };
+      var entry = { date: f.date.value, at: Date.now().toString(36), note: f.note.value.trim() || undefined };
+      var w = num('weight');
+      if (w !== undefined) entry.weightKg = us() ? lbToKg(w) : w;
+      ['bpSys', 'bpDia', 'a1c', 'ldl'].forEach(function (k) { if (num(k) !== undefined) entry[k] = num(k); });
+      if (Object.keys(entry).length <= 3 && !entry.note) { toast('Enter at least one reading'); return; }
+      who.log.push(entry);
+      persist('Reading added');
+      route();
+    } else if (form.id === 'recipe-form') {
+      var rf = form.elements;
+      var tags = Array.prototype.slice.call(form.querySelectorAll('input[name="tags"]:checked')).map(function (i) { return i.value; });
+      state.customRecipes.push({
+        id: 'custom-' + Date.now().toString(36),
+        name: rf.name.value.trim(),
+        meal: rf.meal.value,
+        ingredients: splitList(rf.ingredients.value),
+        tags: tags,
+        swaps: [],
+        custom: true
+      });
+      persist('Recipe added — it can now appear in the meal plan');
+      route();
+    }
+  });
+
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
+</body>
+</html>

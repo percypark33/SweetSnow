@@ -16,10 +16,14 @@ sweetsnow.org (Vercel only publishes `website/`).
 
 No install needed: it's plain HTML/CSS/JavaScript.
 
-**Option A: download (easiest)**
-1. Unzip `family-health.zip` anywhere, e.g. `~/Documents/family-health`.
-2. Double-click `index.html`. It opens in Safari or Chrome.
-3. Optional: drag `index.html` to the Dock (right of the divider) or bookmark it.
+**Option A: one file (easiest)**
+1. Download `Family-Health-Guide.html` and put it somewhere permanent, e.g. Documents.
+2. Double-click it. It opens in Safari or Chrome; everything is inside that one file.
+3. Optional: bookmark it in the browser.
+
+`index.html` only works when its `css`, `js` and `sample` folders sit next to it.
+After changing any source file, rebuild the single file with
+`python3 family-health/build-single-file.py`.
 
 **Option B: clone with git (best if you'll keep building it)**
 ```bash
