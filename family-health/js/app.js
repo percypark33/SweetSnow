@@ -9,6 +9,10 @@
   var E = window.FHEngine;
   var Store = window.FHStore;
   var Q = window.FHQuestionnaire;
+  var Foods = window.FHFoods;
+  var Labs = window.FHLabs;
+  var Docs = window.FHDocs;
+  var Shop = window.FHShop;
 
   var state = Store.load();
   var app = document.getElementById('app');
@@ -87,7 +91,9 @@
     var parts = (location.hash || '#/').replace(/^#\/?/, '').split('/');
     var tab = 'family';
     var html;
-    if (parts[0] === 'plan') { tab = 'plan'; html = viewPlan(); }
+    if (parts[0] === 'plan') { tab = 'plan'; html = viewBuilder(); }
+    else if (parts[0] === 'week') { tab = 'plan'; html = viewWeek(); }
+    else if (parts[0] === 'shop') { tab = 'plan'; html = viewShop(parts[1]); }
     else if (parts[0] === 'recipes') { tab = 'recipes'; html = viewRecipes(); }
     else if (parts[0] === 'data') { tab = 'data'; html = viewData(); }
     else if (parts[0] === 'new') { html = viewQuickAdd(); }
@@ -97,10 +103,12 @@
       else if (parts[2] === 'log') html = viewLog(m);
       else if (parts[2] === 'check') html = viewCheck(m, Number(parts[3]) || 0);
       else if (parts[2] === 'results') html = viewResults(m);
+      else if (parts[2] === 'records') html = '<div class="spread" style="margin-bottom:12px"><h1>' + esc(m.name) + '\'s health records</h1><a class="btn" href="#/member/' + esc(m.id) + '">Back to guide</a></div><section class="card">' + recordsInput(m) + '</section>';
       else html = viewGuide(m);
     } else html = viewFamily();
 
     app.innerHTML = html;
+    fillDocList();
     document.querySelectorAll('.tabs a').forEach(function (a) { a.classList.toggle('active', a.getAttribute('data-tab') === tab); });
     window.scrollTo(0, 0);
   }
@@ -242,6 +250,7 @@
       (stats.length ? '<div class="muted small">' + esc(stats.join(' · ')) + '</div>' : '') + '</div>' +
       '<div class="row no-print"><a class="btn primary" href="#/member/' + esc(m.id) + '/edit">Edit profile</a>' +
       '<a class="btn" href="#/member/' + esc(m.id) + '/log">Log readings</a>' +
+      '<a class="btn" href="#/member/' + esc(m.id) + '/records">Records</a>' +
       '<button class="btn" data-action="print">Print</button></div></div></section>' +
       (alerts ? '<section>' + alerts + '</section>' : '') +
       healthCheckCard(m, g.age) +
@@ -416,18 +425,6 @@
 
   // ------------------------------------------------------------------- plan
 
-  function planEaters() {
-    var ids = state.plan.eaters;
-    var list = ids ? state.members.filter(function (m) { return ids.indexOf(m.id) !== -1; }) : state.members.slice();
-    return list.length ? list : state.members.slice();
-  }
-
-  function currentPlan() {
-    var eaters = planEaters();
-    var wk = E.isoDate(E.weekStart(today()));
-    return E.buildPlan(eaters, { today: today(), recipes: recipes(), overrides: state.plan.overrides[wk] || {}, seed: state.plan.seed || '' });
-  }
-
   function fitDetails(fit) {
     var notes = fit.per.filter(function (p) { return p.result.status !== 'ok'; }).map(function (p) {
       var r = p.result, bits = [];
@@ -446,74 +443,295 @@
     return notes;
   }
 
-  function mealCell(fit, key, meal) {
-    if (!fit) return '<div class="meal"><div class="label">' + MEAL_LABELS[meal] + '</div><div class="muted">No recipe available</div></div>';
-    var notes = fitDetails(fit);
-    var dots = fit.per.map(function (p) { return '<span class="status-dot status-' + p.result.status + '" title="' + esc(p.member.name + ': ' + STATUS_TEXT[p.result.status]) + '"></span>'; }).join('');
-    return '<div class="meal"><div class="label">' + MEAL_LABELS[meal] + '</div>' +
-      '<button class="btn small ghost reroll" title="Pick something else" data-action="reroll" data-key="' + key + '" data-current="' + esc(fit.recipe.id) + '">↻</button>' +
-      '<div class="name">' + esc(fit.recipe.name) + '</div><div>' + dots + '</div>' +
-      (notes.length ? '<details><summary>' + notes.length + ' note' + (notes.length > 1 ? 's' : '') + '</summary><ul>' + notes.join('') + '</ul></details>' : '<div class="small muted">Works for everyone as-is</div>') +
-      '</div>';
+  // --------------------------------------------------------- meal builder
+
+  var SLOTS = ['breakfast', 'lunch', 'dinner', 'snack'];
+  var SLOT_EMOJI = { breakfast: '🌅', lunch: '☀️', dinner: '🌙', snack: '🍎' };
+
+  function builder() {
+    state.builder = state.builder || {};
+    var b = state.builder;
+    if (!b.items) b.items = [];
+    if (!b.meal) b.meal = 'dinner';
+    if (!b.cat) b.cat = 'all';
+    if (b.who !== 'family' && !member(b.who)) b.who = state.members.length > 1 ? 'family' : (state.members[0] && state.members[0].id);
+    if (b.day === undefined) b.day = (new Date().getDay() + 6) % 7;
+    return b;
   }
 
-  function viewPlan() {
-    if (!state.members.length) return '<section class="card empty"><h1>Meal plan</h1><p class="muted">Add family members first — the plan is built from their profiles.</p><a class="btn primary" href="#/new">Add a person</a></section>';
-    var plan = currentPlan();
-    var eaterIds = plan.eaters.map(function (e) { return e.member.id; });
+  function eatersFor(b) { return b.who === 'family' ? state.members.slice() : [member(b.who)].filter(Boolean); }
 
-    var chips = state.members.map(function (m) {
-      return '<label class="chip-check"><input type="checkbox" data-action="toggle-eater" value="' + esc(m.id) + '"' + (eaterIds.indexOf(m.id) !== -1 ? ' checked' : '') + '> ' + esc(m.name) + '</label>';
-    }).join('');
+  function weekKey() { return E.isoDate(E.weekStart(today())); }
 
-    var days = plan.days.map(function (d, i) {
-      return '<div class="plan-day"><div class="day">' + esc(d.name) + '<small>' + esc(d.date.slice(5)) + '</small></div>' +
-        E.MEALS.map(function (meal) { return mealCell(d.meals[meal], i + '-' + meal, meal); }).join('') + '</div>';
-    }).join('');
-
-    var snacks = plan.snacks.map(function (s) {
-      var notes = fitDetails(s);
-      return '<li>' + esc(s.recipe.name) + (notes.length ? ' <details style="display:inline"><summary class="small">notes</summary><ul>' + notes.join('') + '</ul></details>' : '') + '</li>';
-    }).join('');
-
-    var grocery = E.groceryList(plan).map(function (g) {
-      return '<li><label style="font-weight:400;display:flex;gap:8px;align-items:center"><input type="checkbox"> ' + esc(g.name) + (g.meals > 1 ? ' <span class="muted small">×' + g.meals + ' meals</span>' : '') + '</label></li>';
-    }).join('');
-
-    return '<div class="spread" style="margin-bottom:12px"><div><h1>This week\'s meals</h1><div class="muted">Week of ' + esc(plan.weekStart) + ' · rebuilds automatically each Monday and whenever a profile changes</div></div>' +
-      '<div class="row no-print"><button class="btn" data-action="shuffle">Shuffle week</button><button class="btn" data-action="print">Print</button></div></div>' +
-      '<section class="card no-print"><div class="row"><strong style="margin-right:6px">Who\'s eating:</strong>' + chips + '</div>' +
-      '<div class="legend" style="margin-top:10px"><span><span class="status-dot status-ok"></span>good as-is</span><span><span class="status-dot status-caution"></span>OK, with a note</span><span><span class="status-dot status-swap"></span>needs a swap</span><span><span class="status-dot status-no"></span>can\'t eat</span></div></section>' +
-      plan.notices.map(function (n) { return '<div class="alert warn" style="margin-top:12px"><div>' + esc(n) + '</div></div>'; }).join('') +
-      '<section class="card" style="margin-top:16px">' + days + '</section>' +
-      '<div class="grid grid-2" style="margin-top:16px">' +
-      '<section class="card"><h2>Snack ideas everyone can have</h2>' + (snacks ? '<ul>' + snacks + '</ul>' : '<p class="muted">None fit everyone — try adding a custom snack.</p>') + '</section>' +
-      '<section class="card"><h2>Grocery list</h2><p class="muted small">From this week\'s meals. Remember the swap ingredients (GF bread, oat milk…) noted in each meal.</p><ul class="grocery" style="list-style:none;padding:0">' + grocery + '</ul></section>' +
-      '</div>';
+  // Daily calories + protein for one person, from their guide.
+  function dayNeeds(m) {
+    var g = E.buildGuide(m, today());
+    var kcal = g.targets.kcal || 2000;
+    var protein = parseInt(String(g.targets.protein || ''), 10) || Math.round(kcal * 0.15 / 4);
+    return { kcal: kcal, protein: protein };
   }
 
-  function reroll(key, current) {
-    var plan = currentPlan();
-    var meal = key.split('-')[1];
-    var used = plan.days.map(function (d) { return d.meals[meal] && d.meals[meal].recipe.id; });
-    var options = recipes().filter(function (r) { return r.meal === meal; })
-      .map(function (r) { return plan.fits[r.id]; })
-      .filter(function (f) { return f.noCount === 0; })
-      .sort(function (a, b) { return b.weight - a.weight; });
-    if (options.length < 2) { toast('No other dish fits everyone for ' + meal + '.'); return; }
-    var unused = options.filter(function (f) { return used.indexOf(f.recipe.id) === -1; });
-    var pool = unused.length ? unused : options;
-    var idx = pool.map(function (f) { return f.recipe.id; }).indexOf(current);
-    var next = pool[(idx + 1) % pool.length];
-    if (next.recipe.id === current) next = pool[(idx + 2) % pool.length];
-    var wk = E.isoDate(E.weekStart(today()));
-    state.plan.overrides[wk] = state.plan.overrides[wk] || {};
-    state.plan.overrides[wk][key] = next.recipe.id;
-    // Drop overrides from past weeks.
-    Object.keys(state.plan.overrides).forEach(function (k) { if (k < wk) delete state.plan.overrides[k]; });
-    persist();
-    route();
+  // Family meals are sized for an adult portion; kids take smaller servings.
+  function targetPeople(b, eaters) {
+    if (b.who !== 'family') return eaters;
+    var adults = eaters.filter(function (m) { var a = E.ageYears(m.birthdate, today()); return a === null || a >= 18; });
+    return adults.length ? adults : eaters;
   }
+
+  function builderTargets(b, eaters) {
+    eaters = targetPeople(b, eaters);
+    if (!eaters.length) return Foods.mealTargets(2000, null, b.meal);
+    var needs = eaters.map(dayNeeds);
+    var kcal = needs.reduce(function (s, n) { return s + n.kcal; }, 0) / needs.length;
+    var protein = needs.reduce(function (s, n) { return s + n.protein; }, 0) / needs.length;
+    return Foods.mealTargets(kcal, protein, b.meal);
+  }
+
+  // ok | caution | no for each eater, using the same rules as recipes.
+  function foodFit(food, eaters) {
+    var pseudo = { id: food.id, ingredients: [food.name], tags: food.tags, swaps: [] };
+    var per = eaters.map(function (m) { return { member: m, result: E.evaluateRecipe(pseudo, E.profileRules(m, today())) }; });
+    var no = per.filter(function (p) { return p.result.status === 'no'; });
+    var caution = per.filter(function (p) { return p.result.status === 'caution'; });
+    return { per: per, status: no.length ? 'no' : caution.length ? 'caution' : 'ok', no: no, caution: caution };
+  }
+
+  function fitReason(fit) {
+    var bits = [];
+    fit.no.forEach(function (p) {
+      var why = p.result.blockedBy.map(function (x) { return x.why.join(', '); }).concat(p.result.avoidHits.length ? ['on their must-avoid list'] : []);
+      bits.push(p.member.name + ': ' + why.join(', '));
+    });
+    fit.caution.forEach(function (p) {
+      var why = p.result.cautions.map(function (c) { return tagLabel(c.tag) + ' (' + c.why.join(', ') + ')'; }).concat(p.result.dislikes.length ? ['dislikes it'] : []);
+      bits.push(p.member.name + ': go easy — ' + why.join(', '));
+    });
+    return bits.join(' · ');
+  }
+
+  function plateSvg(totals) {
+    var total = Object.keys(totals.byCat).reduce(function (s, k) { return s + totals.byCat[k]; }, 0);
+    var r = 70, c = 2 * Math.PI * r, offset = 0;
+    var arcs = Foods.CATEGORIES.map(function (cat) {
+      var share = total ? totals.byCat[cat.id] / total : 0;
+      if (!share) return '';
+      var len = share * c;
+      var arc = '<circle r="' + r + '" cx="90" cy="90" fill="none" stroke="' + cat.color + '" stroke-width="34" stroke-dasharray="' + len + ' ' + (c - len) + '" stroke-dashoffset="' + (-offset) + '" transform="rotate(-90 90 90)"><title>' + cat.label + ' ' + Math.round(share * 100) + '% of calories</title></circle>';
+      offset += len;
+      return arc;
+    }).join('');
+    return '<svg class="plate-svg" viewBox="0 0 180 180" role="img" aria-label="Plate by food group">' +
+      '<circle r="88" cx="90" cy="90" class="plate-rim"/><circle r="70" cx="90" cy="90" fill="none" class="plate-empty" stroke-width="34"/>' + arcs +
+      '<circle r="50" cx="90" cy="90" class="plate-center"/>' +
+      '<text x="90" y="86" text-anchor="middle" class="plate-kcal">' + totals.kcal + '</text><text x="90" y="104" text-anchor="middle" class="plate-unit">kcal</text></svg>';
+  }
+
+  function bar(label, value, min, max, unit) {
+    var target = max || min;
+    var pct = target ? Math.min(100, Math.round(value / target * 100)) : 0;
+    var status = value < min * 0.8 ? 'low' : (max && value > max * 1.15) ? 'over' : 'good';
+    return '<div class="bar-row"><div class="bar-label"><span>' + label + '</span><span><strong>' + value + '</strong> / ' + (max && max !== min ? min + '–' + max : target) + ' ' + unit + '</span></div>' +
+      '<div class="bar bar-' + status + '"><span style="width:' + pct + '%"></span></div></div>';
+  }
+
+  function viewBuilder() {
+    if (!state.members.length) return '<section class="card empty"><h1>Build a meal</h1><p class="muted">Add family members first — the builder checks every food against their allergies and needs.</p><a class="btn primary" href="#/new">Add a person</a></section>';
+    var b = builder();
+    var eaters = eatersFor(b);
+    var target = builderTargets(b, eaters);
+    var sc = Foods.score(b.items, target);
+    var t = sc.totals;
+    var q = (b.search || '').toLowerCase();
+
+    var whoChips = (state.members.length > 1 ? ['family'] : []).concat(state.members.map(function (m) { return m.id; })).map(function (id) {
+      var label = id === 'family' ? '👨‍👩‍👧 Whole family' : esc(member(id).name);
+      return '<button class="chip' + (b.who === id ? ' on' : '') + '" data-action="b-who" data-id="' + esc(id) + '">' + label + '</button>';
+    }).join('');
+    var slotChips = SLOTS.map(function (s) {
+      return '<button class="chip' + (b.meal === s ? ' on' : '') + '" data-action="b-meal" data-id="' + s + '">' + SLOT_EMOJI[s] + ' ' + MEAL_LABELS[s] + '</button>';
+    }).join('');
+
+    var tabs = [{ id: 'all', label: 'All foods', emoji: '🍽️' }].concat(Foods.CATEGORIES).map(function (c) {
+      var n = b.items.filter(function (it) { var f = Foods.byId(it.foodId); return f && (c.id === 'all' || f.cat === c.id); }).length;
+      return '<button class="cat-tab' + (b.cat === c.id ? ' on' : '') + '" data-action="b-cat" data-id="' + c.id + '" style="--cat:' + (c.color || 'var(--brand)') + '">' +
+        '<span class="cat-emoji">' + c.emoji + '</span>' + esc(c.label) + (n ? ' <span class="count">' + n + '</span>' : '') + '</button>';
+    }).join('');
+
+    var cats = b.cat === 'all' ? Foods.CATEGORIES : Foods.CATEGORIES.filter(function (c) { return c.id === b.cat; });
+    var grids = cats.map(function (cat) {
+      var foods = Foods.FOODS.filter(function (fd) { return fd.cat === cat.id && (!q || fd.name.toLowerCase().indexOf(q) !== -1); });
+      var cards = foods.map(function (fd) {
+        var fit = foodFit(fd, eaters);
+        if (b.safeOnly && fit.status === 'no') return '';
+        var onPlate = b.items.filter(function (it) { return it.foodId === fd.id; })[0];
+        var reason = fitReason(fit);
+        return '<div class="food-card fit-' + fit.status + (onPlate ? ' picked' : '') + '" style="--cat:' + cat.color + '">' +
+          '<button class="food-add" data-action="b-add" data-id="' + fd.id + '"' + (fit.status === 'no' ? ' disabled' : '') + ' title="' + esc(fit.status === 'no' ? 'Not for ' + reason : 'Add to plate') + '">' +
+          '<span class="food-emoji">' + fd.emoji + '</span><span class="food-name">' + esc(fd.name) + '</span><span class="food-serving">' + esc(fd.serving) + ' · ' + fd.kcal + ' kcal</span>' +
+          '<span class="macros"><span>P ' + fd.protein + '</span><span>C ' + fd.carbs + '</span><span>F ' + fd.fat + '</span><span>Fib ' + fd.fiber + '</span></span>' +
+          (onPlate ? '<span class="on-plate">×' + onPlate.qty + ' on plate</span>' : '') + '</button>' +
+          (fit.status !== 'ok' ? '<div class="fit-note">' + (fit.status === 'no' ? '✕ ' : '! ') + esc(reason) + '</div>' : '') +
+          '<a class="shop-link" href="#/shop/' + fd.id + '" title="Where to buy & which brand">🛒</a></div>';
+      }).join('');
+      return '<section class="food-section"><h2 style="--cat:' + cat.color + '"><span>' + cat.emoji + '</span> ' + cat.label + '</h2><p class="muted small">' + esc(cat.blurb) + '</p>' +
+        '<div class="food-grid">' + (cards || '<p class="muted">No matches.</p>') + '</div></section>';
+    }).join('');
+
+    var plateItems = b.items.map(function (it, i) {
+      var fd = Foods.byId(it.foodId);
+      if (!fd) return '';
+      return '<li><span>' + fd.emoji + ' ' + esc(fd.name) + '<small>' + esc(fd.serving) + '</small></span><span class="qty">' +
+        '<button class="btn small ghost" data-action="b-qty" data-id="' + i + '" data-d="-1" aria-label="Less">−</button><strong>' + it.qty + '</strong>' +
+        '<button class="btn small ghost" data-action="b-qty" data-id="' + i + '" data-d="1" aria-label="More">+</button></span></li>';
+    }).join('');
+
+    var days = E.DAYS.map(function (d, i) { return opt(i, d, b.day); }).join('');
+    var plate = '<aside class="plate-panel card" id="plate-panel">' +
+      '<div class="plate-head"><h2>Your plate</h2><span class="muted small">' + esc(b.who === 'family' ? 'one adult portion — kids take smaller servings' : (member(b.who) || {}).name) + ' · ' + MEAL_LABELS[b.meal].toLowerCase() + '</span></div>' +
+      '<div class="plate-wrap">' + plateSvg(t) + '<div class="score' + (sc.score >= 85 ? ' great' : '') + '"><div class="score-num">' + sc.score + '</div><div class="score-label">balance score</div></div></div>' +
+      '<div class="legend plate-legend">' + Foods.CATEGORIES.map(function (c) { return '<span><i style="background:' + c.color + '"></i>' + c.label + '</span>'; }).join('') + '</div>' +
+      (sc.badges.length ? '<div class="badges-row">' + sc.badges.map(function (x) { return '<span class="badge ok">' + esc(x) + '</span>'; }).join('') + '</div>' : '') +
+      (b.items.length ? '<ul class="plate-items">' + plateItems + '</ul>' : '<p class="muted small">Tap foods to add them. Aim for one from each group — half the plate from 🥦 fiber.</p>') +
+      bar('Calories', t.kcal, Math.round(target.kcal * 0.85), Math.round(target.kcal * 1.15), 'kcal') +
+      bar('Protein', t.protein, target.protein, null, 'g') +
+      bar('Carbs', t.carbs, target.carbsMin, target.carbsMax, 'g') +
+      bar('Fat', t.fat, target.fatMin, target.fatMax, 'g') +
+      bar('Fiber', t.fiber, target.fiber, null, 'g') +
+      (sc.parts.length ? '<p class="small muted">' + esc(sc.parts.join(' · ')) + '</p>' : '') +
+      '<div class="plate-actions"><input type="text" id="meal-name" placeholder="Name it (optional)" value="' + esc(b.name || '') + '">' +
+      '<select id="meal-day">' + days + '</select>' +
+      '<button class="btn primary" data-action="b-save"' + (b.items.length ? '' : ' disabled') + '>Save to my week</button></div>' +
+      '<div class="row"><button class="btn small" data-action="b-surprise">🎲 Surprise me</button><button class="btn small ghost" data-action="b-clear">Clear plate</button></div>' +
+      '<p class="hint">Targets: protein from body weight (0.8 g/kg), carbs 45–65% and fat 20–35% of calories, fiber 14 g per 1,000 kcal — Dietary Guidelines for Americans.</p>' +
+      '</aside>';
+
+    return '<div class="spread" style="margin-bottom:8px"><div><h1>Build a meal</h1><div class="muted">Pick what you feel like eating — the plate keeps score.</div></div>' +
+      '<a class="btn" href="#/week">My week →</a></div>' +
+      '<section class="card builder-controls"><div class="row"><strong>Who\'s eating?</strong>' + whoChips + '</div>' +
+      '<div class="row" style="margin-top:8px"><strong>Which meal?</strong>' + slotChips + '</div></section>' +
+      '<div class="builder">' +
+      '<div class="builder-foods"><div class="cat-tabs">' + tabs + '</div>' +
+      '<div class="row" style="margin:10px 0"><input type="text" id="food-search" placeholder="Search foods…" value="' + esc(b.search || '') + '" style="max-width:260px">' +
+      '<label class="chip-check"><input type="checkbox" data-action="b-safe"' + (b.safeOnly ? ' checked' : '') + '> Hide foods someone can\'t eat</label></div>' +
+      grids + '</div>' + plate + '</div>' +
+      '<button class="mini-plate" data-action="b-scroll">🍽️ ' + b.items.length + ' item' + (b.items.length === 1 ? '' : 's') + ' · ' + t.kcal + ' kcal · score <strong>' + sc.score + '</strong> <span>View plate ↑</span></button>' +
+      '<div id="confetti" aria-hidden="true"></div>';
+  }
+
+  function viewWeek() {
+    var wk = weekKey();
+    var meals = (state.meals && state.meals[wk]) || [];
+    var b = builder();
+    var dayHtml = E.DAYS.map(function (d, i) {
+      var dm = meals.filter(function (m) { return m.day === i; }).sort(function (a, c) { return SLOTS.indexOf(a.slot) - SLOTS.indexOf(c.slot); });
+      return '<div class="week-day"><div class="day">' + d + '</div><div class="week-meals">' + (dm.length ? dm.map(function (m) {
+        var tt = Foods.totals(m.items);
+        var who = m.who === 'family' ? 'Family' : (member(m.who) || {}).name || '—';
+        return '<div class="week-meal"><div class="label">' + SLOT_EMOJI[m.slot] + ' ' + MEAL_LABELS[m.slot] + ' · ' + esc(who) + '</div>' +
+          '<div class="name">' + esc(m.name) + '</div><div class="small muted">' + m.items.map(function (it) { var f = Foods.byId(it.foodId); return f ? f.emoji : ''; }).join(' ') + ' · ' + tt.kcal + ' kcal · P ' + tt.protein + ' g · Fib ' + tt.fiber + ' g</div>' +
+          '<div class="row" style="margin-top:6px"><button class="btn small" data-action="w-edit" data-id="' + esc(m.id) + '">Edit</button><button class="btn small ghost" data-action="w-del" data-id="' + esc(m.id) + '">Remove</button></div></div>';
+      }).join('') : '<a class="week-empty" href="#/plan" data-action="w-plan" data-day="' + i + '">+ Build a meal</a>') + '</div></div>';
+    }).join('');
+
+    var grocery = {};
+    meals.forEach(function (m) {
+      m.items.forEach(function (it) {
+        var mult = m.who === 'family' ? state.members.length : 1;
+        grocery[it.foodId] = (grocery[it.foodId] || 0) + it.qty * mult;
+      });
+    });
+    var groceryHtml = Object.keys(grocery).map(function (id) { return { food: Foods.byId(id), n: grocery[id] }; }).filter(function (x) { return x.food; })
+      .sort(function (a, c) { return Foods.CATEGORIES.map(function (k) { return k.id; }).indexOf(a.food.cat) - Foods.CATEGORIES.map(function (k) { return k.id; }).indexOf(c.food.cat); })
+      .map(function (x) {
+        return '<li><label><input type="checkbox"> ' + x.food.emoji + ' ' + esc(x.food.name) + ' <span class="muted small">' + x.n + ' × ' + esc(x.food.serving) + '</span></label><a href="#/shop/' + x.food.id + '" class="small">🛒 where to buy</a></li>';
+      }).join('');
+
+    return '<div class="spread" style="margin-bottom:12px"><div><h1>My week</h1><div class="muted">Week of ' + esc(wk) + ' · meals you built</div></div>' +
+      '<div class="row no-print"><a class="btn primary" href="#/plan">+ Build a meal</a><button class="btn" data-action="print">Print</button></div></div>' +
+      '<section class="card">' + dayHtml + '</section>' +
+      '<section class="card" style="margin-top:16px"><h2>Grocery list</h2><p class="muted small">Totals for everyone eating each meal. Tap 🛒 to find stores nearby and compare brands.</p>' +
+      (groceryHtml ? '<ul class="grocery plain">' + groceryHtml + '</ul>' : '<p class="muted">Save meals to build your list.</p>') + '</section>' +
+      '<p class="muted small">Looking for ready-made ideas? The <a href="#/recipes">Recipes</a> tab checks 40 family dishes against everyone\'s profile.</p>';
+  }
+
+  // ----------------------------------------------------------------- shop
+
+  var shopCache = { stores: null, storesFor: '', products: {}, error: {} };
+
+  function stars(n) { var s = ''; for (var i = 1; i <= 5; i++) s += i <= n ? '★' : '☆'; return s; }
+
+  function viewShop(foodId) {
+    var fd = Foods.byId(foodId);
+    if (!fd) return '<section class="card"><p>Unknown food.</p><a class="btn" href="#/plan">Back</a></section>';
+    var b = builder();
+    var eaters = eatersFor(b);
+    var allergyKeys = [];
+    eaters.forEach(function (m) { Object.keys(m.allergies || {}).forEach(function (k) { if (allergyKeys.indexOf(k) === -1) allergyKeys.push(k); }); });
+    var loc = state.location;
+
+    var storesHtml = '';
+    var storesKey = loc ? loc.lat.toFixed(3) + ',' + loc.lon.toFixed(3) : '';
+    if (shopCache.error.stores) storesHtml = '<div class="alert warn"><div>' + esc(shopCache.error.stores) + '</div></div>';
+    else if (shopCache.stores && shopCache.storesFor === storesKey) {
+      storesHtml = shopCache.stores.length ? '<ul class="store-list">' + shopCache.stores.map(function (s) {
+        var links = Shop.mapLinks(s);
+        var mi = s.km * 0.621;
+        return '<li><div><strong>' + esc(s.name) + '</strong>' + (s.organic ? ' <span class="badge ok">organic / health</span>' : '') +
+          '<div class="small muted">' + esc(s.address || s.kind) + (s.hours ? ' · ' + esc(s.hours) : '') + '</div></div>' +
+          '<div class="store-meta"><span class="dist">' + (us() ? mi.toFixed(1) + ' mi' : s.km.toFixed(1) + ' km') + '</span>' +
+          '<a href="' + links.apple + '" target="_blank" rel="noopener">Apple Maps</a> · <a href="' + links.google + '" target="_blank" rel="noopener">Google Maps</a></div></li>';
+      }).join('') + '</ul><p class="hint">Store data © OpenStreetMap contributors. Stock isn\'t listed on maps — check the store\'s app or the links below before you go.</p>' : '<p class="muted">No grocery stores found within 5 km.</p>';
+    }
+
+    var prods = shopCache.products[fd.id];
+    var prodHtml = '';
+    if (shopCache.error[fd.id]) prodHtml = '<div class="alert warn"><div>' + esc(shopCache.error[fd.id]) + '</div></div>';
+    else if (prods) {
+      var nameOf = function (key) { return eaters.filter(function (m) { return (m.allergies || {})[key]; }).map(function (m) { return m.name; }).join(', '); };
+      prodHtml = prods.length ? '<div class="product-grid">' + prods.map(function (p) {
+        return '<a class="product' + (p.conflicts.length ? ' conflict' : '') + '" href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
+          (p.image ? '<img src="' + esc(p.image) + '" alt="" loading="lazy">' : '<span class="product-ph">' + fd.emoji + '</span>') +
+          '<div class="product-name">' + esc(p.name) + '</div><div class="small muted">' + esc([p.brand, p.quantity].filter(Boolean).join(' · ')) + '</div>' +
+          '<div class="row" style="gap:4px;margin-top:4px">' + (p.nutriscore && GRADE_OK.test(p.nutriscore) ? '<span class="nutri nutri-' + p.nutriscore + '">Nutri-Score ' + p.nutriscore.toUpperCase() + '</span>' : '') +
+          (p.nova ? '<span class="badge' + (p.nova === 4 ? ' warn' : '') + '">NOVA ' + p.nova + '</span>' : '') + '</div>' +
+          (p.conflicts.length ? '<div class="small" style="color:var(--danger);margin-top:4px">✕ Contains ' + p.conflicts.map(function (c) { return KB.ALLERGENS[c].label.toLowerCase() + ' (' + nameOf(c) + ')'; }).join(', ') + '</div>' : '') +
+          '</a>';
+      }).join('') + '</div>' : '<p class="muted">No packaged products found — fresh items usually aren\'t in the database.</p>';
+    }
+
+    var ratings = ((state.ratings || {})[fd.id] || []).slice().sort(function (a, c) { return c.stars - a.stars; });
+    var ratingHtml = ratings.length ? '<ul class="plain">' + ratings.map(function (r, i) {
+      return '<li><span class="stars">' + stars(r.stars) + '</span> <strong>' + esc(r.product) + '</strong> — ' + esc((member(r.who) || {}).name || 'Someone') +
+        (r.note ? ': ' + esc(r.note) : '') + ' <button class="btn small ghost" data-action="r-del" data-id="' + fd.id + '" data-i="' + i + '">Remove</button></li>';
+    }).join('') + '</ul>' : '<p class="muted small">No family ratings yet — be the first.</p>';
+
+    return '<div class="spread" style="margin-bottom:12px"><div><h1>' + fd.emoji + ' ' + esc(fd.name) + '</h1><div class="muted">Where to buy it and which product to pick</div></div>' +
+      '<div class="row"><a class="btn" href="#/plan">← Back to the builder</a><a class="btn" href="#/week">My week</a></div></div>' +
+      '<div class="grid grid-2">' +
+      '<section class="card"><h2>📍 Nearby grocery stores</h2>' +
+      '<div class="row"><button class="btn primary" data-action="loc-me">Use my location</button><span class="muted small">or</span>' +
+      '<input type="text" id="loc-q" placeholder="ZIP code or city" style="max-width:180px"><button class="btn" data-action="loc-set">Search</button></div>' +
+      (loc ? '<p class="small muted" style="margin-top:8px">Near ' + esc(loc.label) + '</p>' : '<p class="small muted" style="margin-top:8px">Your location is only sent to OpenStreetMap to find stores, and saved on this device.</p>') +
+      '<div id="stores">' + storesHtml + '</div>' +
+      '<h3 style="margin-top:14px">Check stock & price online</h3><div class="row">' + Shop.retailerLinks(fd.name).map(function (l) { return '<a class="btn small" href="' + l[1] + '" target="_blank" rel="noopener">' + l[0] + '</a>'; }).join('') + '</div></section>' +
+      '<section class="card"><h2>⭐ Family ratings</h2>' + ratingHtml +
+      '<form id="rating-form" data-id="' + fd.id + '" class="rating-form"><input type="text" name="product" placeholder="Brand / product (e.g. Fage 0%)" required>' +
+      '<select name="who">' + state.members.map(function (m) { return opt(m.id, m.name, b.who === m.id ? m.id : ''); }).join('') + '</select>' +
+      '<select name="stars">' + [5, 4, 3, 2, 1].map(function (n) { return opt(n, stars(n) + ' taste', 5); }).join('') + '</select>' +
+      '<input type="text" name="note" placeholder="Taste, texture, price… (optional)"><button class="btn primary" type="submit">Add rating</button></form>' +
+      '<h3 style="margin-top:14px">What other people say</h3><div class="row">' + Shop.reviewLinks(fd.name).map(function (l) { return '<a class="btn small" href="' + l[1] + '" target="_blank" rel="noopener">' + l[0] + '</a>'; }).join('') + '</div>' +
+      '<p class="hint">Online taste reviews aren\'t available through a free, reliable source, so these open the searches; your family\'s ratings stay here.</p></section>' +
+      '</div>' +
+      '<section class="card" style="margin-top:16px"><div class="spread"><div><h2>🏷️ Compare packaged products</h2><p class="muted small" style="margin:0">' +
+      'Healthiest first, and anything containing ' + (allergyKeys.length ? 'an allergen for ' + esc(eaters.map(function (m) { return m.name; }).join(', ')) : 'a family allergen') + ' is flagged.</p></div>' +
+      '<button class="btn primary" data-action="prod-load" data-id="' + fd.id + '">' + (prods ? 'Refresh' : 'Compare products') + '</button></div>' +
+      '<div id="products" style="margin-top:12px">' + prodHtml + '</div>' +
+      '<details class="small" style="margin-top:10px"><summary>What Nutri-Score and NOVA mean</summary><p><strong>Nutri-Score</strong> (A best → E) rates a product\'s overall nutrition per 100 g from sugar, salt, saturated fat, fiber, protein and fruit/vegetable content. It was developed by France\'s public-health agency and is used across Europe; it isn\'t an FDA label. ' +
+      '<strong>NOVA</strong> groups foods by processing: 1 unprocessed, 4 ultra-processed. In a controlled NIH trial, people ate about 500 more calories a day on an ultra-processed diet (Hall et al., <em>Cell Metabolism</em> 2019).</p>' +
+      '<p>Product data © Open Food Facts contributors (open database; entries can be incomplete — always check the label for allergens).</p></details></section>';
+  }
+
+  var GRADE_OK = /^[a-e]$/;
 
   // ---------------------------------------------------------------- recipes
 
@@ -603,7 +821,89 @@
       (top ? '<ul class="plain">' + top + '</ul>' : '<p class="muted">Nothing flagged so far.</p>') + '</section>';
   }
 
+  function labUnit(def) { return !us() && def.si ? def.si.unit : def.unit; }
+  function labShow(def, v) { return !us() && def.si ? Math.round(v * def.si.factor * 100) / 100 : v; }
+
+  function wearableInput(m) {
+    var w = m.wearable || {};
+    var device = w.device || '';
+    var deviceChips = Labs.DEVICES.map(function (d) {
+      return '<label class="pill"><input type="radio" name="w-device" value="' + d[0] + '"' + (device === d[0] ? ' checked' : '') + '><span>' + esc(d[1]) + '</span></label>';
+    }).join('');
+    if (!device || device === 'none') return '<div class="qtext">Which tracker do you wear?</div><div class="pills">' + deviceChips + '</div>';
+    var fields = Labs.WEARABLE_FIELDS.map(function (fd) {
+      return '<div><label>' + esc(fd.label) + (fd.hint ? ' <span class="hint">' + esc(fd.hint) + '</span>' : '') + '</label><div class="inline">' +
+        '<input type="number" step="' + (fd.step || 1) + '" min="0" name="w-' + fd.id + '" value="' + esc(w[fd.id] === undefined || w[fd.id] === null ? '' : w[fd.id]) + '"><span class="unit">' + esc(fd.unit) + '</span></div></div>';
+    }).join('');
+    var stress = Labs.STRESS.map(function (o) {
+      return '<label class="pill"><input type="radio" name="w-stress" value="' + o[0] + '"' + (w.stress === o[0] ? ' checked' : '') + '><span>' + esc(o[1]) + '</span></label>';
+    }).join('');
+    return '<div class="qtext">Which tracker do you wear?</div><div class="pills">' + deviceChips + '</div>' +
+      '<div class="import-box"><div><strong>Fastest: import your export file</strong><div class="hint">In the ' + esc((Labs.DEVICES.filter(function (d) { return d[0] === device; })[0] || [])[1] || 'tracker') +
+      ' app or website, look for <em>Export data</em> / <em>Download my data</em> and save the CSV. The app averages your last 30 days. The file never leaves this device.</div></div>' +
+      '<label class="btn">Choose CSV file<input type="file" accept=".csv,text/csv" data-action="wearable-csv" hidden></label></div>' +
+      (w.importNote ? '<div class="alert info"><div>' + esc(w.importNote) + '</div></div>' : '') +
+      '<div class="qtext" style="margin-top:14px">Or type your 30-day averages from the app</div><div class="fields">' + fields + '</div>' +
+      '<div class="qtext" style="margin-top:14px">How does your tracker (or how do you) rate your daytime stress?</div><div class="pills">' + stress + '</div>';
+  }
+
+  function labsInput(m) {
+    var groups = {};
+    Labs.LABS.forEach(function (l) { (groups[l.group] = groups[l.group] || []).push(l); });
+    var form = Object.keys(groups).map(function (g) {
+      return '<div class="lab-group"><div class="hint">' + esc(g) + '</div><div class="fields">' + groups[g].map(function (l) {
+        return '<div><label>' + esc(l.label) + '</label><div class="inline"><input type="number" min="0" step="any" name="lab-' + l.id + '"><span class="unit">' + esc(labUnit(l)) + '</span></div></div>';
+      }).join('') + '</div></div>';
+    }).join('');
+    var latest = Labs.latestLabs(m);
+    var pregnant = (m.conditions || []).indexOf('pregnancy') !== -1;
+    var rows = Object.keys(latest).map(function (id) {
+      var def = Labs.labDef(id);
+      if (!def) return '';
+      var r = Labs.interpret(id, latest[id].value, m.sex, pregnant);
+      return '<tr><td>' + esc(def.label) + '</td><td><strong>' + labShow(def, latest[id].value) + '</strong> ' + esc(labUnit(def)) + '</td><td><span class="badge ' + ({ ok: 'ok', watch: 'warn', high: 'warn', alert: 'danger' }[r.level] || '') + '">' + esc(r.text) + '</span></td><td class="small muted">' + esc(latest[id].date) + '</td></tr>';
+    }).join('');
+    var entries = (m.labs || []).slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }).map(function (e) {
+      return '<li>' + esc(e.date) + ' — ' + Object.keys(e.values).length + ' result' + (Object.keys(e.values).length === 1 ? '' : 's') + (e.note ? ' · ' + esc(e.note) : '') +
+        ' <button type="button" class="btn small ghost" data-action="lab-del" data-id="' + esc(e.id) + '">Remove</button></li>';
+    }).join('');
+    return (rows ? '<h3>Latest results</h3><div class="table-wrap"><table><thead><tr><th>Test</th><th>Result</th><th>Meaning</th><th>Date</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="hint">' + ((ageOf(m) !== null && ageOf(m) < 18) ? 'Children\'s ranges differ — the pediatrician should interpret these. ' : '') + 'Ranges from ADA, ACC/AHA, KDIGO, WHO and NIH guidance. If your report\'s printed range differs, trust the report.</p>' : '') +
+      '<div class="lab-entry"><h3>Add results</h3><div class="fields"><div><label>Date of the blood test</label><input type="date" name="lab-date" value="' + E.isoDate(new Date()) + '"></div>' +
+      '<div><label>Where from (optional)</label><input type="text" name="lab-note" placeholder="e.g. annual physical, Quest"></div></div>' + form +
+      '<div class="row" style="justify-content:flex-end;margin-top:10px"><button type="button" class="btn primary" data-action="lab-add">Add these results</button></div></div>' +
+      (entries ? '<h3>All entries</h3><ul class="plain">' + entries + '</ul>' : '');
+  }
+
+  function recordsInput(m) {
+    return '<div class="upload-box"><div class="fields">' +
+      '<div><label>What is it?</label><select name="doc-kind">' + Docs.KINDS.map(function (k) { return opt(k[0], k[1], 'lab'); }).join('') + '</select></div>' +
+      '<div><label>Date on the document</label><input type="date" name="doc-date" value="' + E.isoDate(new Date()) + '"></div>' +
+      '<div><label>Title (optional)</label><input type="text" name="doc-title" placeholder="e.g. Annual blood work"></div></div>' +
+      '<label class="btn primary" style="margin-top:12px">📎 Choose file (PDF or photo)<input type="file" accept=".pdf,image/*,.txt,.csv" data-action="doc-upload" hidden></label>' +
+      '<p class="hint">Stored only in this browser on this device and included in exported backups. The app doesn\'t read the file itself yet — copy key numbers into Blood test results.</p></div>' +
+      '<div id="doc-list" data-member="' + esc(m.id) + '"><p class="muted small">Loading records…</p></div>';
+  }
+
+  function fillDocList() {
+    var el = document.getElementById('doc-list');
+    if (!el) return;
+    var memberId = el.getAttribute('data-member');
+    Docs.listFor(memberId).then(function (docs) {
+      if (!document.body.contains(el)) return;
+      var kindLabel = function (k) { return (Docs.KINDS.filter(function (x) { return x[0] === k; })[0] || [k, k])[1]; };
+      el.innerHTML = docs.length ? '<ul class="doc-list">' + docs.map(function (d) {
+        var icon = /pdf/.test(d.type) ? '📄' : /image/.test(d.type) ? '🖼️' : '📎';
+        return '<li><span class="doc-icon">' + icon + '</span><div><strong>' + esc(d.title) + '</strong><div class="small muted">' + esc(kindLabel(d.kind)) + ' · ' + esc(d.date) + ' · ' + Docs.prettySize(d.size) + '</div></div>' +
+          '<div class="row"><button type="button" class="btn small" data-action="doc-open" data-id="' + esc(d.id) + '">Open</button><button type="button" class="btn small ghost" data-action="doc-del" data-id="' + esc(d.id) + '">Delete</button></div></li>';
+      }).join('') + '</ul>' : '<p class="muted small">No records yet.</p>';
+    }).catch(function (e) { el.innerHTML = '<div class="alert warn"><div>' + esc(e.message) + '</div></div>'; });
+  }
+
   function inputFor(q, m, c) {
+    if (q.type === 'wearable') return wearableInput(m);
+    if (q.type === 'labs') return labsInput(m);
+    if (q.type === 'records') return recordsInput(m);
     var a = m.answers || {};
     var v = a[q.id];
     var name = 'q-' + q.id;
@@ -700,6 +1000,17 @@
         var grid = {};
         q.rows.forEach(function (r) { var el = f[name + '-' + r[0]]; if (el && el.value) grid[r[0]] = el.value; });
         m.answers[q.id] = grid;
+      } else if (q.type === 'wearable') {
+        m.wearable = m.wearable || {};
+        var dev = form.querySelector('input[name="w-device"]:checked');
+        if (dev) m.wearable.device = dev.value;
+        Labs.WEARABLE_FIELDS.forEach(function (fd) {
+          var el = f['w-' + fd.id];
+          if (el) m.wearable[fd.id] = el.value === '' ? null : Number(el.value);
+        });
+        var st = form.querySelector('input[name="w-stress"]:checked');
+        if (st) m.wearable.stress = st.value;
+        m.wearable.updatedAt = new Date().toISOString();
       } else if (q.type === 'body') {
         if (us()) {
           var ft = Number(f.heightFt.value) || 0, inch = Number(f.heightIn.value) || 0;
@@ -810,7 +1121,9 @@
       '<p>Guidance comes from mainstream sources (Dietary Guidelines for Americans, American Heart Association, American Diabetes Association, DASH, National Kidney Foundation, FDA food-safety advice). ' +
       'It is general information to help the family plan meals and remember what each person needs — it is <strong>not medical advice</strong>. ' +
       'When your doctor, pharmacist or dietitian says something different, follow them and record it in the profile ("Must avoid", "Limit", calorie override or Notes).</p>' +
-      '<p class="muted small">Calories: Mifflin-St Jeor equation for adults; Dietary Guidelines estimates for ages 2–18. Medication notes cover common, well-documented food interactions only.</p></section>';
+      '<p class="muted small">Calories: Mifflin-St Jeor equation for adults; Dietary Guidelines estimates for ages 2–18. Medication notes cover common, well-documented food interactions only.</p>' +
+      '<h3>Privacy</h3><p class="small">Profiles, answers, lab results, tracker data and records are stored only in this browser. The app goes online only when you ask it to: ' +
+      '<strong>Find stores</strong> sends a location (or the ZIP you type) to OpenStreetMap, and <strong>Compare products</strong> sends a food name to Open Food Facts. No health information is ever sent.</p></section>';
   }
 
   function download(filename, text) {
@@ -821,6 +1134,155 @@
     document.body.appendChild(a);
     a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+
+  function keepScroll() {
+    var y = window.scrollY;
+    route();
+    window.scrollTo(0, y);
+  }
+
+  function friendlyNetError(e) {
+    var msg = (e && e.message) || '';
+    if (/Failed to fetch|NetworkError|Load failed/i.test(msg)) return 'Couldn\'t reach the service — check your internet connection and try again.';
+    return msg || 'Something went wrong. Try again in a minute.';
+  }
+
+  function confetti() {
+    var box = document.getElementById('confetti');
+    if (!box || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    var bits = ['🥦', '⭐', '🍓', '💪', '🥑', '✨'];
+    for (var i = 0; i < 18; i++) {
+      var sp = document.createElement('span');
+      sp.textContent = bits[i % bits.length];
+      sp.style.left = (10 + Math.random() * 80) + '%';
+      sp.style.animationDelay = (Math.random() * 0.3) + 's';
+      box.appendChild(sp);
+    }
+    setTimeout(function () { box.innerHTML = ''; }, 1600);
+  }
+
+  function builderAction(action, el) {
+    var b = builder();
+    var id = el.getAttribute('data-id');
+    if (action === 'b-scroll') { var pp = document.querySelector('.plate-panel'); if (pp) pp.scrollIntoView({ behavior: 'smooth' }); return; }
+    var before = Foods.score(b.items, builderTargets(b, eatersFor(b))).score;
+    if (action === 'b-who') b.who = id;
+    else if (action === 'b-meal') b.meal = id;
+    else if (action === 'b-cat') b.cat = id;
+    else if (action === 'b-add') {
+      var ex = b.items.filter(function (it) { return it.foodId === id; })[0];
+      if (ex) ex.qty++; else b.items.push({ foodId: id, qty: 1 });
+    } else if (action === 'b-qty') {
+      var it = b.items[Number(id)];
+      it.qty += Number(el.getAttribute('data-d'));
+      if (it.qty <= 0) b.items.splice(Number(id), 1);
+    } else if (action === 'b-clear') { b.items = []; b.name = ''; b.editing = null; }
+    else if (action === 'b-surprise') {
+      var eaters = eatersFor(b);
+      var allowed = Foods.FOODS.filter(function (fd) { return foodFit(fd, eaters).status === 'ok'; }).map(function (fd) { return fd.id; });
+      b.items = Foods.surprise(allowed);
+      b.name = '';
+    } else if (action === 'b-save') {
+      var nameEl = document.getElementById('meal-name'), dayEl = document.getElementById('meal-day');
+      var foods = b.items.map(function (x) { return Foods.byId(x.foodId); }).filter(Boolean);
+      var auto = foods.filter(function (fd) { return fd.cat === 'protein'; }).concat(foods.filter(function (fd) { return fd.cat !== 'protein'; })).slice(0, 3).map(function (fd) { return fd.name.split(/[ ,(]/)[0]; }).join(', ');
+      var wk = weekKey();
+      state.meals = state.meals || {};
+      state.meals[wk] = (state.meals[wk] || []).filter(function (x) { return x.id !== b.editing; });
+      state.meals[wk].push({ id: b.editing || ('meal' + Date.now().toString(36)), day: Number(dayEl.value), slot: b.meal, who: b.who,
+        name: (nameEl.value || '').trim() || auto + ' plate', items: JSON.parse(JSON.stringify(b.items)) });
+      Object.keys(state.meals).forEach(function (k) { if (k < wk) delete state.meals[k]; });
+      b.items = []; b.name = ''; b.editing = null;
+      persist('Saved to ' + E.DAYS[Number(dayEl.value)] + ' ' + MEAL_LABELS[b.meal].toLowerCase());
+      go('#/week');
+      return;
+    } else if (action === 'w-edit' || action === 'w-del') {
+      var wk2 = weekKey();
+      var meal = (state.meals[wk2] || []).filter(function (x) { return x.id === id; })[0];
+      if (action === 'w-del') {
+        state.meals[wk2] = state.meals[wk2].filter(function (x) { return x.id !== id; });
+        persist('Meal removed');
+        route();
+        return;
+      }
+      b.items = JSON.parse(JSON.stringify(meal.items)); b.who = meal.who; b.meal = meal.slot; b.day = meal.day; b.name = meal.name; b.editing = meal.id;
+      persist();
+      go('#/plan');
+      return;
+    } else if (action === 'w-plan') {
+      b.day = Number(el.getAttribute('data-day'));
+      persist();
+      return;
+    }
+    var nameNow = document.getElementById('meal-name');
+    if (nameNow) b.name = nameNow.value;
+    var dayNow = document.getElementById('meal-day');
+    if (dayNow) b.day = Number(dayNow.value);
+    persist();
+    keepScroll();
+    var after = Foods.score(b.items, builderTargets(b, eatersFor(b))).score;
+    if (after >= 85 && before < 85) confetti();
+  }
+
+  function importWearable(el) {
+    var file = el.files && el.files[0];
+    if (!file) return;
+    var form = el.closest('form');
+    var m = member(form.getAttribute('data-id'));
+    readCheckForm(form, m);
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var out = Labs.importWearableCSV(String(reader.result), 30);
+        m.wearable = m.wearable || {};
+        ['sleepHours', 'sleepScore', 'restingHr', 'hrv', 'recovery', 'spo2', 'stressScore'].forEach(function (k) { if (out[k] !== undefined) m.wearable[k] = out[k]; });
+        m.wearable.importNote = 'Imported ' + out.importedRows + ' days from ' + file.name + '. Matched: ' + out.columns.join(', ') + '. Check the numbers below look right.';
+        m.wearable.updatedAt = new Date().toISOString();
+        persist('Tracker data imported');
+      } catch (e) {
+        alert('Could not read that file: ' + e.message);
+      }
+      keepScroll();
+    };
+    reader.readAsText(file);
+  }
+
+  function addLabEntry(el, silent) {
+    var form = el.tagName === 'FORM' ? el : el.closest('form');
+    var m = member(form.getAttribute('data-id'));
+    var f = form.elements, values = {};
+    Labs.LABS.forEach(function (l) {
+      var v = f['lab-' + l.id] && f['lab-' + l.id].value;
+      if (v === '' || v === undefined) return;
+      var n = Number(v);
+      if (!us() && l.si) n = Math.round(n / l.si.factor * 100) / 100;
+      values[l.id] = n;
+    });
+    if (!Object.keys(values).length) { if (!silent) toast('Type at least one result first'); return; }
+    m.labs = m.labs || [];
+    m.labs.push({ id: 'lab' + Date.now().toString(36), date: f['lab-date'].value || E.isoDate(new Date()), note: f['lab-note'].value.trim(), values: values });
+    m.updatedAt = new Date().toISOString();
+    persist(Object.keys(values).length + ' result' + (Object.keys(values).length === 1 ? '' : 's') + ' added');
+    if (!silent) keepScroll();
+  }
+
+  function uploadDoc(el) {
+    var file = el.files && el.files[0];
+    if (!file) return;
+    var box = el.closest('.upload-box');
+    var memberId = (document.getElementById('doc-list') || {}).getAttribute ? document.getElementById('doc-list').getAttribute('data-member') : null;
+    var meta = {
+      kind: box.querySelector('[name="doc-kind"]').value,
+      date: box.querySelector('[name="doc-date"]').value,
+      title: box.querySelector('[name="doc-title"]').value.trim() || file.name.replace(/\.[^.]+$/, '')
+    };
+    Docs.add(memberId, file, meta).then(function () {
+      toast('Saved ' + meta.title);
+      box.querySelector('[name="doc-title"]').value = '';
+      el.value = '';
+      fillDocList();
+    }).catch(function (e) { alert(e.message); });
   }
 
   // ----------------------------------------------------------------- events
@@ -845,7 +1307,7 @@
       var m = member(id);
       if (!confirm('Delete ' + m.name + ' and all their readings? This can\'t be undone.')) return;
       state.members = state.members.filter(function (x) { return x.id !== id; });
-      if (state.plan.eaters) state.plan.eaters = state.plan.eaters.filter(function (x) { return x !== id; });
+      Docs.removeFor(id).catch(function () {});
       persist('Deleted');
       go('#/');
     } else if (action === 'delete-log') {
@@ -855,14 +1317,6 @@
       if (idx !== -1) mm.log.splice(idx, 1);
       persist('Removed');
       route();
-    } else if (action === 'shuffle') {
-      state.plan.seed = Math.random().toString(36).slice(2, 8);
-      var wk = E.isoDate(E.weekStart(today()));
-      delete state.plan.overrides[wk];
-      persist();
-      route();
-    } else if (action === 'reroll') {
-      reroll(el.getAttribute('data-key'), el.getAttribute('data-current'));
     } else if (action === 'recipe-filter') {
       recipeFilter = el.getAttribute('data-filter');
       route();
@@ -870,12 +1324,61 @@
       state.customRecipes = state.customRecipes.filter(function (r) { return r.id !== id; });
       persist('Recipe deleted');
       route();
+    } else if (action.indexOf('b-') === 0 || action.indexOf('w-') === 0) {
+      builderAction(action, el);
+    } else if (action === 'loc-me' || action === 'loc-set') {
+      var find = action === 'loc-me' ? Shop.currentLocation() : Shop.geocode((document.getElementById('loc-q') || {}).value || '');
+      if (action === 'loc-set' && !((document.getElementById('loc-q') || {}).value || '').trim()) { toast('Type a ZIP code or city first'); return; }
+      el.disabled = true; el.textContent = 'Finding stores…';
+      shopCache.error.stores = null;
+      find.then(function (loc) {
+        state.location = loc;
+        persist();
+        return Shop.nearbyStores(loc).then(function (stores) {
+          shopCache.stores = stores;
+          shopCache.storesFor = loc.lat.toFixed(3) + ',' + loc.lon.toFixed(3);
+        });
+      }).catch(function (e) { shopCache.error.stores = friendlyNetError(e); }).then(function () { route(); });
+    } else if (action === 'prod-load') {
+      var pm = eatersFor(builder());
+      var allergyKeys = [];
+      pm.forEach(function (x) { Object.keys(x.allergies || {}).forEach(function (k) { if (allergyKeys.indexOf(k) === -1) allergyKeys.push(k); }); });
+      el.disabled = true; el.textContent = 'Searching…';
+      shopCache.error[id] = null;
+      Shop.products(Foods.byId(id).name, allergyKeys).then(function (list) { shopCache.products[id] = list; })
+        .catch(function (e) { shopCache.error[id] = friendlyNetError(e); }).then(function () { var y = window.scrollY; route(); window.scrollTo(0, y); });
+    } else if (action === 'r-del') {
+      (state.ratings[id] || []).splice(Number(el.getAttribute('data-i')), 1);
+      persist('Rating removed');
+      route();
+    } else if (action === 'lab-add') {
+      addLabEntry(el);
+    } else if (action === 'lab-del') {
+      var lm = member(el.closest('form').getAttribute('data-id'));
+      lm.labs = (lm.labs || []).filter(function (x) { return x.id !== id; });
+      persist('Lab entry removed');
+      keepScroll();
+    } else if (action === 'doc-open') {
+      Docs.get(id).then(function (d) {
+        var url = URL.createObjectURL(d.blob);
+        var w = window.open(url, '_blank');
+        if (!w) { var a = document.createElement('a'); a.href = url; a.download = d.fileName; a.click(); }
+        setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+      });
+    } else if (action === 'doc-del') {
+      if (!confirm('Delete this record from this device?')) return;
+      Docs.remove(id).then(function () { toast('Record deleted'); fillDocList(); });
     } else if (action === 'export') {
-      download('family-health-backup-' + E.isoDate(new Date()) + '.json', Store.exportJSON(state));
-      toast('Backup downloaded');
+      Docs.exportAll().catch(function () { return []; }).then(function (docs) {
+        var data = JSON.parse(Store.exportJSON(state));
+        data.documents = docs;
+        download('family-health-backup-' + E.isoDate(new Date()) + '.json', JSON.stringify(data, null, 2));
+        toast('Backup downloaded' + (docs.length ? ' (with ' + docs.length + ' record' + (docs.length === 1 ? '' : 's') + ')' : ''));
+      });
     } else if (action === 'reset') {
       if (!confirm('Delete every profile, reading and custom recipe from this browser?')) return;
       state = Store.empty();
+      Docs.clear().catch(function () {});
       persist('Everything deleted');
       go('#/');
     }
@@ -883,6 +1386,9 @@
 
   document.addEventListener('change', function (ev) {
     var el = ev.target;
+    if (el.type === 'file' && el.getAttribute('data-action') === 'wearable-csv') { importWearable(el); return; }
+    if (el.type === 'file' && el.getAttribute('data-action') === 'doc-upload') { uploadDoc(el); return; }
+    if (el.getAttribute('data-action') === 'b-safe') { builder().safeOnly = el.checked; persist(); keepScroll(); return; }
     var checkForm = el.form && el.form.id === 'check-form' ? el.form : null;
     if (checkForm) {
       // "None of these" is exclusive with the other choices.
@@ -908,12 +1414,6 @@
     if (action === 'units') {
       state.settings.units = el.value;
       persist('Units updated');
-    } else if (action === 'toggle-eater') {
-      var ids = Array.prototype.slice.call(document.querySelectorAll('[data-action="toggle-eater"]:checked')).map(function (i) { return i.value; });
-      if (!ids.length) { el.checked = true; toast('At least one person has to be eating!'); return; }
-      state.plan.eaters = ids.length === state.members.length ? null : ids;
-      persist();
-      route();
     } else if (action === 'import') {
       var file = el.files && el.files[0];
       if (!file) return;
@@ -924,6 +1424,8 @@
           if (state.members.length && !confirm('Replace what\'s here with the backup (' + data.members.length + ' people)?')) return;
           state = data;
           persist('Backup imported');
+          var parsed = JSON.parse(String(reader.result));
+          if (parsed.documents && parsed.documents.length) Docs.importAll(parsed.documents).then(function () { toast('Backup and ' + parsed.documents.length + ' records imported'); });
           go('#/');
         } catch (e) {
           alert('Could not import: ' + e.message);
@@ -949,6 +1451,8 @@
     if (form.id === 'check-form') {
       var cm = member(form.getAttribute('data-id'));
       readCheckForm(form, cm);
+      // Lab numbers typed but not yet added are saved rather than lost.
+      if (form.querySelector('[name="lab-date"]')) addLabEntry(form, true);
       cm.reviewedAt = E.isoDate(new Date());
       persist();
       var dest = submitter ? submitter.value : 'results';
@@ -964,6 +1468,14 @@
       sm.updatedAt = new Date().toISOString();
       persist(picked.length + ' item' + (picked.length === 1 ? '' : 's') + ' added — guide and meal plan updated');
       route();
+      return;
+    }
+    if (form.id === 'rating-form') {
+      var rfE = form.elements, fid = form.getAttribute('data-id');
+      state.ratings = state.ratings || {};
+      (state.ratings[fid] = state.ratings[fid] || []).push({ product: rfE.product.value.trim(), who: rfE.who.value, stars: Number(rfE.stars.value), note: rfE.note.value.trim(), date: E.isoDate(new Date()) });
+      persist('Thanks — rating saved');
+      keepScroll();
       return;
     }
     if (form.id === 'member-form') {
@@ -1000,6 +1512,15 @@
       persist('Recipe added — it can now appear in the meal plan');
       route();
     }
+  });
+
+  document.addEventListener('input', function (ev) {
+    if (ev.target.id !== 'food-search') return;
+    builder().search = ev.target.value;
+    var pos = ev.target.selectionStart;
+    keepScroll();
+    var box = document.getElementById('food-search');
+    if (box) { box.focus(); box.setSelectionRange(pos, pos); }
   });
 
   window.addEventListener('hashchange', route);

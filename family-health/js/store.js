@@ -11,7 +11,7 @@
   var VERSION = 1;
 
   function empty() {
-    return { version: VERSION, settings: { units: 'us' }, members: [], customRecipes: [], plan: { overrides: {}, eaters: null, seed: '' }, savedAt: null };
+    return { version: VERSION, settings: { units: 'us' }, members: [], customRecipes: [], plan: { overrides: {}, eaters: null, seed: '' }, meals: {}, ratings: {}, location: null, builder: {}, savedAt: null };
   }
 
   function migrate(data) {
@@ -23,6 +23,10 @@
       members: Array.isArray(data.members) ? data.members.map(normalizeMember) : [],
       customRecipes: Array.isArray(data.customRecipes) ? data.customRecipes : [],
       plan: Object.assign({}, base.plan, data.plan || {}),
+      meals: (data.meals && typeof data.meals === 'object') ? data.meals : {},
+      ratings: (data.ratings && typeof data.ratings === 'object') ? data.ratings : {},
+      location: data.location || null,
+      builder: (data.builder && typeof data.builder === 'object') ? data.builder : {},
       savedAt: data.savedAt || null
     };
     if (!out.plan.overrides || typeof out.plan.overrides !== 'object') out.plan.overrides = {};
@@ -36,13 +40,13 @@
       activity: 'light', goal: 'maintain', bloodType: '', allergies: {}, otherAllergies: [], intolerances: [],
       conditions: [], otherConditions: [], medications: [], diet: 'omnivore', dietRules: [], dislikes: [],
       avoidFoods: [], limitFoods: [], favoriteFoods: [], calorieOverride: null, doctor: '', emergencyContact: '',
-      notes: '', log: [], answers: {}, answersUpdatedAt: '', reviewedAt: '', createdAt: '', updatedAt: ''
+      notes: '', log: [], labs: [], wearable: {}, answers: {}, answersUpdatedAt: '', reviewedAt: '', createdAt: '', updatedAt: ''
     }, m, {
       allergies: (m && typeof m.allergies === 'object' && !Array.isArray(m.allergies)) ? m.allergies : {},
       otherAllergies: arr(m && m.otherAllergies), intolerances: arr(m && m.intolerances), conditions: arr(m && m.conditions),
       otherConditions: arr(m && m.otherConditions), medications: arr(m && m.medications), dietRules: arr(m && m.dietRules),
       dislikes: arr(m && m.dislikes), avoidFoods: arr(m && m.avoidFoods), limitFoods: arr(m && m.limitFoods),
-      favoriteFoods: arr(m && m.favoriteFoods), log: arr(m && m.log),
+      favoriteFoods: arr(m && m.favoriteFoods), log: arr(m && m.log), labs: arr(m && m.labs),
       answers: (m && m.answers && typeof m.answers === 'object' && !Array.isArray(m.answers)) ? m.answers : {}
     });
   }

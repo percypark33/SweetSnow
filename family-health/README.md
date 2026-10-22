@@ -67,6 +67,33 @@ Suspicions (likely reflux, possible lactose intolerance) are offered unticked.
 All scoring lives in `js/questionnaire.js` and is covered by
 `tests/questionnaire.test.js`.
 
+## New: trackers, blood tests, records and the meal builder
+
+- **Sleep & stress tracker step** — pick Oura, WHOOP, Apple Watch, Fitbit, Garmin or
+  Samsung, then import the app's CSV export (last 30 days are averaged; Oura seconds and
+  WHOOP minutes are both handled) or type the averages. Findings use AASM sleep needs,
+  AHA resting-heart-rate ranges and compare HRV with *your own* baseline. Device scores
+  are labelled as consumer estimates, not diagnoses.
+- **Blood test results step** — 15 common tests (A1C, glucose, lipids, eGFR, ALT,
+  potassium, hemoglobin, ferritin, TSH, vitamin D, B12, uric acid) interpreted with ADA,
+  ACC/AHA, KDIGO, WHO, AGA and NIH cut-offs. Metric units are converted. One abnormal
+  diabetes-range result is offered unticked because a diagnosis needs a repeat test.
+- **Health records step** — upload PDFs and photos (lab reports, visit notes, vaccine
+  records). Stored in the browser's IndexedDB on this device and included in backups.
+- **Build meals** (replaces the pre-made plan) — choose who's eating and which meal, then
+  pick foods from Protein / Carbs / Fiber / Healthy-fat tabs. Every food card shows
+  whether each person can eat it. The plate shows a live chart, macro bars against
+  per-meal targets (RDA protein, AMDR carbs/fat, 14 g fiber per 1,000 kcal), a balance
+  score and badges. Save meals to the week; the grocery list builds itself.
+- **Where to buy** — each food links to nearby grocery stores (OpenStreetMap), a product
+  comparison sorted by safety → Nutri-Score → processing level (Open Food Facts), links
+  to Instacart/Walmart/Target/Whole Foods/Kroger, review searches, and the family's own
+  taste ratings.
+
+**Privacy:** the app only goes online when you press *Find stores* (sends a location or
+ZIP to OpenStreetMap) or *Compare products* (sends a food name to Open Food Facts). No
+health data ever leaves the device.
+
 ## What it does
 
 | Screen | What you get |
@@ -75,7 +102,7 @@ All scoring lives in `js/questionnaire.js` and is covered by
 | **Guide** (click a person) | Daily targets (calories, protein, fiber, sodium, sugar, sat fat, calcium, iron, fluids); Avoid / Limit / Eat more lists with the reason for each item; medication food interactions and timing; condition and life-stage notes; supplements to ask about; hidden allergen names on labels; a printable emergency card. |
 | **Edit profile** | Top-9 allergens with severity plus any other allergy, intolerances, 18 conditions (incl. pregnancy), medications, diet (vegetarian, vegan, pescatarian, Mediterranean, lower-carb), halal/kosher/no-pork/no-beef/no-alcohol, must-avoid / limit / dislikes / favorites, calorie override, doctor and emergency contact. |
 | **Log readings** | Weight, blood pressure, A1C, LDL. Latest weight drives calories; readings over common thresholds raise alerts. |
-| **Meal plan** | 7-day breakfast/lunch/dinner that only uses dishes everyone at the table can eat, with per-person swaps ("Mia: use sunflower-seed butter"), snack ideas and a grocery list. Pick who's eating, shuffle the week, or ↻ any meal. |
+| **Build meals** | Pick foods by category to build each meal, see the plate's balance live, save meals to the week, and get a grocery list with where-to-buy links. |
 | **Recipes** | 40 built-in recipes with a can/can't-eat dot for each person; add your own family recipes. |
 | **Data** | Units (US / metric), export, import, demo family, delete everything. |
 
@@ -114,10 +141,15 @@ family-health/
   css/styles.css        styles (light + dark mode, print layout)
   js/knowledge.js       ALL health knowledge: allergens, conditions, meds, diets, age bands, recipes
   js/engine.js          pure logic: profile → guide, meal plan, grocery list (no UI)
+  js/questionnaire.js   everyday questions + validated screening scores
+  js/labs.js            blood-test interpretation, tracker CSV import & analysis
+  js/foods.js           build-a-meal foods (USDA nutrition), targets, balance score
+  js/shop.js            nearby stores (OpenStreetMap) and products (Open Food Facts)
+  js/docs.js            health records stored in IndexedDB
   js/store.js           saving, loading, backup import/export
   js/app.js             screens and buttons
   sample/demo-family.js a made-up family for trying it out
-  tests/engine.test.js  engine tests
+  tests/*.test.js       42 automated tests (engine, screening scores, labs, foods)
 ```
 
 To correct or extend what the guide knows (add a condition, medication,

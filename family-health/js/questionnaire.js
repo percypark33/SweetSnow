@@ -13,6 +13,7 @@
   'use strict';
 
   var KB = (typeof module !== 'undefined' && module.exports) ? require('./knowledge.js') : root.FHKnowledge;
+  var Labs = (typeof module !== 'undefined' && module.exports) ? require('./labs.js') : root.FHLabs;
 
   // ------------------------------------------------------------------ sources
 
@@ -70,6 +71,8 @@
     ahaSodium: { title: 'Sodium and health: AHA recommends under 2,300 mg/day, ideally 1,500 mg', org: 'American Heart Association', year: 2021, url: 'https://www.heart.org/en/healthy-living/healthy-eating/eat-smart/sodium/how-much-sodium-should-i-eat-per-day' },
     aap988: { title: '988 Suicide & Crisis Lifeline', org: 'SAMHSA', year: 2022, url: 'https://988lifeline.org' }
   };
+
+  Object.keys(Labs.SOURCES).forEach(function (k) { if (!SOURCES[k]) SOURCES[k] = Labs.SOURCES[k]; });
 
   // Strength-of-evidence labels shown on each finding.
   var STRENGTH = {
@@ -237,6 +240,18 @@
           ['celiac', 'Celiac disease'], ['atopy', 'Food allergies, eczema or asthma'], ['osteoporosis', 'Osteoporosis or hip fracture'], ['kidney', 'Kidney disease'],
           ['none', 'None of these'], ['dk', 'Don\'t know']] }
       ]
+    },
+    {
+      id: 'wearable', title: 'Sleep & stress tracker', intro: 'If you wear an Oura Ring, WHOOP, Apple Watch, Fitbit or Garmin, its 30-day averages make the sleep and stress advice much more precise. Skip this if you don\'t have one.',
+      questions: [{ id: 'wearable', type: 'wearable', optional: true }]
+    },
+    {
+      id: 'labs', title: 'Blood test results', intro: 'Copy numbers from your latest blood work (the patient portal or a printed report). Enter only what you have — even one value helps.',
+      questions: [{ id: 'labs', type: 'labs', optional: true }]
+    },
+    {
+      id: 'records', title: 'Health records', intro: 'Keep lab reports, doctor\'s notes, prescriptions and vaccine records in one place. Files stay on this device.',
+      questions: [{ id: 'records', type: 'records', optional: true }]
     }
   ];
 
@@ -457,8 +472,12 @@
     var ada = adaRisk(c, bmi);
     var bmiCut = a.asian === 'yes' ? 23 : 25;
     var uspstfDiab = age !== null && age >= 35 && age <= 70 && bmi !== null && bmi >= bmiCut;
-    var recentSugar = a.sugar_checked === '3y';
-    if (!hasDiabetes && ((ada && ada.high) || uspstfDiab)) {
+    // A blood test entered in the app counts as recent testing.
+    var labLatest = Labs.latestLabs(member);
+    var withinYears = function (lab, yrs) { return lab && (Date.now() - new Date(lab.date).getTime()) / 31557600000 <= yrs; };
+    var sugarLab = withinYears(labLatest.a1c, 3) || withinYears(labLatest.glucose, 3);
+    var recentSugar = a.sugar_checked === '3y' || sugarLab;
+    if (!hasDiabetes && ((ada && ada.high) || uspstfDiab) && !(sugarLab && Labs.interpret(labLatest.a1c ? 'a1c' : 'glucose', (labLatest.a1c || labLatest.glucose).value).level !== 'ok')) {
       var because = [];
       if (ada && ada.high) because.push('ADA Diabetes Risk Test score ' + ada.score + ' of 10 (5 or more = high risk): ' + ada.parts.join(', ') + '.');
       if (uspstfDiab) because.push('Age 35–70 with BMI ' + bmi + ' (' + bmiCut + '+) — the group USPSTF recommends screening.');
@@ -497,7 +516,7 @@
         strength: STRENGTH.guideline, sources: ['uspstfBP'] });
     }
     var lipidRisk = has(fam, 'earlyheart') || has(fam, 'fh') || has(diag, 'diabetes2') || has(diag, 'hypertension');
-    if (!isKid && age !== null && a.lipids_checked && a.lipids_checked !== '5y' && !has(diag, 'cholesterol') && (age >= 40 || lipidRisk)) {
+    if (!isKid && age !== null && a.lipids_checked && a.lipids_checked !== '5y' && !withinYears(labLatest.ldl, 5) && !has(diag, 'cholesterol') && (age >= 40 || lipidRisk)) {
       add({ id: 'lipids', level: 'doctor', title: 'Get a cholesterol test (lipid panel)',
         because: [a.lipids_checked === 'dk' ? 'No cholesterol test you know of.' : 'Last test over 5 years ago.'].concat(age >= 40 ? ['From 40 to 75, cholesterol results decide whether a statin would lower heart-attack risk.'] : ['Family history or other risk factors make an earlier check worthwhile.']),
         todo: ['Ask for a lipid panel at your next visit (fasting usually isn\'t needed).'], strength: STRENGTH.guideline, sources: ['uspstfStatin'] });
@@ -734,6 +753,19 @@
     });
     if (a.pregnancy === 'pregnant' && !profileHas('condition', 'pregnancy')) suggest({ kind: 'condition', key: 'pregnancy', label: 'Pregnant', checked: true });
     if (a.pregnancy === 'breastfeeding' && !profileHas('condition', 'breastfeeding')) suggest({ kind: 'condition', key: 'breastfeeding', label: 'Breastfeeding', checked: true });
+
+    // Blood tests and wearable data.
+    var labRes = Labs.analyzeLabs(member, age);
+    labRes.findings.forEach(add);
+    labRes.suggestions.forEach(function (s) { if (!profileHas(s.kind, s.key)) suggest(s); });
+    good = good.concat(labRes.good);
+    var wRes = Labs.analyzeWearable(member, age);
+    wRes.findings.forEach(function (f) {
+      // Device short-sleep duplicates the self-reported one; keep the more precise device finding.
+      if (f.id === 'w-sleep') findings = findings.filter(function (x) { return x.id !== 'sleep-short'; });
+      add(f);
+    });
+    good = good.concat(wRes.good);
 
     var order = { urgent: 0, doctor: 1, change: 2 };
     findings.sort(function (x, y) { return order[x.level] - order[y.level]; });

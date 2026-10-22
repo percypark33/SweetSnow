@@ -93,7 +93,9 @@
   function newList() { return { items: [], index: {} }; }
 
   function latest(member, field) {
-    var log = list(member.log).filter(function (e) { return e[field] !== undefined && e[field] !== null && e[field] !== ''; });
+    // Blood-test entries count as readings too (A1C, LDL…).
+    var fromLabs = list(member.labs).map(function (l) { var e = { date: l.date }; e[field] = (l.values || {})[field]; return e; });
+    var log = list(member.log).concat(fromLabs).filter(function (e) { return e[field] !== undefined && e[field] !== null && e[field] !== ''; });
     log.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
     return log.length ? { value: Number(log[0][field]), date: log[0].date, entry: log[0] } : null;
   }
