@@ -5,7 +5,7 @@ root = pathlib.Path(__file__).parent
 html = (root / 'index.html').read_text()
 html = html.replace('<link rel="stylesheet" href="css/styles.css">',
                     '<style>\n' + (root / 'css/styles.css').read_text() + '</style>')
-for src in ['js/knowledge.js', 'js/engine.js', 'js/store.js', 'sample/demo-family.js', 'js/app.js']:
+for src in ['js/knowledge.js', 'js/engine.js', 'js/questionnaire.js', 'js/store.js', 'sample/demo-family.js', 'js/app.js']:
     tag = '<script src="%s"></script>' % src
     assert tag in html, tag
     html = html.replace(tag, '<script>\n' + (root / src).read_text() + '</script>')

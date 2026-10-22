@@ -8,6 +8,7 @@
   var KB = window.FHKnowledge;
   var E = window.FHEngine;
   var Store = window.FHStore;
+  var Q = window.FHQuestionnaire;
 
   var state = Store.load();
   var app = document.getElementById('app');
@@ -89,11 +90,13 @@
     if (parts[0] === 'plan') { tab = 'plan'; html = viewPlan(); }
     else if (parts[0] === 'recipes') { tab = 'recipes'; html = viewRecipes(); }
     else if (parts[0] === 'data') { tab = 'data'; html = viewData(); }
-    else if (parts[0] === 'new') { html = viewEdit(null); }
+    else if (parts[0] === 'new') { html = viewQuickAdd(); }
     else if (parts[0] === 'member' && member(parts[1])) {
       var m = member(parts[1]);
       if (parts[2] === 'edit') html = viewEdit(m);
       else if (parts[2] === 'log') html = viewLog(m);
+      else if (parts[2] === 'check') html = viewCheck(m, Number(parts[3]) || 0);
+      else if (parts[2] === 'results') html = viewResults(m);
       else html = viewGuide(m);
     } else html = viewFamily();
 
@@ -114,7 +117,8 @@
       return '<section class="card empty">' +
         '<h1>Your family\'s health guide</h1>' +
         '<p class="muted">Add each person\'s allergies, health conditions, medications and food preferences. ' +
-        'The app builds a personal guide for everyone and a weekly meal plan the whole family can eat — and it updates itself whenever something changes.</p>' +
+        'No medical knowledge needed: you answer everyday questions (sleep, energy, digestion, what happens after certain foods, family history) and the app scores them with the same screening tools doctors use, ' +
+        'then builds a personal guide for everyone and a weekly meal plan the whole family can eat. It updates itself whenever something changes.</p>' +
         '<div class="row" style="justify-content:center;margin-top:20px">' +
         '<a class="btn primary" href="#/new">Add the first person</a>' +
         '<button class="btn" data-action="load-demo">Try a demo family</button>' +
@@ -130,6 +134,9 @@
       m.conditions.forEach(function (c) { if (KB.CONDITIONS[c]) badges.push('<span class="badge info">' + esc(KB.CONDITIONS[c].label) + '</span>'); });
       if (m.diet && m.diet !== 'omnivore') badges.push('<span class="badge ok">' + esc(KB.DIETS[m.diet].label) + '</span>');
       var urgent = g.alerts.filter(function (a) { return a.level !== 'info'; }).length;
+      var prog = Q.progress(m, g.age);
+      if (!prog.done) badges.push('<span class="badge">Health questions not started</span>');
+      else if (prog.pct < 100) badges.push('<span class="badge">Health questions ' + prog.pct + '%</span>');
       return '<a class="card member-card" href="#/member/' + esc(m.id) + '">' + avatar(m) +
         '<div><h2 style="margin:0">' + esc(m.name) + '</h2>' +
         '<div class="muted small">' + esc([m.relation, ageText(g), g.band ? g.band.label : ''].filter(Boolean).join(' · ')) + '</div>' +
@@ -237,6 +244,7 @@
       '<a class="btn" href="#/member/' + esc(m.id) + '/log">Log readings</a>' +
       '<button class="btn" data-action="print">Print</button></div></div></section>' +
       (alerts ? '<section>' + alerts + '</section>' : '') +
+      healthCheckCard(m, g.age) +
       '<div class="grid grid-2"><section class="card"><h2>Daily targets</h2>' + targetsHtml + '</section>' + emergency + '</div>' +
       '<div class="grid grid-3">' +
       '<section class="card avoid"><h2>Avoid</h2>' + foodList(g.avoid) + '</section>' +
@@ -547,6 +555,243 @@
       '<div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn primary" type="submit">Add recipe</button></div></form>';
   }
 
+  // ------------------------------------------------------------ health check
+
+  var LEVELS = {
+    urgent: { title: 'Act soon', cls: 'danger', blurb: 'These need attention in the next few days.' },
+    doctor: { title: 'Talk to a doctor / get tested', cls: 'warn', blurb: 'Worth raising at your next appointment, or booking one.' },
+    change: { title: 'Everyday changes that help', cls: 'info', blurb: 'Things you can start on your own.' }
+  };
+
+  function viewQuickAdd() {
+    return '<form id="quick-form" class="card" style="max-width:640px;margin:0 auto">' +
+      '<h1>Add a family member</h1>' +
+      '<p class="muted">Just the basics. Next comes a set of everyday questions — no medical knowledge needed — and the app works out the rest.</p>' +
+      '<div class="fields">' +
+      '<div><label>Name *</label><input type="text" name="name" required></div>' +
+      '<div><label>Relationship</label><input type="text" name="relation" placeholder="Me, Mom, Son…"></div>' +
+      '<div><label>Birth date *</label><input type="date" name="birthdate" required></div>' +
+      '<div><label>Sex <span class="hint">(changes some advice)</span></label><select name="sex">' + opt('', 'Prefer not to say', '') + opt('female', 'Female', '') + opt('male', 'Male', '') + '</select></div>' +
+      '</div>' +
+      '<div class="row" style="justify-content:flex-end;margin-top:18px">' +
+      '<button class="btn" type="submit" name="next" value="profile">Fill in the full form instead</button>' +
+      '<button class="btn primary" type="submit" name="next" value="check">Start the health questions →</button></div></form>';
+  }
+
+  function ageOf(m) { return E.ageYears(m.birthdate, today()); }
+
+  function healthCheckCard(m, age) {
+    var prog = Q.progress(m, age);
+    if (!prog.done) {
+      return '<section class="card cta"><div class="spread"><div><h2>Health check-up questions</h2>' +
+        '<p class="muted" style="margin:0">About 10 minutes of everyday questions — sleep, energy, digestion, what happens after certain foods, family history. ' +
+        'They\'re scored with the same screening tools doctors use and turned into recommendations with sources.</p></div>' +
+        '<a class="btn primary no-print" href="#/member/' + esc(m.id) + '/check/0">Start →</a></div></section>';
+    }
+    var r = Q.analyze(m, age);
+    var counts = { urgent: 0, doctor: 0, change: 0 };
+    r.findings.forEach(function (f) { counts[f.level]++; });
+    var top = r.findings.slice(0, 3).map(function (f) {
+      return '<li><span class="badge ' + LEVELS[f.level].cls + '">' + LEVELS[f.level].title + '</span> ' + esc(f.title) + '</li>';
+    }).join('');
+    return '<section class="card cta"><div class="spread"><h2>Health check-up</h2><div class="row no-print">' +
+      '<a class="btn" href="#/member/' + esc(m.id) + '/check/0">' + (prog.pct < 100 ? 'Continue questions (' + prog.pct + '%)' : 'Update answers') + '</a>' +
+      '<a class="btn primary" href="#/member/' + esc(m.id) + '/results">See all results</a></div></div>' +
+      '<div class="row" style="margin:6px 0 10px">' +
+      Object.keys(counts).map(function (k) { return '<span class="badge ' + LEVELS[k].cls + '">' + counts[k] + ' · ' + LEVELS[k].title + '</span>'; }).join('') +
+      '<span class="badge ok">' + r.good.length + ' · Doing well</span></div>' +
+      (top ? '<ul class="plain">' + top + '</ul>' : '<p class="muted">Nothing flagged so far.</p>') + '</section>';
+  }
+
+  function inputFor(q, m, c) {
+    var a = m.answers || {};
+    var v = a[q.id];
+    var name = 'q-' + q.id;
+    if (q.type === 'single') {
+      return '<div class="pills">' + q.options.map(function (o) {
+        return '<label class="pill"><input type="radio" name="' + name + '" value="' + esc(o[0]) + '"' + (String(v) === String(o[0]) ? ' checked' : '') + '><span>' + esc(o[1]) + '</span></label>';
+      }).join('') + '</div>';
+    }
+    if (q.type === 'multi') {
+      var vals = Array.isArray(v) ? v : [];
+      return '<div class="pills">' + q.options.map(function (o) {
+        return '<label class="pill"><input type="checkbox" name="' + name + '" value="' + esc(o[0]) + '"' + (vals.indexOf(o[0]) !== -1 ? ' checked' : '') + '><span>' + esc(o[1]) + '</span></label>';
+      }).join('') + '</div>';
+    }
+    if (q.type === 'number') {
+      var unit = q.unit === 'waist' ? (us() ? 'inches' : 'cm') : q.unit;
+      var shown = v;
+      if (q.unit === 'waist' && v !== undefined && v !== '' && !us()) shown = Math.round(Number(v) * 2.54);
+      return '<div class="inline" style="max-width:260px"><input type="number" step="0.5" min="0" name="' + name + '" value="' + esc(shown === undefined ? '' : shown) + '"><span class="unit">' + esc(unit) + '</span></div>';
+    }
+    if (q.type === 'text') return '<input type="text" name="' + name + '" value="' + esc(v === undefined ? (q.id === 'dislikes' ? m.dislikes.join(', ') : q.id === 'favorites' ? m.favoriteFoods.join(', ') : '') : v) + '">';
+    if (q.type === 'textarea') return '<textarea name="' + name + '">' + esc(v === undefined ? (q.id === 'meds' ? m.medications.join('\n') : '') : v) + '</textarea>';
+    if (q.type === 'body') {
+      if (us()) {
+        var inches = m.heightCm ? Math.round(m.heightCm / 2.54) : '';
+        return '<div class="fields"><div><label>Height</label><div class="inline"><input type="number" name="heightFt" min="0" max="8" placeholder="ft" value="' + (inches !== '' ? Math.floor(inches / 12) : '') + '"><span class="unit">ft</span>' +
+          '<input type="number" name="heightIn" min="0" max="11" placeholder="in" value="' + (inches !== '' ? inches % 12 : '') + '"><span class="unit">in</span></div></div>' +
+          '<div><label>Weight</label><div class="inline"><input type="number" step="0.1" name="weight" value="' + (m.weightKg ? kgToLb(m.weightKg) : '') + '"><span class="unit">lb</span></div></div></div>';
+      }
+      return '<div class="fields"><div><label>Height</label><div class="inline"><input type="number" name="heightCm" value="' + esc(m.heightCm || '') + '"><span class="unit">cm</span></div></div>' +
+        '<div><label>Weight</label><div class="inline"><input type="number" step="0.1" name="weight" value="' + esc(m.weightKg || '') + '"><span class="unit">kg</span></div></div></div>';
+    }
+    if (q.type === 'grid') {
+      var grid = v || {};
+      return '<div class="table-wrap"><table class="react-grid"><tbody>' + q.rows.map(function (r) {
+        return '<tr><td>' + esc(r[1]) + '</td><td><select name="' + name + '-' + r[0] + '"><option value="">—</option>' +
+          q.options.map(function (o) { return opt(o[0], o[1], grid[r[0]] || ''); }).join('') + '</select></td></tr>';
+      }).join('') + '</tbody></table></div>';
+    }
+    return '';
+  }
+
+  function viewCheck(m, step) {
+    var age = ageOf(m);
+    var c = Q.context(m, m.answers || {}, age);
+    var sections = Q.visibleSections(c);
+    step = Math.max(0, Math.min(step, sections.length - 1));
+    var sec = sections[step];
+    var prog = Q.progress(m, age);
+    var steps = sections.map(function (s, i) {
+      return '<a class="step' + (i === step ? ' current' : '') + '" href="#/member/' + esc(m.id) + '/check/' + i + '">' + (i + 1) + '. ' + esc(s.title) + '</a>';
+    }).join('');
+    var qs = sec.questions.map(function (q) {
+      return '<div class="question" data-q="' + esc(q.id) + '"><div class="qtext">' + esc(Q.textOf(q, c)) + '</div>' +
+        (q.help ? '<div class="hint" style="margin-bottom:8px">' + esc(q.help) + '</div>' : '') + inputFor(q, m, c) + '</div>';
+    }).join('');
+    var last = step === sections.length - 1;
+    return '<div class="spread" style="margin-bottom:6px"><div><h1>Health questions for ' + esc(m.name) + '</h1>' +
+      '<div class="muted small">' + (age !== null && age < 18 ? 'Answer for ' + esc(m.name) + ' — "you" means them. ' : '') + 'Skip anything you don\'t know. Answers save as you go.</div></div>' +
+      '<a class="btn" href="#/member/' + esc(m.id) + '">Back to guide</a></div>' +
+      '<div class="progress" title="' + prog.pct + '% answered"><span style="width:' + prog.pct + '%"></span></div>' +
+      '<nav class="steps no-print">' + steps + '</nav>' +
+      '<form id="check-form" class="card" data-id="' + esc(m.id) + '" data-step="' + step + '">' +
+      '<h2>' + esc(sec.title) + '</h2><p class="muted">' + esc(sec.intro || '') + '</p>' + qs +
+      '<div class="form-actions">' +
+      (step > 0 ? '<button type="submit" class="btn" name="go" value="' + (step - 1) + '" style="margin-right:auto">← Back</button>' : '') +
+      '<button type="submit" class="btn" name="go" value="results">Save &amp; see results</button>' +
+      (!last ? '<button type="submit" class="btn primary" name="go" value="' + (step + 1) + '">Next →</button>' : '') +
+      '</div></form>';
+  }
+
+  function readCheckForm(form, m) {
+    var age = ageOf(m);
+    m.answers = m.answers || {};
+    var c = Q.context(m, m.answers, age);
+    var step = Number(form.getAttribute('data-step'));
+    var sec = Q.visibleSections(c)[step];
+    if (!sec) return;
+    var f = form.elements;
+    sec.questions.forEach(function (q) {
+      var name = 'q-' + q.id;
+      if (q.type === 'single') {
+        var picked = form.querySelector('input[name="' + name + '"]:checked');
+        if (picked) m.answers[q.id] = picked.value;
+      } else if (q.type === 'multi') {
+        m.answers[q.id] = Array.prototype.slice.call(form.querySelectorAll('input[name="' + name + '"]:checked')).map(function (i) { return i.value; });
+      } else if (q.type === 'number') {
+        var raw = f[name] ? f[name].value : '';
+        if (raw === '') delete m.answers[q.id];
+        else m.answers[q.id] = q.unit === 'waist' && !us() ? Math.round(Number(raw) / 2.54 * 10) / 10 : Number(raw);
+      } else if (q.type === 'text' || q.type === 'textarea') {
+        if (f[name]) m.answers[q.id] = f[name].value.trim();
+      } else if (q.type === 'grid') {
+        var grid = {};
+        q.rows.forEach(function (r) { var el = f[name + '-' + r[0]]; if (el && el.value) grid[r[0]] = el.value; });
+        m.answers[q.id] = grid;
+      } else if (q.type === 'body') {
+        if (us()) {
+          var ft = Number(f.heightFt.value) || 0, inch = Number(f.heightIn.value) || 0;
+          if (ft || inch) m.heightCm = Math.round((ft * 12 + inch) * 2.54 * 10) / 10;
+        } else if (f.heightCm.value) m.heightCm = Number(f.heightCm.value);
+        if (f.weight.value) m.weightKg = us() ? lbToKg(Number(f.weight.value)) : Number(f.weight.value);
+      }
+    });
+    Q.syncProfile(m);
+    m.answersUpdatedAt = new Date().toISOString();
+    m.updatedAt = m.answersUpdatedAt;
+  }
+
+  function sourceLinks(ids, index) {
+    return ids.map(function (id) {
+      var s = Q.SOURCES[id];
+      if (index.indexOf(id) === -1) index.push(id);
+      return '<a href="' + esc(s.url) + '" target="_blank" rel="noopener" title="' + esc(s.title) + '">[' + (index.indexOf(id) + 1) + '] ' + esc(s.org) + ' ' + s.year + '</a>';
+    }).join(' · ');
+  }
+
+  function pendingSuggestions(m, list) {
+    return list.filter(function (s) {
+      if (s.kind === 'condition') return m.conditions.indexOf(s.key) === -1;
+      if (s.kind === 'intolerance') return m.intolerances.indexOf(s.key) === -1;
+      if (s.kind === 'allergy') return !m.allergies[s.key] || (s.severity === 'severe' && m.allergies[s.key] !== 'severe');
+      if (s.kind === 'otherAllergy') return !m.otherAllergies.some(function (o) { return o.name.toLowerCase() === s.name.toLowerCase(); });
+      return true;
+    });
+  }
+
+  function viewResults(m) {
+    var age = ageOf(m);
+    var r = Q.analyze(m, age);
+    var prog = Q.progress(m, age);
+    var cited = [];
+
+    var suggestions = pendingSuggestions(m, r.suggestions);
+    var suggestHtml = suggestions.length ? '<form id="suggest-form" class="card" data-id="' + esc(m.id) + '"><h2>Update ' + esc(m.name) + '\'s profile?</h2>' +
+      '<p class="muted small">Ticked items are things you told us directly or reactions serious enough to avoid until tested. Unticked items are only suspicions — add them once a doctor confirms, or if you want the meal plan to account for them now.</p>' +
+      '<div class="checks">' + suggestions.map(function (s, i) {
+        return '<label><input type="checkbox" name="s" value="' + i + '"' + (s.checked ? ' checked' : '') + '> ' + esc(s.label) + '</label>';
+      }).join('') + '</div><div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn primary" type="submit">Add ticked items to profile</button></div></form>' : '';
+
+    var groups = ['urgent', 'doctor', 'change'].map(function (lvl) {
+      var items = r.findings.filter(function (f) { return f.level === lvl; });
+      if (!items.length) return '';
+      return '<section class="finding-group"><h2><span class="badge ' + LEVELS[lvl].cls + '">' + items.length + '</span> ' + LEVELS[lvl].title + '</h2>' +
+        '<p class="muted small">' + LEVELS[lvl].blurb + '</p>' +
+        items.map(function (f) {
+          return '<article class="card finding ' + LEVELS[lvl].cls + '"><h3>' + esc(f.title) + '</h3>' +
+            '<div class="small"><strong>Why:</strong> ' + esc(f.because.join(' ')) + '</div>' +
+            '<ul>' + f.todo.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' +
+            '<div class="evidence"><span class="badge">' + esc(f.strength) + '</span> ' + sourceLinks(f.sources, cited) + '</div></article>';
+        }).join('') + '</section>';
+    }).join('');
+
+    var good = r.good.length ? '<section class="card"><h2>Doing well</h2><ul class="plain">' + r.good.map(function (g) {
+      return '<li>✓ ' + esc(g.text) + ' <span class="small">' + sourceLinks([g.source], cited) + '</span></li>';
+    }).join('') + '</ul></section>' : '';
+
+    var screens = r.screenings.length ? '<section class="card"><h2>Check-ups recommended for ' + esc(m.name) + '\'s age</h2>' +
+      '<p class="muted small">Routine preventive care for everyone this age (USPSTF grade A/B or AAP). Ask whether each is due.</p><ul class="plain">' +
+      r.screenings.map(function (s) { return '<li>• ' + esc(s.text) + ' <span class="small">' + sourceLinks([s.source], cited) + '</span></li>'; }).join('') + '</ul></section>' : '';
+
+    var sc = r.scores, scoreRows = [];
+    if (sc.bmi !== null) scoreRows.push(['BMI', sc.bmi, sc.bmi < 18.5 ? 'Under 18.5: underweight' : sc.bmi < 25 ? '18.5–24.9: healthy range' : sc.bmi < 30 ? '25–29.9: overweight' : '30+: obesity']);
+    if (sc.ada) scoreRows.push(['ADA diabetes risk', sc.ada.score + ' / 10', sc.ada.high ? '5+: high risk' : 'Under 5: lower risk']);
+    if (sc.stopBang) scoreRows.push(['STOP-Bang (sleep apnea)', sc.stopBang.score + ' / 8', sc.stopBang.level + ' risk' + (sc.stopBang.unknown ? ' (' + sc.stopBang.unknown + ' "don\'t know")' : '')]);
+    if (sc.phq2 !== null) scoreRows.push(['PHQ-2 (depression)', sc.phq2 + ' / 6', sc.phq2 >= 3 ? '3+: positive screen' : 'Negative screen']);
+    if (sc.gad2 !== null) scoreRows.push(['GAD-2 (anxiety)', sc.gad2 + ' / 6', sc.gad2 >= 3 ? '3+: positive screen' : 'Negative screen']);
+    if (sc.auditC) scoreRows.push(['AUDIT-C (alcohol)', sc.auditC.score + ' / 12', sc.auditC.positive ? 'Positive screen' : 'Low risk']);
+    var scores = scoreRows.length ? '<section class="card"><h2>Screening scores</h2><div class="table-wrap"><table><thead><tr><th>Tool</th><th>Score</th><th>Meaning</th></tr></thead><tbody>' +
+      scoreRows.map(function (row) { return '<tr><td>' + esc(row[0]) + '</td><td><strong>' + esc(row[1]) + '</strong></td><td>' + esc(row[2]) + '</td></tr>'; }).join('') + '</tbody></table></div></section>' : '';
+
+    var refs = '<section class="card"><h2>Sources</h2><ol class="small">' + cited.map(function (id) {
+      var s = Q.SOURCES[id];
+      return '<li>' + esc(s.org) + ' (' + s.year + '). <a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.title) + '</a></li>';
+    }).join('') + '</ol></section>';
+
+    return '<div class="stack">' +
+      '<div class="spread"><div><h1>' + esc(m.name) + '\'s health check-up</h1><div class="muted small">' + prog.pct + '% of questions answered · ' +
+      'results update automatically whenever answers or the profile change</div></div>' +
+      '<div class="row no-print"><a class="btn" href="#/member/' + esc(m.id) + '/check/0">Edit answers</a><a class="btn" href="#/member/' + esc(m.id) + '">Guide</a><button class="btn" data-action="print">Print</button></div></div>' +
+      (prog.pct < 100 ? '<div class="alert info"><div>Some questions are unanswered, so some checks couldn\'t run. <a href="#/member/' + esc(m.id) + '/check/0">Finish the questions</a> for a fuller picture.</div></div>' : '') +
+      suggestHtml +
+      (groups || '<section class="card"><p>Nothing flagged from the answers so far.</p></section>') +
+      good + screens + scores + refs +
+      '<p class="muted small">These are screening results, not diagnoses. Screening tools find people who would benefit from a closer look; only a clinician can confirm a condition. ' +
+      'If something feels urgent, don\'t wait for an appointment — call your doctor, 911, or 988 for a mental-health crisis.</p></div>';
+  }
+
   // ------------------------------------------------------------------- data
 
   function viewData() {
@@ -638,6 +883,27 @@
 
   document.addEventListener('change', function (ev) {
     var el = ev.target;
+    var checkForm = el.form && el.form.id === 'check-form' ? el.form : null;
+    if (checkForm) {
+      // "None of these" is exclusive with the other choices.
+      if (el.type === 'checkbox') {
+        var boxes = checkForm.querySelectorAll('input[name="' + el.name + '"]');
+        Array.prototype.forEach.call(boxes, function (b) {
+          if (el.checked && el.value === 'none' && b !== el) b.checked = false;
+          if (el.checked && el.value !== 'none' && (b.value === 'none' || (b.value === 'unsure' && el.value !== 'unsure') || (b.value === 'dk' && el.value !== 'dk'))) b.checked = false;
+        });
+      }
+      var who = member(checkForm.getAttribute('data-id'));
+      readCheckForm(checkForm, who);
+      persist();
+      // Typed fields never change which questions show; re-rendering on their blur would swallow a click.
+      if (el.type !== 'radio' && el.type !== 'checkbox' && el.tagName !== 'SELECT') return;
+      // Re-render so follow-up questions appear or disappear, keeping the scroll position.
+      var y = window.scrollY;
+      route();
+      window.scrollTo(0, y);
+      return;
+    }
     var action = el.getAttribute('data-action');
     if (action === 'units') {
       state.settings.units = el.value;
@@ -670,6 +936,36 @@
   document.addEventListener('submit', function (ev) {
     var form = ev.target;
     ev.preventDefault();
+    var submitter = ev.submitter;
+    if (form.id === 'quick-form') {
+      var qf = form.elements;
+      var now = new Date().toISOString();
+      var nm = Store.normalizeMember({ name: qf.name.value.trim(), relation: qf.relation.value.trim(), birthdate: qf.birthdate.value, sex: qf.sex.value, createdAt: now, updatedAt: now });
+      state.members.push(nm);
+      persist('Added ' + nm.name);
+      go('#/member/' + nm.id + (submitter && submitter.value === 'profile' ? '/edit' : '/check/0'));
+      return;
+    }
+    if (form.id === 'check-form') {
+      var cm = member(form.getAttribute('data-id'));
+      readCheckForm(form, cm);
+      cm.reviewedAt = E.isoDate(new Date());
+      persist();
+      var dest = submitter ? submitter.value : 'results';
+      go('#/member/' + cm.id + (dest === 'results' ? '/results' : '/check/' + dest));
+      return;
+    }
+    if (form.id === 'suggest-form') {
+      var sm = member(form.getAttribute('data-id'));
+      var res = Q.analyze(sm, ageOf(sm));
+      var shownS = pendingSuggestions(sm, res.suggestions);
+      var picked = Array.prototype.slice.call(form.querySelectorAll('input[name="s"]:checked')).map(function (i) { return shownS[Number(i.value)]; });
+      picked.forEach(function (s) { if (s) Q.applySuggestion(sm, s); });
+      sm.updatedAt = new Date().toISOString();
+      persist(picked.length + ' item' + (picked.length === 1 ? '' : 's') + ' added — guide and meal plan updated');
+      route();
+      return;
+    }
     if (form.id === 'member-form') {
       var existing = member(form.getAttribute('data-id'));
       var m = readMemberForm(form, existing);

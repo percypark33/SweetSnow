@@ -36,13 +36,14 @@
       activity: 'light', goal: 'maintain', bloodType: '', allergies: {}, otherAllergies: [], intolerances: [],
       conditions: [], otherConditions: [], medications: [], diet: 'omnivore', dietRules: [], dislikes: [],
       avoidFoods: [], limitFoods: [], favoriteFoods: [], calorieOverride: null, doctor: '', emergencyContact: '',
-      notes: '', log: [], reviewedAt: '', createdAt: '', updatedAt: ''
+      notes: '', log: [], answers: {}, answersUpdatedAt: '', reviewedAt: '', createdAt: '', updatedAt: ''
     }, m, {
       allergies: (m && typeof m.allergies === 'object' && !Array.isArray(m.allergies)) ? m.allergies : {},
       otherAllergies: arr(m && m.otherAllergies), intolerances: arr(m && m.intolerances), conditions: arr(m && m.conditions),
       otherConditions: arr(m && m.otherConditions), medications: arr(m && m.medications), dietRules: arr(m && m.dietRules),
       dislikes: arr(m && m.dislikes), avoidFoods: arr(m && m.avoidFoods), limitFoods: arr(m && m.limitFoods),
-      favoriteFoods: arr(m && m.favoriteFoods), log: arr(m && m.log)
+      favoriteFoods: arr(m && m.favoriteFoods), log: arr(m && m.log),
+      answers: (m && m.answers && typeof m.answers === 'object' && !Array.isArray(m.answers)) ? m.answers : {}
     });
   }
 

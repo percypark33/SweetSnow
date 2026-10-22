@@ -211,3 +211,32 @@ textarea { min-height: 76px; resize: vertical; }
   .card { box-shadow: none; break-inside: avoid; }
   :root { --bg: #fff; --surface: #fff; --text: #000; }
 }
+
+/* ---------- health check ---------- */
+.cta { border-left: 4px solid var(--brand); }
+ul.plain { list-style: none; padding: 0; }
+ul.plain li { padding: 4px 0; }
+.progress { height: 8px; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin: 10px 0 12px; }
+.progress span { display: block; height: 100%; background: var(--brand); transition: width .3s; }
+.steps { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.step { padding: 5px 11px; border-radius: 999px; font-size: .82rem; text-decoration: none; color: var(--muted); background: var(--surface); border: 1px solid var(--line); }
+.step.current { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+.question { padding: 16px 0; border-top: 1px solid var(--line); }
+.qtext { font-weight: 600; margin-bottom: 6px; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { position: relative; margin: 0; font-weight: 400; font-size: .92rem; cursor: pointer; }
+.pill input { position: absolute; opacity: 0; pointer-events: none; }
+.pill span { display: inline-block; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); }
+.pill input:checked + span { background: var(--brand-soft); border-color: var(--brand); color: var(--brand); font-weight: 600; }
+.pill input:focus-visible + span { outline: 2px solid var(--brand); outline-offset: 2px; }
+.unit { align-self: center; color: var(--muted); font-size: .88rem; white-space: nowrap; }
+.react-grid td { vertical-align: middle; }
+.react-grid td:first-child { font-weight: 600; width: 45%; }
+.finding-group { margin-top: 8px; }
+.finding { margin-top: 10px; border-left: 4px solid var(--line); }
+.finding.danger { border-left-color: var(--danger); }
+.finding.warn { border-left-color: var(--warn); }
+.finding.info { border-left-color: var(--info); }
+.finding ul { margin: 8px 0; }
+.evidence { font-size: .8rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+@media (max-width: 720px) { .react-grid td:first-child { width: auto; } .react-grid tr { display: grid; } }

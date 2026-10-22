@@ -43,6 +43,30 @@ open family-health/index.html
 - Backups contain private health information. `.gitignore` keeps them out of
   git, so don't commit them anywhere else either.
 
+## Health check-up questions (the easy way to fill in a profile)
+
+Most people don't know their allergies or conditions, so new profiles start with
+about 10 minutes of everyday questions: body and activity, eating habits, what
+happens after eating common foods, digestion, energy, sleep and mood, smoking and
+alcohol, checkups and family history. Answers are scored with published tools:
+
+| Tool | Screens for | Source |
+|---|---|---|
+| ADA Diabetes Risk Test | type 2 diabetes risk | Bang et al., Ann Intern Med 2009 |
+| STOP-Bang | obstructive sleep apnea | Chung et al., Anesthesiology 2008 |
+| PHQ-2 / GAD-2 | depression / anxiety | Kroenke et al. 2003 / 2007 |
+| AUDIT-C | unhealthy drinking | Bush et al., Arch Intern Med 1998 |
+| Rome IV | IBS pattern | ACG 2021 |
+| USPSTF / AAP schedules | check-ups due by age and sex | uspreventiveservicestaskforce.org |
+
+Every finding shows why it was triggered, what to do, the strength of evidence
+and numbered sources. Findings are screening results, not diagnoses: only
+things you state directly (e.g. "a doctor told me I have high blood pressure")
+or reactions serious enough to avoid until tested are pre-ticked for the profile.
+Suspicions (likely reflux, possible lactose intolerance) are offered unticked.
+All scoring lives in `js/questionnaire.js` and is covered by
+`tests/questionnaire.test.js`.
+
 ## What it does
 
 | Screen | What you get |
