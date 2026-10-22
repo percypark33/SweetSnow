@@ -78,6 +78,23 @@ All scoring lives in `js/questionnaire.js` and is covered by
   potassium, hemoglobin, ferritin, TSH, vitamin D, B12, uric acid) interpreted with ADA,
   ACC/AHA, KDIGO, WHO, AGA and NIH cut-offs. Metric units are converted. One abnormal
   diabetes-range result is offered unticked because a diagnosis needs a repeat test.
+- **Read my lab report** — upload the PDF from MyChart, Quest or Labcorp, or paste the
+  results text, and the numbers fill in for review (US or SI units; a PDF is also saved
+  to records). Reading PDFs loads pdf.js from cdnjs the first time, so it needs internet;
+  photos can't be read yet. A lab PDF uploaded in Health records is read too.
+- **Built around each person** — blood-test results (adults), conditions and goals become
+  focus rules: blood sugar, LDL, triglycerides, HDL, iron, vitamin D, B12, uric acid,
+  liver, kidneys, potassium, blood pressure, pregnancy. Each lists what was found, foods
+  to eat more of, what to go easy on, and its source. They change the guide's food
+  lists, the saturated-fat / added-sugar / sodium targets, and the meal builder, which
+  stars and sorts foods per person ("Picked for Alex") and biases *Surprise me*.
+- **Today card** — water and step goals sized per person and logged with a tap.
+  Water: National Academies intake by age and sex, adjusted for pregnancy,
+  breastfeeding, activity and high uric acid; no goal when the care team sets a fluid
+  limit (heart failure, advanced CKD). Steps: the person's own average (tracker or
+  logged) + 1,000 a day, working up to where benefits level off (Paluch 2022:
+  ~9,000 under 60, ~7,000 for 60+; higher for blood-sugar/lipid goals); held steady on
+  low-recovery days; kids 10,000–13,000. Also activity minutes and sleep hours by age.
 - **Health records step** — upload PDFs and photos (lab reports, visit notes, vaccine
   records), or drop/paste links to results in a patient portal or shared folder
   (MyChart, Quest, Labcorp, Kaiser, Google Drive, Dropbox, iCloud are recognised).
@@ -146,7 +163,8 @@ family-health/
   js/knowledge.js       ALL health knowledge: allergens, conditions, meds, diets, age bands, recipes
   js/engine.js          pure logic: profile → guide, meal plan, grocery list (no UI)
   js/questionnaire.js   everyday questions + validated screening scores
-  js/labs.js            blood-test interpretation, tracker CSV import & analysis
+  js/labs.js            blood-test interpretation, lab-report reading, tracker CSV import
+  js/personal.js        per-person diet focus from labs/conditions/goals; water & step goals
   js/foods.js           build-a-meal foods (USDA nutrition), targets, balance score
   js/shop.js            nearby stores (OpenStreetMap) and products (Open Food Facts)
   js/docs.js            health records stored in IndexedDB

@@ -13,6 +13,7 @@
   var Labs = window.FHLabs;
   var Docs = window.FHDocs;
   var Shop = window.FHShop;
+  var P = window.FHPersonal;
 
   var state = Store.load();
   var app = document.getElementById('app');
@@ -20,6 +21,8 @@
   var MEAL_LABELS = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack' };
   var STATUS_TEXT = { ok: 'Good to go', caution: 'OK — note', swap: 'Needs a swap', no: 'Can\'t eat' };
   var recipeFilter = 'all';
+  var labPrefill = null; // numbers read from a report, waiting for review
+  var labFlash = null;   // what the last added results changed
 
   // ---------------------------------------------------------------- helpers
 
@@ -91,6 +94,7 @@
     var parts = (location.hash || '#/').replace(/^#\/?/, '').split('/');
     var tab = 'family';
     var html;
+    if (parts[2] !== 'check') labFlash = null;
     if (parts[0] === 'plan') { tab = 'plan'; html = viewBuilder(); }
     else if (parts[0] === 'week') { tab = 'plan'; html = viewWeek(); }
     else if (parts[0] === 'shop') { tab = 'plan'; html = viewShop(parts[1]); }
@@ -253,6 +257,8 @@
       '<a class="btn" href="#/member/' + esc(m.id) + '/records">Records</a>' +
       '<button class="btn" data-action="print">Print</button></div></div></section>' +
       (alerts ? '<section>' + alerts + '</section>' : '') +
+      todayCard(m, g) +
+      focusCard(m, g) +
       healthCheckCard(m, g.age) +
       '<div class="grid grid-2"><section class="card"><h2>Daily targets</h2>' + targetsHtml + '</section>' + emergency + '</div>' +
       '<div class="grid grid-3">' +
@@ -496,6 +502,22 @@
     return { per: per, status: no.length ? 'no' : caution.length ? 'caution' : 'ok', no: no, caution: caution };
   }
 
+  // Foods that help the eaters' blood-test results, conditions and goals.
+  function personalPicks(eaters) {
+    var multi = eaters.length > 1, out = {}, rules = [];
+    Foods.FOODS.forEach(function (fd) { out[fd.id] = { score: 0, reasons: [] }; });
+    eaters.forEach(function (m) {
+      var focus = P.focus(m, ageOf(m));
+      focus.forEach(function (r) { rules.push({ member: m, rule: r }); });
+      var pk = P.foodPicks(focus);
+      Object.keys(pk).forEach(function (id) {
+        out[id].score += pk[id].score;
+        pk[id].reasons.forEach(function (why) { out[id].reasons.push((multi ? m.name + ': ' : '') + why); });
+      });
+    });
+    return { byFood: out, rules: rules };
+  }
+
   function fitReason(fit) {
     var bits = [];
     fit.no.forEach(function (p) {
@@ -534,6 +556,25 @@
       '<div class="bar bar-' + status + '"><span style="width:' + pct + '%"></span></div></div>';
   }
 
+  function picksStrip(b, eaters, picks, fits) {
+    var names = eaters.length > 1 ? 'your family' : esc(eaters[0].name);
+    if (!picks.rules.length) {
+      var adults = eaters.filter(function (m) { var a = ageOf(m); return a === null || a >= 18; });
+      if (!adults.length) return '';
+      return '<div class="picks picks-empty"><span>⭐ Want picks made for ' + names + '?</span> <a href="#/member/' + esc(adults[0].id) + '/check/' + labsStep(adults[0]) + '">Add a blood test</a> or set a goal — foods that help get starred.</div>';
+    }
+    var top = Foods.FOODS.filter(function (fd) { return picks.byFood[fd.id].score > 0 && fits[fd.id].status !== 'no' && (b.cat === 'all' || fd.cat === b.cat); })
+      .sort(function (a, z) { return picks.byFood[z.id].score - picks.byFood[a.id].score; }).slice(0, 8);
+    var seen = {};
+    var why = picks.rules.filter(function (x) { var k = x.rule.id; if (seen[k]) return false; seen[k] = true; return true; })
+      .map(function (x) { return '<span class="badge">' + x.rule.icon + ' ' + esc(x.rule.short) + (eaters.length > 1 ? ' · ' + esc(x.member.name) : '') + '</span>'; }).join('');
+    return '<div class="picks"><div class="picks-head"><strong>⭐ Picked for ' + names + '</strong><div class="picks-why">' + why + '</div></div>' +
+      '<div class="picks-row">' + top.map(function (fd) {
+        var pk = picks.byFood[fd.id];
+        return '<button class="pick" data-action="b-add" data-id="' + fd.id + '" title="' + esc(pk.reasons.join('\n')) + '"><span class="food-emoji">' + fd.emoji + '</span><span>' + esc(fd.name) + '</span><small>' + esc(pk.reasons[0].replace(/^[^:]*: /, '')) + '</small></button>';
+      }).join('') + '</div></div>';
+  }
+
   function viewBuilder() {
     if (!state.members.length) return '<section class="card empty"><h1>Build a meal</h1><p class="muted">Add family members first — the builder checks every food against their allergies and needs.</p><a class="btn primary" href="#/new">Add a person</a></section>';
     var b = builder();
@@ -542,6 +583,12 @@
     var sc = Foods.score(b.items, target);
     var t = sc.totals;
     var q = (b.search || '').toLowerCase();
+    var picks = personalPicks(eaters);
+    var fits = {};
+    Foods.FOODS.forEach(function (fd) { fits[fd.id] = foodFit(fd, eaters); });
+    // Star only the strongest matches so the stars mean something.
+    var topScore = Math.max.apply(null, Foods.FOODS.map(function (fd) { return fits[fd.id].status === 'no' ? 0 : picks.byFood[fd.id].score; }));
+    var starAt = Math.max(1, Math.ceil(topScore * 0.5));
 
     var whoChips = (state.members.length > 1 ? ['family'] : []).concat(state.members.map(function (m) { return m.id; })).map(function (id) {
       var label = id === 'family' ? '👨‍👩‍👧 Whole family' : esc(member(id).name);
@@ -560,16 +607,24 @@
     var cats = b.cat === 'all' ? Foods.CATEGORIES : Foods.CATEGORIES.filter(function (c) { return c.id === b.cat; });
     var grids = cats.map(function (cat) {
       var foods = Foods.FOODS.filter(function (fd) { return fd.cat === cat.id && (!q || fd.name.toLowerCase().indexOf(q) !== -1); });
+      // Best for these eaters first; the original order breaks ties.
+      foods = foods.map(function (fd, i) { return { fd: fd, i: i }; }).sort(function (a, z) {
+        return (picks.byFood[z.fd.id].score - picks.byFood[a.fd.id].score) || (a.i - z.i);
+      }).map(function (x) { return x.fd; });
       var cards = foods.map(function (fd) {
-        var fit = foodFit(fd, eaters);
+        var fit = fits[fd.id];
+        var pk = picks.byFood[fd.id];
         if (b.safeOnly && fit.status === 'no') return '';
         var onPlate = b.items.filter(function (it) { return it.foodId === fd.id; })[0];
         var reason = fitReason(fit);
-        return '<div class="food-card fit-' + fit.status + (onPlate ? ' picked' : '') + '" style="--cat:' + cat.color + '">' +
+        var good = pk.score >= starAt && fit.status !== 'no';
+        return '<div class="food-card fit-' + fit.status + (onPlate ? ' picked' : '') + (good ? ' for-you' : '') + '" style="--cat:' + cat.color + '">' +
+          (good ? '<span class="pick-star" title="' + esc(pk.reasons.join('\n')) + '">★</span>' : '') +
           '<button class="food-add" data-action="b-add" data-id="' + fd.id + '"' + (fit.status === 'no' ? ' disabled' : '') + ' title="' + esc(fit.status === 'no' ? 'Not for ' + reason : 'Add to plate') + '">' +
           '<span class="food-emoji">' + fd.emoji + '</span><span class="food-name">' + esc(fd.name) + '</span><span class="food-serving">' + esc(fd.serving) + ' · ' + fd.kcal + ' kcal</span>' +
           '<span class="macros"><span>P ' + fd.protein + '</span><span>C ' + fd.carbs + '</span><span>F ' + fd.fat + '</span><span>Fib ' + fd.fiber + '</span></span>' +
           (onPlate ? '<span class="on-plate">×' + onPlate.qty + ' on plate</span>' : '') + '</button>' +
+          (good ? '<div class="pick-note" title="' + esc(pk.reasons.join('\n')) + '">' + esc(pk.reasons[0]) + (pk.reasons.length > 1 ? ' +' + (pk.reasons.length - 1) : '') + '</div>' : '') +
           (fit.status !== 'ok' ? '<div class="fit-note">' + (fit.status === 'no' ? '✕ ' : '! ') + esc(reason) + '</div>' : '') +
           '<a class="shop-link" href="#/shop/' + fd.id + '" title="Where to buy & which brand">🛒</a></div>';
       }).join('');
@@ -613,6 +668,7 @@
       '<div class="builder-foods"><div class="cat-tabs">' + tabs + '</div>' +
       '<div class="row" style="margin:10px 0"><input type="text" id="food-search" placeholder="Search foods…" value="' + esc(b.search || '') + '" style="max-width:260px">' +
       '<label class="chip-check"><input type="checkbox" data-action="b-safe"' + (b.safeOnly ? ' checked' : '') + '> Hide foods someone can\'t eat</label></div>' +
+      picksStrip(b, eaters, picks, fits) +
       grids + '</div>' + plate + '</div>' +
       '<button class="mini-plate" data-action="b-scroll">🍽️ ' + b.items.length + ' item' + (b.items.length === 1 ? '' : 's') + ' · ' + t.kcal + ' kcal · score <strong>' + sc.score + '</strong> <span>View plate ↑</span></button>' +
       '<div id="confetti" aria-hidden="true"></div>';
@@ -798,6 +854,113 @@
 
   function ageOf(m) { return E.ageYears(m.birthdate, today()); }
 
+  // ------------------------------------------------------- today & focus
+
+  function dayKey(d) { return E.isoDate(d || today()); }
+
+  function dayEntry(m, key) {
+    m.daily = m.daily || {};
+    if (!m.daily[key]) m.daily[key] = {};
+    // Keep about two months of history.
+    var keys = Object.keys(m.daily).sort();
+    while (keys.length > 62) delete m.daily[keys.shift()];
+    return m.daily[key];
+  }
+
+  function ring(pct, label, sub, color) {
+    var r = 34, c = 2 * Math.PI * r, p = Math.max(0, Math.min(1, pct));
+    return '<svg class="ring" viewBox="0 0 84 84" role="img" aria-label="' + esc(label + ' ' + sub) + '">' +
+      '<circle cx="42" cy="42" r="' + r + '" class="ring-bg"/>' +
+      '<circle cx="42" cy="42" r="' + r + '" class="ring-fg" stroke="' + color + '" stroke-dasharray="' + (p * c) + ' ' + c + '" transform="rotate(-90 42 42)"/>' +
+      '<text x="42" y="40" text-anchor="middle" class="ring-num">' + esc(label) + '</text><text x="42" y="56" text-anchor="middle" class="ring-sub">' + esc(sub) + '</text></svg>';
+  }
+
+  function weekStrip(m, d) {
+    var cells = '';
+    for (var i = 6; i >= 0; i--) {
+      var dt = new Date(today().getTime() - i * 86400000), k = dayKey(dt), e = (m.daily || {})[k] || {};
+      var water = d.water && d.water.cups && e.water >= d.water.cups, steps = d.steps && e.steps >= d.steps.goal;
+      cells += '<div class="wk-day' + (i === 0 ? ' today' : '') + '" title="' + esc(k) + '"><span>' + 'MTWTFSS'.charAt((dt.getDay() + 6) % 7) + '</span>' +
+        '<i class="' + (water ? 'hit-w' : '') + '"></i><i class="' + (steps ? 'hit-s' : '') + '"></i></div>';
+    }
+    return '<div class="wk-strip" aria-label="Last 7 days">' + cells + '<div class="wk-key small muted"><i class="hit-w"></i> water <i class="hit-s"></i> steps</div></div>';
+  }
+
+  function todayCard(m, g) {
+    var d = g.daily;
+    if (!d || (!d.water && !d.steps)) return '';
+    var e = (m.daily || {})[dayKey()] || {};
+    var idx = [];
+    var cols = [];
+    if (d.water) {
+      if (d.water.cups) {
+        var n = e.water || 0, cups = '';
+        for (var i = 0; i < Math.max(d.water.cups, n); i++) cups += '<button class="cup' + (i < n ? ' full' : '') + '" data-action="water-set" data-id="' + esc(m.id) + '" data-n="' + (i + 1 === n ? i : i + 1) + '" aria-label="' + (i + 1) + ' cups">💧</button>';
+        cols.push('<div class="today-col">' + ring(n / d.water.cups, n + '/' + d.water.cups, 'cups', '#3d6fb4') +
+          '<div><h3>Water</h3><div class="muted small">' + d.water.cups + ' cups ≈ ' + d.water.liters + ' L from drinks</div>' +
+          '<div class="cups">' + cups + '</div><div class="row"><button class="btn small" data-action="water-add" data-id="' + esc(m.id) + '" data-d="-1" aria-label="One cup less">−</button>' +
+          '<button class="btn small primary" data-action="water-add" data-id="' + esc(m.id) + '" data-d="1">+ 1 cup</button></div></div></div>');
+      } else {
+        cols.push('<div class="today-col"><div><h3>Water</h3><p class="small">' + esc(d.water.why[0]) + '</p></div></div>');
+      }
+    }
+    if (d.steps) {
+      var st = e.steps || 0;
+      cols.push('<div class="today-col">' + ring(st / d.steps.goal, st >= 1000 ? (Math.round(st / 100) / 10) + 'k' : String(st), 'of ' + (Math.round(d.steps.goal / 100) / 10) + 'k', '#2f7d5b') +
+        '<div><h3>Steps</h3><div class="muted small">Goal ' + d.steps.goal.toLocaleString('en-US') + ' a day' + (d.steps.plateau && d.steps.goal < d.steps.plateau ? ' · working up to ' + d.steps.plateau.toLocaleString('en-US') : '') + '</div>' +
+        '<div class="row" style="margin-top:6px"><input type="number" min="0" step="100" id="steps-today" data-id="' + esc(m.id) + '" value="' + (e.steps || '') + '" placeholder="Today\'s steps" style="max-width:150px">' +
+        '<button class="btn small primary" data-action="steps-save" data-id="' + esc(m.id) + '">Save</button></div></div></div>');
+    }
+    var why = [];
+    if (d.water && d.water.why) why.push('<h4>💧 Water</h4><ul>' + d.water.why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul><p class="small">' + sourceLinks(d.water.sources, idx) + '</p>');
+    if (d.steps) why.push('<h4>👟 Steps</h4><ul>' + d.steps.why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul><p class="small">' + sourceLinks(d.steps.sources, idx) + '</p>');
+    if (d.active) why.push('<h4>🏃 Activity</h4><p>' + esc(d.active.text) + '</p>');
+    if (d.sleep) why.push('<h4>😴 Sleep</h4><p>' + d.sleep.min + '–' + d.sleep.max + ' hours' + (d.sleep.tracked ? ' · your tracker averages ' + d.sleep.tracked + ' h' : '') + '</p><p class="small">' + sourceLinks(d.sleep.sources, idx) + '</p>');
+    return '<section class="card today"><div class="spread"><h2>Today for ' + esc(m.name) + '</h2>' + weekStrip(m, d) + '</div>' +
+      '<div class="today-grid">' + cols.join('') + '</div>' +
+      '<details class="why"><summary>Why these goals? (set for ' + esc(m.name) + ')</summary>' + why.join('') + '</details></section>';
+  }
+
+  var FOCUS_KIND = { 3: ['Blood test', 'danger'], 2: ['Health', 'warn'], 1: ['Goal', 'ok'] };
+
+  function labsStep(m) {
+    var secs = Q.visibleSections(Q.context(m, m.answers || {}, ageOf(m)));
+    for (var i = 0; i < secs.length; i++) if (secs[i].id === 'labs') return i;
+    return 0;
+  }
+
+  function focusCard(m, g) {
+    var hasLabs = (m.labs || []).length > 0;
+    var adult = g.age === null || g.age >= 18;
+    var addLabs = adult ? '<a class="btn' + (hasLabs ? '' : ' primary') + ' no-print" href="#/member/' + esc(m.id) + '/check/' + labsStep(m) + '">' + (hasLabs ? 'Add newer results' : 'Add blood test results') + '</a>' : '';
+    if (!g.focus.length) {
+      if (!adult) return '';
+      return '<section class="card focus-empty"><div class="spread"><div><h2>Make it personal</h2><p class="muted" style="margin:0">' +
+        (hasLabs ? 'Your latest blood test is in range — nothing in the food plan needs to change. 🎉' :
+          'Add a blood test (upload the PDF, paste the text or type a few numbers) and ' + esc(m.name) + '\'s foods, picks and daily goals adjust to the results.') +
+        '</p></div>' + addLabs + '</div></section>';
+    }
+    var blocked = Object.keys(g.rules.block);
+    var idx = [];
+    var items = g.focus.map(function (r) {
+      var kind = r.lab ? FOCUS_KIND[3] : FOCUS_KIND[r.weight] || FOCUS_KIND[1];
+      var foods = P.topFoods(r, blocked, 6).map(function (fd) { return '<span class="food-chip">' + fd.emoji + ' ' + esc(fd.name) + '</span>'; }).join('');
+      return '<div class="focus-item"><div class="focus-head"><span class="focus-icon">' + r.icon + '</span><div><h3>' + esc(r.title) + ' <span class="badge ' + kind[1] + '">' + kind[0] + '</span></h3>' +
+        '<div class="muted small">' + esc(r.because) + '</div></div></div>' +
+        (foods ? '<div class="focus-row"><strong>Eat more</strong><div class="food-chips">' + foods + '</div></div>' : '') +
+        (r.easyOn.length ? '<div class="focus-row"><strong>Go easy on</strong><span class="small">' + esc(r.easyOn.join(' · ')) + '</span></div>' : '') +
+        '<p class="small" style="margin:6px 0 0">💡 ' + esc(r.tip) + '</p>' +
+        '<p class="small muted" style="margin:4px 0 0">' + sourceLinks(r.sources, idx) + '</p></div>';
+    }).join('');
+    var latest = (m.labs || []).map(function (l) { return l.date; }).sort().pop();
+    return '<section class="card focus"><div class="spread"><div><h2>Built around ' + esc(m.name) + '</h2><p class="muted small" style="margin:0">' +
+      (latest ? 'Using the blood test from ' + esc(latest) + '. ' : '') + 'The meal builder\'s picks, the food lists and the daily goals all follow these.</p></div>' +
+      '<div class="row no-print">' + addLabs + '<button class="btn primary" data-action="b-for" data-id="' + esc(m.id) + '">Build a meal for ' + esc(m.name) + ' →</button></div></div>' +
+      '<div class="focus-list">' + items + '</div></section>';
+  }
+
+  // ---------------------------------------------------------------- health check
+
   function healthCheckCard(m, age) {
     var prog = Q.progress(m, age);
     if (!prog.done) {
@@ -848,11 +1011,13 @@
   }
 
   function labsInput(m) {
+    var prefill = labPrefill && labPrefill.memberId === m.id ? labPrefill : null;
     var groups = {};
     Labs.LABS.forEach(function (l) { (groups[l.group] = groups[l.group] || []).push(l); });
     var form = Object.keys(groups).map(function (g) {
       return '<div class="lab-group"><div class="hint">' + esc(g) + '</div><div class="fields">' + groups[g].map(function (l) {
-        return '<div><label>' + esc(l.label) + '</label><div class="inline"><input type="number" min="0" step="any" name="lab-' + l.id + '"><span class="unit">' + esc(labUnit(l)) + '</span></div></div>';
+        var pre = prefill && prefill.values[l.id] !== undefined ? labShow(l, prefill.values[l.id]) : '';
+        return '<div><label>' + esc(l.label) + '</label><div class="inline"><input type="number" min="0" step="any" name="lab-' + l.id + '" value="' + esc(pre) + '"' + (pre !== '' ? ' class="prefilled"' : '') + '><span class="unit">' + esc(labUnit(l)) + '</span></div></div>';
       }).join('') + '</div></div>';
     }).join('');
     var latest = Labs.latestLabs(m);
@@ -868,13 +1033,124 @@
         ' <button type="button" class="btn small ghost" data-action="lab-del" data-id="' + esc(e.id) + '">Remove</button></li>';
     }).join('');
     var labLinks = linksList(m, 'lab');
-    return (labLinks ? '<h3>Results online</h3>' + labLinks : '') + linkBox(m, 'lab') +
+    return labFlashHtml(m) + readerBox(m) +
+      (labLinks ? '<h3>Results online</h3>' + labLinks : '') + linkBox(m, 'lab') +
       (rows ? '<h3>Latest results</h3><div class="table-wrap"><table><thead><tr><th>Test</th><th>Result</th><th>Meaning</th><th>Date</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
       '<p class="hint">' + ((ageOf(m) !== null && ageOf(m) < 18) ? 'Children\'s ranges differ — the pediatrician should interpret these. ' : '') + 'Ranges from ADA, ACC/AHA, KDIGO, WHO and NIH guidance. If your report\'s printed range differs, trust the report.</p>' : '') +
-      '<div class="lab-entry"><h3>Add results</h3><div class="fields"><div><label>Date of the blood test</label><input type="date" name="lab-date" value="' + E.isoDate(new Date()) + '"></div>' +
-      '<div><label>Where from (optional)</label><input type="text" name="lab-note" placeholder="e.g. annual physical, Quest"></div></div>' + form +
+      '<div class="lab-entry"><h3>Add results</h3>' +
+      (prefill ? '<div class="alert info"><div>Found <strong>' + prefill.found.length + '</strong> result' + (prefill.found.length === 1 ? '' : 's') + (prefill.source ? ' in ' + esc(prefill.source) : '') + ' — highlighted below. Check them against the report, then press <strong>Add these results</strong>.</div></div>' : '') +
+      '<div class="fields"><div><label>Date of the blood test</label><input type="date" name="lab-date" value="' + esc((prefill && prefill.date) || E.isoDate(new Date())) + '"></div>' +
+      '<div><label>Where from (optional)</label><input type="text" name="lab-note" placeholder="e.g. annual physical, Quest" value="' + esc((prefill && prefill.source) || '') + '"></div></div>' + form +
       '<div class="row" style="justify-content:flex-end;margin-top:10px"><button type="button" class="btn primary" data-action="lab-add">Add these results</button></div></div>' +
       (entries ? '<h3>All entries</h3><ul class="plain">' + entries + '</ul>' : '');
+  }
+
+
+  // What the last results changed — shown right where they were added.
+  function labFlashHtml(m) {
+    if (!labFlash || labFlash.memberId !== m.id) return '';
+    var f = labFlash;
+    var body = f.rules.length ? '<ul class="plain">' + f.rules.map(function (r) {
+      return '<li>' + r.icon + ' <strong>' + esc(r.title) + '</strong>' + (f.added.indexOf(r.id) !== -1 ? ' <span class="badge danger">new</span>' : '') + '<div class="small muted">' + esc(r.because) + '</div></li>';
+    }).join('') + '</ul>' : '<p>Everything entered is in range — no food changes needed. 🎉</p>';
+    return '<div class="flash card"><h3>✅ ' + f.count + ' result' + (f.count === 1 ? '' : 's') + ' saved — ' + esc(m.name) + '\'s plan is updated</h3>' + body +
+      (f.water ? '<p class="small">💧 Water goal: <strong>' + f.water + ' cups</strong> · 👟 Steps goal: <strong>' + (f.steps ? f.steps.toLocaleString('en-US') : '—') + '</strong></p>' : '') +
+      '<div class="row"><a class="btn" href="#/member/' + esc(m.id) + '">See ' + esc(m.name) + '\'s guide</a><button type="button" class="btn primary" data-action="b-for" data-id="' + esc(m.id) + '">Build a meal with the new picks →</button></div></div>';
+  }
+
+  function readerBox(m) {
+    return '<div class="reader-box drop-zone" data-member="' + esc(m.id) + '"><div class="link-head"><span class="drop-icon">📄</span><div><strong>Read my lab report</strong>' +
+      '<div class="hint">Upload the PDF from your patient portal (MyChart, Quest, Labcorp…) or copy all the text on the results page and paste it here. The numbers fill in below for you to check. A PDF is also saved to Health records.</div></div></div>' +
+      '<div class="row"><label class="btn">Choose PDF<input type="file" accept="application/pdf,.pdf,.txt,image/*" data-action="report-file" hidden></label>' +
+      '<span class="muted small">or drop it here</span></div>' +
+      '<textarea name="report-text" rows="3" placeholder="…or paste the results text here (Ctrl/⌘+A, Ctrl/⌘+C on the results page)"></textarea>' +
+      '<div class="row" style="justify-content:flex-end;margin-top:8px"><button type="button" class="btn" data-action="report-read">Fill in the numbers</button></div>' +
+      '<div class="reader-status small" aria-live="polite"></div></div>';
+  }
+
+  var PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+
+  function loadPdfJs() {
+    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+    return new Promise(function (resolve, reject) {
+      var sc = document.createElement('script');
+      sc.src = PDFJS + 'pdf.min.js';
+      sc.onload = function () {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js';
+        resolve(window.pdfjsLib);
+      };
+      sc.onerror = function () { reject(new Error('The PDF reader needs an internet connection the first time. Paste the text instead, or type the numbers.')); };
+      document.head.appendChild(sc);
+    });
+  }
+
+  // Text of a PDF, one line per row of the page (items grouped by height).
+  function pdfText(file) {
+    return loadPdfJs().then(function (lib) {
+      return file.arrayBuffer().then(function (buf) { return lib.getDocument({ data: new Uint8Array(buf) }).promise; });
+    }).then(function (pdf) {
+      var pages = [];
+      for (var i = 1; i <= Math.min(pdf.numPages, 20); i++) {
+        pages.push(pdf.getPage(i).then(function (pg) { return pg.getTextContent(); }).then(function (tc) {
+          var rows = {};
+          tc.items.forEach(function (it) {
+            if (!it.str || !it.str.trim()) return;
+            var y = Math.round(it.transform[5] / 3) * 3;
+            (rows[y] = rows[y] || []).push(it);
+          });
+          return Object.keys(rows).map(Number).sort(function (a, z) { return z - a; }).map(function (y) {
+            return rows[y].sort(function (a, z) { return a.transform[4] - z.transform[4]; }).map(function (it) { return it.str.trim(); }).join('   ');
+          }).join('\n');
+        }));
+      }
+      return Promise.all(pages).then(function (t) { return t.join('\n'); });
+    });
+  }
+
+  function fileText(file) {
+    if (/pdf$/i.test(file.type) || /\.pdf$/i.test(file.name)) return pdfText(file);
+    if (/^text\//.test(file.type) || /\.txt$/i.test(file.name)) return file.text();
+    return Promise.reject(new Error('Photos can\'t be read automatically yet. Paste the text from your patient portal, or type the numbers below.'));
+  }
+
+  function applyReport(m, text, source) {
+    var r = Labs.parseReport(text);
+    if (!r.found.length) return null;
+    labPrefill = { memberId: m.id, values: r.values, found: r.found, date: r.date, source: source || '' };
+    labFlash = null;
+    return r;
+  }
+
+  function readReport(box, file) {
+    var m = member(box.getAttribute('data-member'));
+    var status = box.querySelector('.reader-status');
+    var text = box.querySelector('[name="report-text"]');
+    var say = function (msg, cls) { status.className = 'reader-status small ' + (cls || ''); status.textContent = msg; };
+    var done = function (r) {
+      if (!r) { say('Couldn\'t find blood-test numbers in that. Try pasting the results text, or type them below.', 'warn-text'); return; }
+      toast('Found ' + r.found.length + ' result' + (r.found.length === 1 ? '' : 's') + ' — check and add them');
+      keepScroll();
+      var entry = document.querySelector('.lab-entry');
+      if (entry) entry.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    if (!file) {
+      if (!text.value.trim()) { say('Paste the results text first, or choose a PDF.', 'warn-text'); return; }
+      done(applyReport(m, text.value, ''));
+      return;
+    }
+    say('Reading ' + file.name + '…');
+    fileText(file).then(function (t) {
+      if (/pdf$/i.test(file.type) || /\.pdf$/i.test(file.name)) {
+        // Keep the report itself in Health records too.
+        Docs.add(m.id, file, { kind: 'lab', title: file.name.replace(/\.[^.]+$/, ''), date: Labs.findDate(t) || E.isoDate(new Date()) }).catch(function () {});
+      }
+      done(applyReport(m, t, file.name.replace(/\.[^.]+$/, '')));
+    }).catch(function (e) { say(friendlyReadError(e), 'warn-text'); });
+  }
+
+  function friendlyReadError(e) {
+    if (/internet|Photos/.test(e.message)) return e.message;
+    return 'Couldn\'t read numbers from this file (it may be a scanned image). Paste the results text, or type the numbers on the Blood test results step.';
   }
 
   function kindLabel(k) { return (Docs.KINDS.filter(function (x) { return x[0] === k; })[0] || [k, k])[1]; }
@@ -912,7 +1188,8 @@
       '<div><label>Date on the document</label><input type="date" name="doc-date" value="' + E.isoDate(new Date()) + '"></div>' +
       '<div><label>Title (optional)</label><input type="text" name="doc-title" placeholder="e.g. Annual blood work"></div></div>' +
       '<label class="btn primary" style="margin-top:12px">📎 Choose file (PDF or photo)<input type="file" accept=".pdf,image/*,.txt,.csv" data-action="doc-upload" hidden></label>' +
-      '<p class="hint">Stored only in this browser on this device and included in exported backups. The app doesn\'t read the file itself yet — copy key numbers into Blood test results.</p></div>' +
+      '<div class="reader-note small" aria-live="polite"></div>' +
+      '<p class="hint">Stored only in this browser on this device and included in exported backups. Lab report PDFs are read automatically so the numbers can update the plan; photos can\'t be read yet — type those numbers on the Blood test results step.</p></div>' +
       linkBox(m, 'lab') +
       '<h3>Saved records</h3><div id="link-list">' + linksList(m) + '</div>' +
       '<div id="doc-list" data-member="' + esc(m.id) + '"><p class="muted small">Loading records…</p></div>';
@@ -1059,7 +1336,8 @@
 
   function sourceLinks(ids, index) {
     return ids.map(function (id) {
-      var s = Q.SOURCES[id];
+      var s = Q.SOURCES[id] || P.SOURCES[id];
+      if (!s) return '';
       if (index.indexOf(id) === -1) index.push(id);
       return '<a href="' + esc(s.url) + '" target="_blank" rel="noopener" title="' + esc(s.title) + '">[' + (index.indexOf(id) + 1) + '] ' + esc(s.org) + ' ' + s.year + '</a>';
     }).join(' · ');
@@ -1200,6 +1478,7 @@
     var id = el.getAttribute('data-id');
     if (action === 'b-scroll') { var pp = document.querySelector('.plate-panel'); if (pp) pp.scrollIntoView({ behavior: 'smooth' }); return; }
     var before = Foods.score(b.items, builderTargets(b, eatersFor(b))).score;
+    if (action === 'b-for') { b.who = id; persist(); go('#/plan'); return; }
     if (action === 'b-who') b.who = id;
     else if (action === 'b-meal') b.meal = id;
     else if (action === 'b-cat') b.cat = id;
@@ -1213,7 +1492,15 @@
     } else if (action === 'b-clear') { b.items = []; b.name = ''; b.editing = null; }
     else if (action === 'b-surprise') {
       var eaters = eatersFor(b);
-      var allowed = Foods.FOODS.filter(function (fd) { return foodFit(fd, eaters).status === 'ok'; }).map(function (fd) { return fd.id; });
+      var ok = Foods.FOODS.filter(function (fd) { return foodFit(fd, eaters).status === 'ok'; });
+      var pp = personalPicks(eaters).byFood;
+      // Prefer foods that help these eaters, category by category.
+      var allowed = [];
+      Foods.CATEGORIES.forEach(function (c) {
+        var inCat = ok.filter(function (fd) { return fd.cat === c.id; });
+        var best = inCat.filter(function (fd) { return pp[fd.id].score > 0; });
+        (best.length ? best : inCat).forEach(function (fd) { allowed.push(fd.id); });
+      });
       b.items = Foods.surprise(allowed);
       b.name = '';
     } else if (action === 'b-save') {
@@ -1269,7 +1556,7 @@
       try {
         var out = Labs.importWearableCSV(String(reader.result), 30);
         m.wearable = m.wearable || {};
-        ['sleepHours', 'sleepScore', 'restingHr', 'hrv', 'recovery', 'spo2', 'stressScore'].forEach(function (k) { if (out[k] !== undefined) m.wearable[k] = out[k]; });
+        ['sleepHours', 'sleepScore', 'restingHr', 'hrv', 'recovery', 'spo2', 'stressScore', 'steps'].forEach(function (k) { if (out[k] !== undefined) m.wearable[k] = out[k]; });
         m.wearable.importNote = 'Imported ' + out.importedRows + ' days from ' + file.name + '. Matched: ' + out.columns.join(', ') + '. Check the numbers below look right.';
         m.wearable.updatedAt = new Date().toISOString();
         persist('Tracker data imported');
@@ -1294,10 +1581,33 @@
     });
     if (!Object.keys(values).length) { if (!silent) toast('Type at least one result first'); return; }
     m.labs = m.labs || [];
+    var labIds = function () { return P.focus(m, ageOf(m)).filter(function (r) { return r.lab; }).map(function (r) { return r.id; }); };
+    var before = labIds();
     m.labs.push({ id: 'lab' + Date.now().toString(36), date: f['lab-date'].value || E.isoDate(new Date()), note: f['lab-note'].value.trim(), values: values });
     m.updatedAt = new Date().toISOString();
+    var focusNow = P.focus(m, ageOf(m));
+    var day = P.daily(m, ageOf(m), focusNow);
+    labPrefill = null;
+    labFlash = { memberId: m.id, count: Object.keys(values).length, rules: focusNow.filter(function (r) { return r.lab; }),
+      added: labIds().filter(function (id) { return before.indexOf(id) === -1; }),
+      water: day.water && day.water.cups, steps: day.steps && day.steps.goal };
     persist(Object.keys(values).length + ' result' + (Object.keys(values).length === 1 ? '' : 's') + ' added');
-    if (!silent) keepScroll();
+    if (!silent) {
+      keepScroll();
+      var fl = document.querySelector('.flash');
+      if (fl) fl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  function saveSteps(input) {
+    if (!input) return;
+    var sm = member(input.getAttribute('data-id'));
+    var v = Number(input.value);
+    if (input.value === '' || isNaN(v) || v < 0 || v > 150000) { toast('Type today\'s steps (e.g. 6500)'); return; }
+    var goal = (P.daily(sm, ageOf(sm)).steps || {}).goal;
+    dayEntry(sm, dayKey()).steps = Math.round(v);
+    persist(goal && v >= goal ? '👟 Step goal reached — great job!' : 'Steps saved');
+    keepScroll();
   }
 
   function uploadDoc(el) {
@@ -1336,6 +1646,18 @@
       box.querySelector('[name="doc-title"]').value = '';
       if (done) done();
       fillDocList();
+      // A lab report PDF: offer to pull the numbers into the plan.
+      var m = member(memberId);
+      if (!m || !(/pdf$/i.test(file.type) || /\.pdf$/i.test(file.name)) || ['lab', 'other'].indexOf(meta.kind) === -1) return;
+      var note = box.querySelector('.reader-note');
+      if (note) note.textContent = 'Looking for blood-test numbers in ' + meta.title + '…';
+      pdfText(file).then(function (t) {
+        var r = applyReport(m, t, meta.title);
+        if (!note) return;
+        if (!r) { note.textContent = meta.kind === 'lab' ? 'Saved. No blood-test numbers found automatically — you can type them on the Blood test results step.' : ''; return; }
+        note.innerHTML = '🧪 Found <strong>' + r.found.length + '</strong> blood-test result' + (r.found.length === 1 ? '' : 's') + ' (' + esc(r.found.map(function (x) { return x.label.split(' (')[0]; }).slice(0, 4).join(', ')) + (r.found.length > 4 ? '…' : '') + '). ' +
+          '<a class="btn small primary" href="#/member/' + esc(m.id) + '/check/' + labsStep(m) + '">Review &amp; add to ' + esc(m.name) + '\'s plan →</a>';
+      }).catch(function (e) { if (note) note.textContent = 'Saved. ' + friendlyReadError(e); });
     }).catch(function (e) { alert(e.message); });
   }
 
@@ -1414,6 +1736,17 @@
       keepScroll();
     } else if (action === 'lab-add') {
       addLabEntry(el);
+    } else if (action === 'report-read') {
+      readReport(el.closest('.reader-box'));
+    } else if (action === 'water-add' || action === 'water-set') {
+      var wm = member(id), we = dayEntry(wm, dayKey());
+      var goalCups = (P.daily(wm, ageOf(wm)).water || {}).cups;
+      var was = we.water || 0;
+      we.water = action === 'water-add' ? Math.max(0, was + Number(el.getAttribute('data-d'))) : Number(el.getAttribute('data-n'));
+      persist(goalCups && we.water >= goalCups && was < goalCups ? '💧 Water goal reached — nice!' : null);
+      keepScroll();
+    } else if (action === 'steps-save') {
+      saveSteps(document.getElementById('steps-today'));
     } else if (action === 'lab-del') {
       var lm = member(el.closest('form').getAttribute('data-id'));
       lm.labs = (lm.labs || []).filter(function (x) { return x.id !== id; });
@@ -1449,9 +1782,11 @@
     var el = ev.target;
     if (el.type === 'file' && el.getAttribute('data-action') === 'wearable-csv') { importWearable(el); return; }
     if (el.type === 'file' && el.getAttribute('data-action') === 'doc-upload') { uploadDoc(el); return; }
+    if (el.type === 'file' && el.getAttribute('data-action') === 'report-file') { if (el.files[0]) readReport(el.closest('.reader-box'), el.files[0]); el.value = ''; return; }
+    if (el.id === 'steps-today') return;
     if (el.getAttribute('data-action') === 'b-safe') { builder().safeOnly = el.checked; persist(); keepScroll(); return; }
     // Record/link boxes and the lab form keep their own state until their button is pressed.
-    if (el.closest && el.closest('.link-box, .upload-box, .lab-entry')) return;
+    if (el.closest && el.closest('.link-box, .upload-box, .lab-entry, .reader-box')) return;
     var checkForm = el.form && el.form.id === 'check-form' ? el.form : null;
     if (checkForm) {
       // "None of these" is exclusive with the other choices.
@@ -1579,6 +1914,7 @@
 
   document.addEventListener('keydown', function (ev) {
     if (ev.key === 'Enter' && ev.target.name === 'link-url') { ev.preventDefault(); addLink(ev.target.closest('.link-box')); }
+    if (ev.key === 'Enter' && ev.target.id === 'steps-today') { ev.preventDefault(); saveSteps(ev.target); }
   });
 
   // Drag a link or a file onto a records box.
@@ -1598,6 +1934,7 @@
     ev.preventDefault();
     zone.classList.remove('dragging');
     var dt = ev.dataTransfer;
+    if (dt.files && dt.files.length && zone.classList.contains('reader-box')) { readReport(zone, dt.files[0]); return; }
     if (dt.files && dt.files.length) {
       // Files always go to the upload box, wherever they're dropped.
       var upload = zone.classList.contains('upload-box') ? zone : document.querySelector('.upload-box');

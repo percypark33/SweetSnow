@@ -178,6 +178,8 @@
       var v = latest[id].value;
       var r = interpret(id, v, member.sex, pregnant);
       var adv = adviceFor(id, r, v, member);
+      var same = adv && findings.filter(function (f) { return f.title === adv[1]; })[0];
+      if (same) { same.because.push(def.label + ' ' + v + ' ' + def.unit + ' on ' + latest[id].date + ': ' + r.text + '.'); return; }
       if (adv) {
         findings.push({ id: 'lab-' + id, level: adv[0], title: adv[1],
           because: [def.label + ' ' + v + ' ' + def.unit + ' on ' + latest[id].date + ': ' + r.text + '.'],
@@ -201,7 +203,8 @@
     { id: 'hrvBaseline', label: 'Your usual HRV (optional)', unit: 'ms', hint: 'From a few months ago, to spot a drop' },
     { id: 'recovery', label: 'Readiness / recovery', unit: '/ 100', hint: 'Oura readiness, WHOOP recovery %, Garmin Body Battery' },
     { id: 'spo2', label: 'Night-time blood oxygen (SpO2)', unit: '%', step: 0.1 },
-    { id: 'stressScore', label: 'Daytime stress score (optional)', unit: '/ 100', hint: 'Garmin or Samsung stress average' }
+    { id: 'stressScore', label: 'Daytime stress score (optional)', unit: '/ 100', hint: 'Garmin or Samsung stress average' },
+    { id: 'steps', label: 'Average daily steps', unit: 'steps', hint: 'Sets your personal step goal' }
   ];
 
   var STRESS = [['low', 'Mostly calm / restored'], ['normal', 'Normal'], ['high', 'Often stressed (most days)']];
@@ -234,7 +237,8 @@
     ['hrv', /(hrv|heart rate variability)/i],
     ['recovery', /(recovery score|readiness score|readiness|body battery|recovery)/i],
     ['spo2', /(spo2|blood oxygen|oxygen saturation)/i],
-    ['stressScore', /(stress score|average stress|stress level)/i]
+    ['stressScore', /(stress score|average stress|stress level)/i],
+    ['steps', /^(steps|daily steps|step count|total steps)$/i]
   ];
 
   /*
@@ -269,9 +273,9 @@
       var hours = /\(min/i.test(h) || (sd > 24 && sd < 1440) ? sd / 60 : sd >= 1440 ? sd / 3600 : sd;
       out.sleepHours = Math.round(hours * 10) / 10;
     }
-    ['sleepScore', 'restingHr', 'hrv', 'recovery', 'spo2', 'stressScore'].forEach(function (k) {
+    ['sleepScore', 'restingHr', 'hrv', 'recovery', 'spo2', 'stressScore', 'steps'].forEach(function (k) {
       var v = avg(k);
-      if (v !== null) out[k] = Math.round(v * 10) / 10;
+      if (v !== null) out[k] = k === 'steps' ? Math.round(v) : Math.round(v * 10) / 10;
     });
     return out;
   }
@@ -320,10 +324,108 @@
     return { findings: findings, good: good };
   }
 
+
+  // ------------------------------------------------------- report reading
+  // Pulls results out of text copied from a patient portal or a lab PDF.
+  // Each test has name patterns, lines to skip, and a plausible range so a
+  // reference range or a date is never mistaken for the result.
+
+  var REPORT = {
+    a1c: { re: /(hemoglobin a1c|hb ?a1c|\ba1c\b|glycated h(a)?emoglobin|glycohemoglobin)/i, skip: /estimated average|eag/i, range: [3, 20] },
+    glucose: { re: /(glucose|blood sugar)/i, skip: /average|tolerance|urine|eag|hour|ogtt/i, range: [30, 700] },
+    tc: { re: /(total cholesterol|cholesterol,? total|^\s*cholesterol\b)/i, skip: /ratio|hdl|ldl|non-?hdl|vldl/i, range: [50, 700] },
+    ldl: { re: /(\bldl\b|low[- ]density)/i, skip: /ratio|particle|vldl|non-?hdl|ldl[- ]?p\b|size/i, range: [5, 600] },
+    hdl: { re: /(\bhdl\b|high[- ]density)/i, skip: /ratio|non-?hdl|particle|ldl/i, range: [5, 200] },
+    tg: { re: /triglyceride/i, skip: /ratio/i, range: [10, 6000] },
+    egfr: { re: /(\begfr\b|glomerular filtration)/i, skip: /african|non-?black(?! ).*\bblack\b/i, range: [1, 200] },
+    alt: { re: /(\balt\b|\bsgpt\b|alanine amino ?transferase)/i, skip: /alk|alkaline/i, range: [1, 3000] },
+    potassium: { re: /potassium/i, skip: /urine/i, range: [1.5, 9] },
+    hgb: { re: /(h(a)?emoglobin|\bhgb\b|\bhb\b)/i, skip: /a1c|glyc|corpuscular|\bmch|urine|eag/i, range: [3, 25] },
+    ferritin: { re: /ferritin/i, skip: null, range: [1, 5000] },
+    tsh: { re: /(\btsh\b|thyroid[- ]stimulating)/i, skip: /reflex to/i, range: [0.001, 200] },
+    vitd: { re: /(vitamin d|25[- ]?(oh|hydroxy))/i, skip: /1,25|dihydroxy/i, range: [2, 200] },
+    b12: { re: /(\bb[- ]?12\b|cobalamin)/i, skip: /folate only/i, range: [50, 5000] },
+    uric: { re: /(uric acid|\burate\b)/i, skip: /urine/i, range: [0.5, 20] }
+  };
+
+  var MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+
+  function findDate(text) {
+    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    var pick = function (m) {
+      if (!m) return null;
+      var y, mo, d;
+      if (m[1].length === 4) { y = +m[1]; mo = +m[2]; d = +m[3]; } else { mo = +m[1]; d = +m[2]; y = +m[3]; if (y < 100) y += 2000; }
+      if (mo < 1 || mo > 12 || d < 1 || d > 31 || y < 1990 || y > 2100) return null;
+      return y + '-' + pad(mo) + '-' + pad(d);
+    };
+    var nums = /(\d{4})-(\d{1,2})-(\d{1,2})|(\d{1,2})\/(\d{1,2})\/(\d{2,4})/;
+    var words = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.? (\d{1,2}),? (\d{4})/i;
+    var asDate = function (line) {
+      var m = line.match(nums);
+      if (m) return pick(m[1] ? [m[0], m[1], m[2], m[3]] : [m[0], m[4], m[5], m[6]]);
+      var w = line.match(words);
+      return w ? w[3] + '-' + pad(MONTHS[w[1].toLowerCase()]) + '-' + pad(+w[2]) : null;
+    };
+    var lines = String(text).split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+      if (/collect|drawn|specimen|result(ed)? date|date of service|test date/i.test(lines[i])) {
+        var d = asDate(lines[i]) || (lines[i + 1] && asDate(lines[i + 1]));
+        if (d) return d;
+      }
+    }
+    for (var j = 0; j < lines.length; j++) { var any = asDate(lines[j]); if (any) return any; }
+    return null;
+  }
+
+  // First plausible number after the test name on this line, or on the next
+  // two lines when the portal puts the value below the name.
+  function valueAfter(rest, nextLines, def, spec) {
+    var candidates = [rest].concat(nextLines);
+    for (var i = 0; i < candidates.length; i++) {
+      var t = String(candidates[i] || '')
+        .replace(/25[\s-]*(oh|hydroxy)\b,?\s*(d[23]?\b)?/ig, ' ')
+        .replace(/\bb[- ]?12\b|\ba1c\b|\bd[23]\b/ig, ' ')
+        .replace(/\d{1,2}\/\d{1,2}\/\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}:\d{2}/g, ' ');
+      if (i > 0 && /[a-z]{4,}/i.test(t.split(/\d/)[0])) return null; // next line is another test
+      var m = t.match(/(^|[^\d.\-])([<>]?)\s*(\d+(?:\.\d+)?)/);
+      if (!m) continue;
+      var v = Number(m[3]);
+      var after = t.slice(t.indexOf(m[0]) + m[0].length, t.indexOf(m[0]) + m[0].length + 14);
+      // Convert SI units when the line says so.
+      var unitText = after + ' ' + t + ' ' + (candidates[i + 1] || '');
+      var dp = def.step ? 100 : 1;
+      if (def.si && new RegExp(def.si.unit.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(unitText)) v = Math.round(v / def.si.factor * dp) / dp;
+      else if (def.id === 'a1c' && /mmol\/mol/i.test(t)) v = Math.round((v * 0.0915 + 2.15) * 10) / 10;
+      if (v < spec.range[0] || v > spec.range[1]) return null;
+      return v;
+    }
+    return null;
+  }
+
+  function parseReport(text) {
+    var lines = String(text || '').replace(/\t/g, '  ').split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+    var values = {}, found = [];
+    LABS.forEach(function (def) {
+      var spec = REPORT[def.id];
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        var m = line.match(spec.re);
+        if (!m || (spec.skip && spec.skip.test(line))) continue;
+        var v = valueAfter(line.slice(m.index + m[0].length), lines.slice(i + 1, i + 3), def, spec);
+        if (v === null) continue;
+        values[def.id] = v;
+        found.push({ id: def.id, label: def.label, value: v, unit: def.unit, line: line });
+        break;
+      }
+    });
+    return { values: values, found: found, date: findDate(text) };
+  }
+
   var Labs = {
     SOURCES: SOURCES, LABS: LABS, DEVICES: DEVICES, WEARABLE_FIELDS: WEARABLE_FIELDS, STRESS: STRESS,
     labDef: labDef, latestLabs: latestLabs, interpret: interpret, analyzeLabs: analyzeLabs,
-    parseCSV: parseCSV, importWearableCSV: importWearableCSV, analyzeWearable: analyzeWearable
+    parseCSV: parseCSV, importWearableCSV: importWearableCSV, analyzeWearable: analyzeWearable, parseReport: parseReport, findDate: findDate
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = Labs;

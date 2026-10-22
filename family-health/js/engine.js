@@ -8,6 +8,7 @@
   'use strict';
 
   var KB = (typeof module !== 'undefined' && module.exports) ? require('./knowledge.js') : root.FHKnowledge;
+  var Personal = (typeof module !== 'undefined' && module.exports) ? require('./personal.js') : root.FHPersonal;
 
   var DAY_MS = 24 * 60 * 60 * 1000;
   var MEALS = ['breakfast', 'lunch', 'dinner'];
@@ -170,6 +171,9 @@
       list(band.caution).forEach(function (t) { addReason(caution, t, band.label); });
     }
     // Anything that's blocked doesn't also need a caution.
+    Personal.focus(member, age).forEach(function (r) {
+      if (r.lab) r.caution.forEach(function (t) { addReason(caution, t, 'blood test: ' + r.short); });
+    });
     Object.keys(block).forEach(function (t) { delete caution[t]; });
 
     return {
@@ -244,6 +248,8 @@
     var weight = currentWeightKg(member);
     var height = member.heightCm ? Number(member.heightCm) : null;
     var t = { notes: [] };
+    var focus = Personal.focus(member, age);
+    var tweak = Personal.targetTweaks(focus);
 
     // Calories
     if (member.calorieOverride) {
@@ -288,13 +294,14 @@
 
     if (t.kcal) {
       t.fiber = Math.round(t.kcal / 1000 * 14) + ' g';
-      t.addedSugar = age < 2 ? 'None' : 'under ' + Math.round(t.kcal * 0.10 / 4) + ' g';
-      var satPct = (has('cholesterol') || has('heart')) ? 0.06 : 0.10;
+      t.addedSugar = age < 2 ? 'None' : 'under ' + Math.round(t.kcal * (tweak.sugarPct || 0.10) / 4) + ' g';
+      var satPct = Math.min((has('cholesterol') || has('heart')) ? 0.06 : 0.10, tweak.satFatPct || 1);
       t.satFat = 'under ' + Math.round(t.kcal * satPct / 9) + ' g';
     }
     var na = sodiumMg(age);
     if (na) {
       if (has('hypertension') || has('heart') || has('ckd')) na = Math.min(na, 1500);
+      if (tweak.sodiumMg) na = Math.min(na, tweak.sodiumMg);
       t.sodium = 'under ' + na.toLocaleString('en-US') + ' mg';
     }
     var ca = calciumMg(age, sex);
@@ -304,8 +311,9 @@
       if (member.diet === 'vegetarian' || member.diet === 'vegan') fe = Math.round(fe * 1.8);
       t.iron = fe + ' mg' + ((member.diet === 'vegetarian' || member.diet === 'vegan') ? ' (plant-based ×1.8)' : '');
     }
-    var cups = fluidsCups(age, sex);
-    if (cups) t.fluids = cups + ' cups';
+    var day = Personal.daily(member, age, focus);
+    if (day.water && day.water.cups) t.fluids = day.water.cups + ' cups (' + day.water.liters + ' L) from drinks';
+    else if (!day.water) { var cups = fluidsCups(age, sex); if (cups) t.fluids = cups + ' cups'; }
     if (has('heart')) t.notes.push('Heart failure: the care team may set a fluid limit — it overrides the fluids guide.');
     if (has('ckd')) t.notes.push('Kidney disease: fluid, potassium and phosphorus limits come from the care team.');
     return t;
@@ -393,6 +401,12 @@
     if (list(member.conditions).indexOf('pregnancy') !== -1) addItem(supplements, 'Prenatal vitamin with folic acid, iron & iodine', 'Pregnancy');
 
     // Custom rules typed by the family
+    var focus = Personal.focus(member, age);
+    focus.forEach(function (r) {
+      if (!r.lab) return;
+      r.eatMore.forEach(function (f) { addItem(emphasize, f, 'Blood test: ' + r.short); });
+      r.easyOn.forEach(function (f) { addItem(limit, f, 'Blood test: ' + r.short); });
+    });
     list(member.avoidFoods).forEach(function (f) { if (f) addItem(avoid, f, 'Added by family'); });
     list(member.limitFoods).forEach(function (f) { if (f) addItem(limit, f, 'Added by family'); });
     list(member.favoriteFoods).forEach(function (f) { if (f) addItem(emphasize, f, 'Favorite', { favorite: true }); });
@@ -473,7 +487,9 @@
       lifeStageTips: band ? band.tips : [],
       labelWords: labelWords,
       allergies: allergies,
-      rules: rules
+      rules: rules,
+      focus: focus,
+      daily: Personal.daily(member, age, focus)
     };
   }
 

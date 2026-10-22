@@ -204,8 +204,8 @@ textarea { min-height: 76px; resize: vertical; }
 .empty { text-align: center; padding: 48px 20px; }
 .empty h1 { font-size: 1.6rem; }
 
-#toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(120%); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 600; font-size: .9rem; transition: transform .25s; z-index: 20; pointer-events: none; }
-#toast.show { transform: translateX(-50%) translateY(0); }
+#toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(120%); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 600; font-size: .9rem; transition: transform .25s, opacity .25s; opacity: 0; z-index: 20; pointer-events: none; }
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
 @media (max-width: 720px) {
   .plan-day { grid-template-columns: 1fr; }
@@ -356,7 +356,7 @@ ul.plain li { padding: 4px 0; }
 .nutri-a { background: #038141; } .nutri-b { background: #85bb2f; } .nutri-c { background: #e5a800; } .nutri-d { background: #ee8100; } .nutri-e { background: #e63e11; }
 
 @media (max-width: 900px) {
-  .builder { grid-template-columns: 1fr; }
+  .builder { grid-template-columns: minmax(0, 1fr); }
   .plate-panel { position: static; }
   .week-day { grid-template-columns: 1fr; }
 }
@@ -381,6 +381,66 @@ ul.plain li { padding: 4px 0; }
 .link-meta { margin-top: 10px; }
 .drop-zone { transition: border-color .15s, background .15s; }
 .drop-zone.dragging { border-color: var(--brand); border-style: solid; background: var(--brand-soft); }
+
+/* ---------- today: water & steps ---------- */
+.today-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 8px; }
+.today-col { display: flex; gap: 14px; align-items: center; }
+.today-col h3 { margin: 0 0 2px; }
+.ring { width: 84px; height: 84px; flex: none; }
+.ring circle { fill: none; stroke-width: 9; stroke-linecap: round; }
+.ring-bg { stroke: var(--line); }
+.ring-fg { transition: stroke-dasharray .4s; }
+.ring-num { font-size: 15px; font-weight: 700; fill: var(--text); }
+.ring-sub { font-size: 10px; fill: var(--muted); }
+.cups { display: flex; flex-wrap: wrap; gap: 2px; margin: 6px 0; }
+.cup { border: 0; background: none; padding: 2px; font-size: 1.1rem; line-height: 1; cursor: pointer; filter: grayscale(1); opacity: .35; border-radius: 6px; min-width: 28px; min-height: 28px; }
+.cup.full { filter: none; opacity: 1; }
+.cup:focus-visible { outline: 2px solid var(--brand); }
+.wk-strip { display: flex; gap: 6px; align-items: flex-end; flex-wrap: wrap; }
+.wk-day { display: grid; gap: 3px; justify-items: center; font-size: .72rem; color: var(--muted); }
+.wk-day.today span { color: var(--brand); font-weight: 700; }
+.wk-day i, .wk-key i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.wk-day i.hit-w, .wk-key i.hit-w { background: #3d6fb4; }
+.wk-day i.hit-s, .wk-key i.hit-s { background: #2f7d5b; }
+.wk-key { width: 100%; text-align: right; }
+.why { margin-top: 12px; }
+.why summary { cursor: pointer; color: var(--brand); font-weight: 600; }
+.why h4 { margin: 12px 0 4px; }
+.why ul { margin: 0; padding-left: 20px; }
+
+/* ---------- built around you ---------- */
+.focus-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-top: 12px; }
+.focus-item { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; background: var(--bg); }
+.focus-head { display: flex; gap: 10px; align-items: flex-start; }
+.focus-head h3 { margin: 0; }
+.focus-icon { font-size: 1.5rem; line-height: 1; }
+.focus-row { display: grid; gap: 4px; margin-top: 8px; }
+.food-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.food-chip { font-size: .8rem; padding: 3px 8px; border-radius: 999px; background: var(--brand-soft); white-space: nowrap; }
+
+/* ---------- builder picks ---------- */
+.picks { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 12px; margin-bottom: 14px; }
+.picks-empty { font-size: .9rem; }
+.picks-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.picks-why { display: flex; flex-wrap: wrap; gap: 4px; }
+.picks-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x mandatory; }
+.pick { flex: none; width: 132px; display: grid; gap: 2px; text-align: left; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); color: inherit; font: inherit; cursor: pointer; scroll-snap-align: start; }
+.pick:hover { border-color: var(--brand); }
+.pick small { color: var(--muted); font-size: .72rem; line-height: 1.25; }
+.food-card.for-you { border-color: #d9b44a; }
+.pick-star { position: absolute; top: 6px; right: 34px; color: #c99a1d; font-size: 1rem; z-index: 1; pointer-events: none; }
+.pick-note { font-size: .75rem; padding: 4px 10px 6px; color: var(--ok); line-height: 1.25; }
+
+/* ---------- lab report reader ---------- */
+.reader-box { padding: 14px 16px; margin: 0 0 14px; border: 1px dashed var(--brand); border-radius: var(--radius); background: var(--brand-soft); }
+.reader-box textarea { width: 100%; margin-top: 8px; }
+.reader-status, .reader-note { margin-top: 6px; }
+.reader-note .btn { margin-left: 6px; }
+.warn-text { color: var(--warn); }
+input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
+.flash { border: 2px solid var(--brand); margin-bottom: 14px; }
+.flash h3 { margin-top: 0; }
+.builder-foods { min-width: 0; }
 </style>
 </head>
 <body>
@@ -986,6 +1046,1012 @@ ul.plain li { padding: 4px 0; }
 </script>
   <script>
 /*
+ * Family Health Guide — blood tests and wearable data (Oura, WHOOP, etc.).
+ *
+ * Lab cut-offs come from the guideline named on each test. Labs differ a
+ * little in their reference ranges, so the printed range on a report wins
+ * when it disagrees. Wearable numbers are consumer-device estimates: useful
+ * for trends, not for diagnosis.
+ */
+(function (root) {
+  'use strict';
+
+  var SOURCES = {
+    adaDx: { title: 'Standards of Care in Diabetes — diagnosis (A1C, fasting glucose; confirm with a repeat test)', org: 'American Diabetes Association', year: 2025, url: 'https://diabetesjournals.org/care/article/48/Supplement_1/S27/157566' },
+    accCholesterol: { title: 'Guideline on the management of blood cholesterol', org: 'ACC/AHA', year: 2018, url: 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000625' },
+    atp3: { title: 'Third Report of the NCEP Expert Panel (ATP III) — lipid categories', org: 'NHLBI', year: 2002, url: 'https://www.nhlbi.nih.gov/files/docs/resources/heart/atp3full.pdf' },
+    kdigo: { title: 'Clinical practice guideline for the evaluation and management of CKD', org: 'KDIGO', year: 2024, url: 'https://kdigo.org/guidelines/ckd-evaluation-and-management/' },
+    acgLiver: { title: 'ACG clinical guideline: evaluation of abnormal liver chemistries (healthy ALT ≈ 29–33 U/L men, 19–25 U/L women)', org: 'American College of Gastroenterology', year: 2017, url: 'https://journals.lww.com/ajg/fulltext/2017/01000/acg_clinical_guideline__evaluation_of_abnormal.13.aspx' },
+    ataThyroid: { title: 'Thyroid function tests (typical TSH reference range about 0.4–4.5 mIU/L)', org: 'American Thyroid Association', year: 2024, url: 'https://www.thyroid.org/thyroid-function-tests/' },
+    agaIron: { title: 'Guidelines on the gastrointestinal evaluation of iron deficiency anemia (ferritin cut-off 45 ng/mL)', org: 'American Gastroenterological Association', year: 2020, url: 'https://www.gastrojournal.org/article/S0016-5085(20)35066-0/fulltext' },
+    whoHb: { title: 'Guideline on haemoglobin cutoffs to define anaemia', org: 'World Health Organization', year: 2024, url: 'https://www.who.int/publications/i/item/9789240088542' },
+    namVitD: { title: 'Dietary Reference Intakes for calcium and vitamin D (20 ng/mL meets the needs of 97.5% of people)', org: 'National Academy of Medicine', year: 2011, url: 'https://nap.nationalacademies.org/catalog/13050' },
+    endoVitD: { title: 'Vitamin D for the prevention of disease (no routine testing for healthy adults under 75)', org: 'Endocrine Society', year: 2024, url: 'https://academic.oup.com/jcem/article/109/8/1907/7685305' },
+    odsB12: { title: 'Vitamin B12 — fact sheet for health professionals', org: 'NIH Office of Dietary Supplements', year: 2024, url: 'https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/' },
+    acrGout: { title: 'Guideline for the management of gout (urate saturation ≈ 6.8 mg/dL)', org: 'American College of Rheumatology', year: 2020, url: 'https://rheumatology.org/gout-guideline' },
+    potassium: { title: 'Potassium — fact sheet (normal serum 3.6–5.2 mmol/L in most labs)', org: 'NIH Office of Dietary Supplements', year: 2022, url: 'https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/' },
+    ahaRhr: { title: 'All about heart rate (normal resting 60–100 bpm)', org: 'American Heart Association', year: 2024, url: 'https://www.heart.org/en/health-topics/high-blood-pressure/the-facts-about-high-blood-pressure/all-about-heart-rate-pulse' },
+    rhrMeta: { title: 'Resting heart rate and all-cause and cardiovascular mortality: meta-analysis (Zhang et al., CMAJ)', org: 'Peer-reviewed meta-analysis', year: 2016, url: 'https://www.cmaj.ca/content/188/3/E53' },
+    deviceSleep: { title: 'Performance of seven consumer sleep-tracking devices compared with polysomnography (Chinoy et al., Sleep)', org: 'Peer-reviewed validation study', year: 2021, url: 'https://academic.oup.com/sleep/article/44/5/zsaa291/6055610' },
+    sleepAdult: { title: 'Recommended amount of sleep for a healthy adult (joint consensus)', org: 'AASM & Sleep Research Society', year: 2015, url: 'https://aasm.org/resources/pdf/pressroom/adult-sleep-duration-consensus.pdf' },
+    fdaOximeter: { title: 'Pulse oximeter accuracy and limitations', org: 'FDA', year: 2024, url: 'https://www.fda.gov/medical-devices/safety-communications/pulse-oximeter-accuracy-and-limitations-fda-safety-communication' },
+    apaStress: { title: 'Stress effects on the body', org: 'American Psychological Association', year: 2023, url: 'https://www.apa.org/topics/stress/body' },
+    hrvReview: { title: 'An overview of heart rate variability metrics and norms (Shaffer & Ginsberg, Frontiers in Public Health) — HRV is individual; compare with your own baseline', org: 'Peer-reviewed review', year: 2017, url: 'https://www.frontiersin.org/articles/10.3389/fpubh.2017.00258/full' }
+  };
+
+  var STRENGTH = {
+    guideline: 'National guideline',
+    lab: 'Lab reference range',
+    moderate: 'Moderate evidence (consistent observational studies)',
+    device: 'Consumer-device estimate — good for trends, not diagnosis'
+  };
+
+  // US units; `si` converts US → SI for metric display.
+  var LABS = [
+    { id: 'a1c', label: 'Hemoglobin A1C', unit: '%', step: 0.1, group: 'Blood sugar' },
+    { id: 'glucose', label: 'Fasting glucose', unit: 'mg/dL', si: { unit: 'mmol/L', factor: 1 / 18 }, group: 'Blood sugar' },
+    { id: 'tc', label: 'Total cholesterol', unit: 'mg/dL', si: { unit: 'mmol/L', factor: 1 / 38.67 }, group: 'Cholesterol' },
+    { id: 'ldl', label: 'LDL cholesterol', unit: 'mg/dL', si: { unit: 'mmol/L', factor: 1 / 38.67 }, group: 'Cholesterol' },
+    { id: 'hdl', label: 'HDL cholesterol', unit: 'mg/dL', si: { unit: 'mmol/L', factor: 1 / 38.67 }, group: 'Cholesterol' },
+    { id: 'tg', label: 'Triglycerides', unit: 'mg/dL', si: { unit: 'mmol/L', factor: 1 / 88.57 }, group: 'Cholesterol' },
+    { id: 'egfr', label: 'eGFR (kidney filtering)', unit: 'mL/min/1.73m²', group: 'Kidney & liver' },
+    { id: 'alt', label: 'ALT (liver enzyme)', unit: 'U/L', group: 'Kidney & liver' },
+    { id: 'potassium', label: 'Potassium', unit: 'mmol/L', step: 0.1, group: 'Kidney & liver' },
+    { id: 'hgb', label: 'Hemoglobin', unit: 'g/dL', step: 0.1, group: 'Blood count & iron' },
+    { id: 'ferritin', label: 'Ferritin (iron stores)', unit: 'ng/mL', group: 'Blood count & iron' },
+    { id: 'tsh', label: 'TSH (thyroid)', unit: 'mIU/L', step: 0.01, group: 'Vitamins & hormones' },
+    { id: 'vitd', label: 'Vitamin D, 25-OH', unit: 'ng/mL', si: { unit: 'nmol/L', factor: 2.5 }, group: 'Vitamins & hormones' },
+    { id: 'b12', label: 'Vitamin B12', unit: 'pg/mL', si: { unit: 'pmol/L', factor: 0.738 }, group: 'Vitamins & hormones' },
+    { id: 'uric', label: 'Uric acid', unit: 'mg/dL', step: 0.1, si: { unit: 'µmol/L', factor: 59.48 }, group: 'Vitamins & hormones' }
+  ];
+
+  function labDef(id) { return LABS.filter(function (l) { return l.id === id; })[0]; }
+
+  function list(v) { return Array.isArray(v) ? v : []; }
+
+  // Latest value of each test across all lab entries, with its date.
+  function latestLabs(member) {
+    var out = {};
+    list(member.labs).slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; }).forEach(function (entry) {
+      Object.keys(entry.values || {}).forEach(function (k) {
+        var v = entry.values[k];
+        if (v !== null && v !== undefined && v !== '' && !isNaN(Number(v))) out[k] = { value: Number(v), date: entry.date };
+      });
+    });
+    return out;
+  }
+
+  // Interprets one value: { level: ok|low|high|watch|alert, text }.
+  function interpret(id, v, sex, pregnant) {
+    var male = sex === 'male';
+    switch (id) {
+      case 'a1c': return v >= 6.5 ? { level: 'alert', text: 'In the diabetes range (6.5%+)' } : v >= 5.7 ? { level: 'watch', text: 'Prediabetes range (5.7–6.4%)' } : { level: 'ok', text: 'Normal (under 5.7%)' };
+      case 'glucose': return v >= 126 ? { level: 'alert', text: 'In the diabetes range (126+ fasting)' } : v >= 100 ? { level: 'watch', text: 'Prediabetes range (100–125)' } : v < 70 ? { level: 'watch', text: 'Low (under 70)' } : { level: 'ok', text: 'Normal (70–99 fasting)' };
+      case 'tc': return v >= 240 ? { level: 'high', text: 'High (240+)' } : v >= 200 ? { level: 'watch', text: 'Borderline high (200–239)' } : { level: 'ok', text: 'Desirable (under 200)' };
+      case 'ldl': return v >= 190 ? { level: 'alert', text: 'Very high (190+)' } : v >= 160 ? { level: 'high', text: 'High (160–189)' } : v >= 130 ? { level: 'watch', text: 'Borderline high (130–159)' } : v >= 100 ? { level: 'ok', text: 'Near optimal (100–129)' } : { level: 'ok', text: 'Optimal (under 100)' };
+      case 'hdl': return v < (male ? 40 : 50) ? { level: 'watch', text: 'Low (under ' + (male ? 40 : 50) + ')' } : v >= 60 ? { level: 'ok', text: 'Protective (60+)' } : { level: 'ok', text: 'Normal' };
+      case 'tg': return v >= 500 ? { level: 'alert', text: 'Very high (500+) — pancreatitis risk' } : v >= 200 ? { level: 'high', text: 'High (200–499)' } : v >= 150 ? { level: 'watch', text: 'Borderline high (150–199)' } : { level: 'ok', text: 'Normal (under 150)' };
+      case 'egfr': return v < 30 ? { level: 'alert', text: 'Severely reduced (under 30)' } : v < 60 ? { level: 'high', text: 'Reduced (under 60)' } : v < 90 ? { level: 'ok', text: 'Mildly reduced or normal for age (60–89)' } : { level: 'ok', text: 'Normal (90+)' };
+      case 'alt': return v > (male ? 33 : 25) * 2 ? { level: 'high', text: 'Raised (more than twice the healthy upper limit)' } : v > (male ? 33 : 25) ? { level: 'watch', text: 'Above the healthy upper limit (' + (male ? 33 : 25) + ')' } : { level: 'ok', text: 'Normal' };
+      case 'potassium': return v >= 6 || v < 3 ? { level: 'alert', text: v >= 6 ? 'Dangerously high (6.0+)' : 'Dangerously low (under 3.0)' } : v > 5.2 || v < 3.5 ? { level: 'high', text: v > 5.2 ? 'High (over 5.2)' : 'Low (under 3.5)' } : { level: 'ok', text: 'Normal (3.5–5.2)' };
+      case 'hgb':
+        var cut = pregnant ? 11 : male ? 13 : 12;
+        return v < cut - 2 ? { level: 'alert', text: 'Anemia, moderate or worse (under ' + (cut - 2) + ')' } : v < cut ? { level: 'high', text: 'Anemia (under ' + cut + ')' } : { level: 'ok', text: 'Normal' };
+      case 'ferritin': return v < 30 ? { level: 'high', text: 'Low iron stores (under 30)' } : v < 45 ? { level: 'watch', text: 'Possibly low iron stores (30–44)' } : v > 300 ? { level: 'watch', text: 'High (over 300) — can be inflammation or iron overload' } : { level: 'ok', text: 'Normal' };
+      case 'tsh': return v > 10 ? { level: 'high', text: 'High (over 10)' } : v > 4.5 ? { level: 'watch', text: 'Above typical range (over 4.5)' } : v < 0.4 ? { level: 'watch', text: 'Below typical range (under 0.4)' } : { level: 'ok', text: 'Typical range (0.4–4.5)' };
+      case 'vitd': return v < 12 ? { level: 'high', text: 'Deficient (under 12)' } : v < 20 ? { level: 'watch', text: 'Inadequate for some people (12–19)' } : v > 50 ? { level: 'watch', text: 'High (over 50) — check supplement dose' } : { level: 'ok', text: 'Adequate (20–50)' };
+      case 'b12': return v < 200 ? { level: 'high', text: 'Low (under 200)' } : v < 300 ? { level: 'watch', text: 'Borderline (200–300)' } : { level: 'ok', text: 'Normal' };
+      case 'uric': return v > 6.8 ? { level: 'watch', text: 'Above the level where crystals can form (6.8)' } : { level: 'ok', text: 'Normal' };
+    }
+    return { level: 'ok', text: '' };
+  }
+
+  var LAB_SOURCES = { a1c: 'adaDx', glucose: 'adaDx', tc: 'atp3', ldl: 'accCholesterol', hdl: 'atp3', tg: 'accCholesterol', egfr: 'kdigo', alt: 'acgLiver',
+    potassium: 'potassium', hgb: 'whoHb', ferritin: 'agaIron', tsh: 'ataThyroid', vitd: 'namVitD', b12: 'odsB12', uric: 'acrGout' };
+
+  // Advice for each test when out of range: [level, title, todo[], suggestion?]
+  function adviceFor(id, r, v, member) {
+    var conds = list(member.conditions);
+    var has = function (c) { return conds.indexOf(c) !== -1; };
+    switch (id) {
+      case 'a1c':
+      case 'glucose':
+        if (has('diabetes1') || has('diabetes2')) return null;
+        if (r.level === 'alert') return ['doctor', 'Blood sugar in the diabetes range', ['A diagnosis needs a second abnormal test (unless there are clear symptoms) — book a follow-up to confirm.', 'If confirmed, ask about diabetes education and nutrition counseling.'], { kind: 'condition', key: 'diabetes2', label: 'Type 2 diabetes — confirm with a repeat test', checked: false }];
+        if (r.level === 'watch' && (id === 'a1c' ? v >= 5.7 : v >= 100)) return ['doctor', 'Blood sugar in the prediabetes range', ['Losing 5–7% of body weight and 150 minutes a week of activity cut progression to diabetes by about half.', 'Retest yearly.'], { kind: 'condition', key: 'prediabetes', label: 'Prediabetes (from lab result)', checked: true }];
+        return null;
+      case 'ldl':
+        if (r.level === 'alert') return ['doctor', 'Very high LDL cholesterol (190+)', ['At this level guidelines recommend a statin regardless of other risks, and checking family members for inherited high cholesterol.'], { kind: 'condition', key: 'cholesterol', label: 'High cholesterol (from lab result)', checked: true }];
+        if (r.level === 'high') return ['doctor', 'High LDL cholesterol', ['Ask for a 10-year heart-risk estimate to decide about treatment.', 'Cut saturated fat, add soluble fiber (oats, beans) and move more.'], { kind: 'condition', key: 'cholesterol', label: 'High cholesterol (from lab result)', checked: true }];
+        if (r.level === 'watch') return ['change', 'LDL a little high', ['Diet changes can lower LDL 10–20%: less saturated fat, more soluble fiber, nuts and plant sterols.']];
+        return null;
+      case 'tc':
+        return null;
+      case 'hdl':
+        return r.level === 'watch' ? ['change', 'Low HDL ("good") cholesterol', ['Regular aerobic exercise, not smoking and losing extra weight raise HDL.']] : null;
+      case 'tg':
+        if (r.level === 'alert') return ['urgent', 'Very high triglycerides (500+)', ['Call your doctor soon — this level raises the risk of pancreatitis.', 'Avoid alcohol and sugary drinks until it\'s rechecked.']];
+        if (r.level === 'high' || r.level === 'watch') return ['change', 'Triglycerides above normal', ['Cut sugary drinks, refined carbs and alcohol; eat fatty fish; lose extra weight.']];
+        return null;
+      case 'egfr':
+        if (r.level === 'alert' || r.level === 'high') return ['doctor', 'Reduced kidney function (eGFR ' + v + ')', ['Kidney disease is confirmed when eGFR stays under 60 for 3+ months — ask about a repeat test and a urine albumin test.', 'Don\'t start potassium supplements or salt substitutes without your doctor.'], { kind: 'condition', key: 'ckd', label: 'Chronic kidney disease — confirm with a repeat test', checked: false }];
+        return null;
+      case 'alt':
+        if (r.level === 'high' || r.level === 'watch') return [r.level === 'high' ? 'doctor' : 'change', 'Liver enzyme (ALT) above the healthy range', ['The most common cause is fatty liver; others include alcohol, medicines and hepatitis — mention it to your doctor.', 'Cutting alcohol and sugary drinks and losing extra weight lowers ALT.']];
+        return null;
+      case 'potassium':
+        if (r.level === 'alert') return ['urgent', 'Potassium dangerously ' + (v >= 6 ? 'high' : 'low'), ['Call your doctor today — this can affect heart rhythm.']];
+        if (r.level === 'high') return ['doctor', 'Potassium out of range', ['Ask your doctor whether medicines or diet need adjusting.']];
+        return null;
+      case 'hgb':
+        if (r.level === 'alert' || r.level === 'high') return ['doctor', 'Hemoglobin shows anemia', ['Ask what\'s causing it — iron, B12 or folate tests are usually next.'], { kind: 'condition', key: 'anemia', label: 'Anemia (from lab result)', checked: true }];
+        return null;
+      case 'ferritin':
+        if (r.level === 'high') return ['doctor', 'Low iron stores (ferritin ' + v + ')', ['Ask your doctor about iron treatment and the cause (heavy periods, diet, gut absorption).', 'Eat iron-rich foods with vitamin C; keep tea and coffee away from meals.'], { kind: 'condition', key: 'anemia', label: 'Iron deficiency (from lab result)', checked: false }];
+        if (r.level === 'watch' && v < 45) return ['change', 'Iron stores on the low side', ['Iron-rich foods with vitamin C; recheck at your next blood test.']];
+        if (r.level === 'watch') return ['doctor', 'High ferritin', ['Ask your doctor whether it reflects inflammation or iron overload.']];
+        return null;
+      case 'tsh':
+        if (r.level === 'high' || r.level === 'watch') return ['doctor', 'Thyroid test (TSH) out of the typical range', ['TSH can shift with illness and some supplements (biotin) — a repeat test with free T4 confirms it.']];
+        return null;
+      case 'vitd':
+        if (r.level === 'high' && v < 12) return ['doctor', 'Vitamin D deficient', ['Ask your doctor about a supplement dose.', 'Food sources: fatty fish, fortified milk or plant milk, eggs.']];
+        if (r.level === 'watch' && v < 20) return ['change', 'Vitamin D on the low side', ['Fortified foods, fatty fish and some sunlight; ask whether a standard supplement makes sense for you.']];
+        if (r.level === 'watch') return ['change', 'High vitamin D', ['Check your supplement dose — over 4,000 IU a day long-term isn\'t advised without a doctor.']];
+        return null;
+      case 'b12':
+        if (r.level === 'high') return ['doctor', 'Low vitamin B12', ['Ask about treatment; low B12 can cause tiredness, anemia and nerve damage.']];
+        if (r.level === 'watch') return ['change', 'Borderline vitamin B12', ['Ask whether a follow-up test (methylmalonic acid) is needed; B12-fortified foods help.']];
+        return null;
+      case 'uric':
+        return r.level === 'watch' ? ['change', 'High uric acid', ['Limit beer, spirits, sugary drinks and organ meats; stay hydrated. Treatment is usually only needed with gout attacks or kidney stones.']] : null;
+    }
+    return null;
+  }
+
+  function analyzeLabs(member, age) {
+    var latest = latestLabs(member);
+    var findings = [], suggestions = [], good = [];
+    if (age !== null && age < 18 && Object.keys(latest).length) {
+      findings.push({ id: 'labs-kids', level: 'doctor', title: 'Children\'s lab results need child reference ranges', because: ['Normal ranges for children differ by age.'],
+        todo: ['Ask the pediatrician to go over the results.'], strength: STRENGTH.lab, sources: ['whoHb'] });
+      return { findings: findings, suggestions: suggestions, good: good, latest: latest };
+    }
+    var pregnant = list(member.conditions).indexOf('pregnancy') !== -1;
+    var normal = [];
+    Object.keys(latest).forEach(function (id) {
+      var def = labDef(id);
+      if (!def) return;
+      var v = latest[id].value;
+      var r = interpret(id, v, member.sex, pregnant);
+      var adv = adviceFor(id, r, v, member);
+      var same = adv && findings.filter(function (f) { return f.title === adv[1]; })[0];
+      if (same) { same.because.push(def.label + ' ' + v + ' ' + def.unit + ' on ' + latest[id].date + ': ' + r.text + '.'); return; }
+      if (adv) {
+        findings.push({ id: 'lab-' + id, level: adv[0], title: adv[1],
+          because: [def.label + ' ' + v + ' ' + def.unit + ' on ' + latest[id].date + ': ' + r.text + '.'],
+          todo: adv[2], strength: STRENGTH.lab, sources: [LAB_SOURCES[id]] });
+        if (adv[3]) suggestions.push(adv[3]);
+      } else if (r.level === 'ok') normal.push(def.label);
+    });
+    if (normal.length) good.push({ text: 'In range: ' + normal.join(', '), source: 'atp3' });
+    return { findings: findings, suggestions: suggestions, good: good, latest: latest };
+  }
+
+  // ------------------------------------------------------------- wearables
+
+  var DEVICES = [['none', 'No wearable'], ['oura', 'Oura Ring'], ['whoop', 'WHOOP'], ['apple', 'Apple Watch'], ['fitbit', 'Fitbit / Google'], ['garmin', 'Garmin'], ['samsung', 'Samsung'], ['other', 'Other']];
+
+  var WEARABLE_FIELDS = [
+    { id: 'sleepHours', label: 'Average sleep per night', unit: 'hours', step: 0.1, hint: 'Total sleep time, last 30 days' },
+    { id: 'sleepScore', label: 'Sleep score', unit: '/ 100', hint: 'Oura sleep score, WHOOP sleep performance %' },
+    { id: 'restingHr', label: 'Resting heart rate', unit: 'bpm' },
+    { id: 'hrv', label: 'HRV (average)', unit: 'ms', hint: 'Heart rate variability' },
+    { id: 'hrvBaseline', label: 'Your usual HRV (optional)', unit: 'ms', hint: 'From a few months ago, to spot a drop' },
+    { id: 'recovery', label: 'Readiness / recovery', unit: '/ 100', hint: 'Oura readiness, WHOOP recovery %, Garmin Body Battery' },
+    { id: 'spo2', label: 'Night-time blood oxygen (SpO2)', unit: '%', step: 0.1 },
+    { id: 'stressScore', label: 'Daytime stress score (optional)', unit: '/ 100', hint: 'Garmin or Samsung stress average' },
+    { id: 'steps', label: 'Average daily steps', unit: 'steps', hint: 'Sets your personal step goal' }
+  ];
+
+  var STRESS = [['low', 'Mostly calm / restored'], ['normal', 'Normal'], ['high', 'Often stressed (most days)']];
+
+  // Minimal CSV parser that handles quoted fields.
+  function parseCSV(text) {
+    var rows = [], row = [], field = '', q = false;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (q) {
+        if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+        else if (ch === '"') q = false;
+        else field += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === ',') { row.push(field); field = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && text[i + 1] === '\n') i++;
+        row.push(field); rows.push(row); row = []; field = '';
+      } else field += ch;
+    }
+    if (field !== '' || row.length) { row.push(field); rows.push(row); }
+    return rows.filter(function (r) { return r.some(function (c) { return c.trim() !== ''; }); });
+  }
+
+  var COLUMN_PATTERNS = [
+    ['date', /^(date|day|summary_date|cycle start time|start time|calendar date)/i],
+    ['sleepDur', /(total sleep( duration)?|asleep duration|sleep duration|time asleep|total_sleep_duration)/i],
+    ['sleepScore', /(sleep score|sleep performance|sleep_score)/i],
+    ['restingHr', /(resting heart rate|lowest resting|average resting|rhr|resting_heart_rate)/i],
+    ['hrv', /(hrv|heart rate variability)/i],
+    ['recovery', /(recovery score|readiness score|readiness|body battery|recovery)/i],
+    ['spo2', /(spo2|blood oxygen|oxygen saturation)/i],
+    ['stressScore', /(stress score|average stress|stress level)/i],
+    ['steps', /^(steps|daily steps|step count|total steps)$/i]
+  ];
+
+  /*
+   * Reads an Oura / WHOOP / Garmin style CSV export and averages the last
+   * `days` rows. Columns are matched by name, so it is tolerant of format changes.
+   */
+  function importWearableCSV(text, days) {
+    days = days || 30;
+    var rows = parseCSV(text);
+    if (rows.length < 2) throw new Error('No data rows found in that file.');
+    var header = rows[0].map(function (h) { return h.trim(); });
+    var cols = {};
+    COLUMN_PATTERNS.forEach(function (p) {
+      for (var i = 0; i < header.length; i++) {
+        if (p[1].test(header[i]) && Object.keys(cols).map(function (k) { return cols[k]; }).indexOf(i) === -1) { cols[p[0]] = i; break; }
+      }
+    });
+    if (Object.keys(cols).filter(function (k) { return k !== 'date'; }).length === 0) throw new Error('Couldn\'t recognise any sleep or heart columns. Expected names like "Total Sleep Duration", "Resting Heart Rate", "HRV", "Recovery score".');
+    var data = rows.slice(1);
+    if (cols.date !== undefined) data.sort(function (a, b) { return String(a[cols.date]) < String(b[cols.date]) ? -1 : 1; });
+    data = data.slice(-days);
+    function avg(key) {
+      if (cols[key] === undefined) return null;
+      var vals = data.map(function (r) { return parseFloat(String(r[cols[key]]).replace('%', '')); }).filter(function (v) { return !isNaN(v); });
+      return vals.length ? vals.reduce(function (s, v) { return s + v; }, 0) / vals.length : null;
+    }
+    var out = { importedRows: data.length, columns: Object.keys(cols).map(function (k) { return k + ' ← "' + header[cols[k]] + '"'; }) };
+    var sd = avg('sleepDur');
+    if (sd !== null) {
+      var h = header[cols.sleepDur];
+      // Oura exports seconds, WHOOP minutes; some apps hours.
+      var hours = /\(min/i.test(h) || (sd > 24 && sd < 1440) ? sd / 60 : sd >= 1440 ? sd / 3600 : sd;
+      out.sleepHours = Math.round(hours * 10) / 10;
+    }
+    ['sleepScore', 'restingHr', 'hrv', 'recovery', 'spo2', 'stressScore', 'steps'].forEach(function (k) {
+      var v = avg(k);
+      if (v !== null) out[k] = k === 'steps' ? Math.round(v) : Math.round(v * 10) / 10;
+    });
+    return out;
+  }
+
+  function analyzeWearable(member, age) {
+    var w = member.wearable || {};
+    var findings = [], good = [];
+    if (!w.device || w.device === 'none') return { findings: findings, good: good };
+    var num = function (v) { return v === undefined || v === null || v === '' ? null : Number(v); };
+    var sleep = num(w.sleepHours), rhr = num(w.restingHr), hrv = num(w.hrv), base = num(w.hrvBaseline), rec = num(w.recovery), spo2 = num(w.spo2), score = num(w.sleepScore), stress = num(w.stressScore);
+    var adult = age === null || age >= 18;
+
+    if (sleep !== null && adult) {
+      if (sleep < 7) findings.push({ id: 'w-sleep', level: 'change', title: 'Your tracker shows short sleep (' + sleep + ' h a night)',
+        because: ['Adults need 7+ hours. Consumer trackers measure total sleep reasonably well (usually within about 20–30 minutes of a sleep lab), though they tend to overestimate a little.'],
+        todo: ['Same wake time every day; aim to get into bed 30–45 minutes earlier.', 'Use the tracker\'s trend, not single nights, to see if changes help.'],
+        strength: STRENGTH.device, sources: ['sleepAdult', 'deviceSleep'] });
+      else good.push({ text: 'Tracker sleep ' + sleep + ' h a night', source: 'sleepAdult' });
+    }
+    if (score !== null && score < 70) findings.push({ id: 'w-sleepscore', level: 'change', title: 'Sleep score usually below 70',
+      because: ['Sleep scores are each company\'s own formula (not medically validated), but a consistently low score usually reflects short, broken or late sleep.'],
+      todo: ['Look at which part drags the score down (total sleep, timing, restfulness) in the app and target that.'], strength: STRENGTH.device, sources: ['deviceSleep'] });
+    if (rhr !== null && adult) {
+      if (rhr > 100) findings.push({ id: 'w-rhr-high', level: 'doctor', title: 'Resting heart rate above 100 bpm',
+        because: ['A resting rate over 100 is called tachycardia; it can come from illness, dehydration, thyroid problems, anemia or heart-rhythm problems.'],
+        todo: ['Mention it to your doctor, especially with dizziness, palpitations or shortness of breath.'], strength: STRENGTH.guideline, sources: ['ahaRhr'] });
+      else if (rhr >= 80) findings.push({ id: 'w-rhr', level: 'change', title: 'Resting heart rate on the high side (' + rhr + ' bpm)',
+        because: ['Normal is 60–100, but in large studies each 10 bpm higher resting rate was linked to about 9% higher risk of death from any cause.'],
+        todo: ['Regular aerobic exercise, better sleep and less alcohol all lower resting heart rate over weeks to months.'], strength: STRENGTH.moderate, sources: ['ahaRhr', 'rhrMeta'] });
+      else good.push({ text: 'Resting heart rate ' + rhr + ' bpm', source: 'ahaRhr' });
+    }
+    if (hrv !== null && base !== null && base > 0 && hrv < base * 0.8) findings.push({ id: 'w-hrv', level: 'change', title: 'HRV is ' + Math.round((1 - hrv / base) * 100) + '% below your usual',
+      because: ['HRV varies hugely between people, so it only means something compared with your own baseline. A sustained drop often follows poor sleep, stress, alcohol, illness or overtraining.'],
+      todo: ['Prioritise sleep, ease off hard training for a few days, skip alcohol, and watch whether it recovers.'], strength: STRENGTH.device, sources: ['hrvReview'] });
+    if (rec !== null && rec < 50) findings.push({ id: 'w-recovery', level: 'change', title: 'Readiness / recovery usually low (' + rec + ')',
+      because: ['These are proprietary device scores built from HRV, resting heart rate, sleep and temperature. They\'re useful for spotting strain, not for diagnosis.'],
+      todo: ['Treat low-recovery days as easier days; look for the pattern (late meals, alcohol, short sleep, stress).'], strength: STRENGTH.device, sources: ['hrvReview'] });
+    if (spo2 !== null && spo2 < 92) findings.push({ id: 'w-spo2', level: 'doctor', title: 'Night-time blood oxygen averages ' + spo2 + '%',
+      because: ['A low night-time average can be a sign of sleep apnea or lung problems. Finger and ring sensors are less accurate than medical oximeters, especially on darker skin.'],
+      todo: ['Mention it to your doctor and ask whether a sleep study is worthwhile — particularly if you snore or wake unrefreshed.'], strength: STRENGTH.device, sources: ['fdaOximeter'] });
+    var highStress = w.stress === 'high' || (stress !== null && stress >= 50);
+    if (highStress) findings.push({ id: 'w-stress', level: 'change', title: 'Stress is high most days',
+      because: ['Long-running stress raises blood pressure, disrupts sleep and drives cravings for sugary, salty food.'],
+      todo: ['Regular exercise, consistent sleep and short daily relaxation (breathing, walks, mindfulness) have good evidence.', 'If it\'s affecting daily life, talk to a doctor or counselor — the mood questions are a good starting point.'],
+      strength: STRENGTH.moderate, sources: ['apaStress'] });
+    return { findings: findings, good: good };
+  }
+
+
+  // ------------------------------------------------------- report reading
+  // Pulls results out of text copied from a patient portal or a lab PDF.
+  // Each test has name patterns, lines to skip, and a plausible range so a
+  // reference range or a date is never mistaken for the result.
+
+  var REPORT = {
+    a1c: { re: /(hemoglobin a1c|hb ?a1c|\ba1c\b|glycated h(a)?emoglobin|glycohemoglobin)/i, skip: /estimated average|eag/i, range: [3, 20] },
+    glucose: { re: /(glucose|blood sugar)/i, skip: /average|tolerance|urine|eag|hour|ogtt/i, range: [30, 700] },
+    tc: { re: /(total cholesterol|cholesterol,? total|^\s*cholesterol\b)/i, skip: /ratio|hdl|ldl|non-?hdl|vldl/i, range: [50, 700] },
+    ldl: { re: /(\bldl\b|low[- ]density)/i, skip: /ratio|particle|vldl|non-?hdl|ldl[- ]?p\b|size/i, range: [5, 600] },
+    hdl: { re: /(\bhdl\b|high[- ]density)/i, skip: /ratio|non-?hdl|particle|ldl/i, range: [5, 200] },
+    tg: { re: /triglyceride/i, skip: /ratio/i, range: [10, 6000] },
+    egfr: { re: /(\begfr\b|glomerular filtration)/i, skip: /african|non-?black(?! ).*\bblack\b/i, range: [1, 200] },
+    alt: { re: /(\balt\b|\bsgpt\b|alanine amino ?transferase)/i, skip: /alk|alkaline/i, range: [1, 3000] },
+    potassium: { re: /potassium/i, skip: /urine/i, range: [1.5, 9] },
+    hgb: { re: /(h(a)?emoglobin|\bhgb\b|\bhb\b)/i, skip: /a1c|glyc|corpuscular|\bmch|urine|eag/i, range: [3, 25] },
+    ferritin: { re: /ferritin/i, skip: null, range: [1, 5000] },
+    tsh: { re: /(\btsh\b|thyroid[- ]stimulating)/i, skip: /reflex to/i, range: [0.001, 200] },
+    vitd: { re: /(vitamin d|25[- ]?(oh|hydroxy))/i, skip: /1,25|dihydroxy/i, range: [2, 200] },
+    b12: { re: /(\bb[- ]?12\b|cobalamin)/i, skip: /folate only/i, range: [50, 5000] },
+    uric: { re: /(uric acid|\burate\b)/i, skip: /urine/i, range: [0.5, 20] }
+  };
+
+  var MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+
+  function findDate(text) {
+    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    var pick = function (m) {
+      if (!m) return null;
+      var y, mo, d;
+      if (m[1].length === 4) { y = +m[1]; mo = +m[2]; d = +m[3]; } else { mo = +m[1]; d = +m[2]; y = +m[3]; if (y < 100) y += 2000; }
+      if (mo < 1 || mo > 12 || d < 1 || d > 31 || y < 1990 || y > 2100) return null;
+      return y + '-' + pad(mo) + '-' + pad(d);
+    };
+    var nums = /(\d{4})-(\d{1,2})-(\d{1,2})|(\d{1,2})\/(\d{1,2})\/(\d{2,4})/;
+    var words = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.? (\d{1,2}),? (\d{4})/i;
+    var asDate = function (line) {
+      var m = line.match(nums);
+      if (m) return pick(m[1] ? [m[0], m[1], m[2], m[3]] : [m[0], m[4], m[5], m[6]]);
+      var w = line.match(words);
+      return w ? w[3] + '-' + pad(MONTHS[w[1].toLowerCase()]) + '-' + pad(+w[2]) : null;
+    };
+    var lines = String(text).split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+      if (/collect|drawn|specimen|result(ed)? date|date of service|test date/i.test(lines[i])) {
+        var d = asDate(lines[i]) || (lines[i + 1] && asDate(lines[i + 1]));
+        if (d) return d;
+      }
+    }
+    for (var j = 0; j < lines.length; j++) { var any = asDate(lines[j]); if (any) return any; }
+    return null;
+  }
+
+  // First plausible number after the test name on this line, or on the next
+  // two lines when the portal puts the value below the name.
+  function valueAfter(rest, nextLines, def, spec) {
+    var candidates = [rest].concat(nextLines);
+    for (var i = 0; i < candidates.length; i++) {
+      var t = String(candidates[i] || '')
+        .replace(/25[\s-]*(oh|hydroxy)\b,?\s*(d[23]?\b)?/ig, ' ')
+        .replace(/\bb[- ]?12\b|\ba1c\b|\bd[23]\b/ig, ' ')
+        .replace(/\d{1,2}\/\d{1,2}\/\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}:\d{2}/g, ' ');
+      if (i > 0 && /[a-z]{4,}/i.test(t.split(/\d/)[0])) return null; // next line is another test
+      var m = t.match(/(^|[^\d.\-])([<>]?)\s*(\d+(?:\.\d+)?)/);
+      if (!m) continue;
+      var v = Number(m[3]);
+      var after = t.slice(t.indexOf(m[0]) + m[0].length, t.indexOf(m[0]) + m[0].length + 14);
+      // Convert SI units when the line says so.
+      var unitText = after + ' ' + t + ' ' + (candidates[i + 1] || '');
+      var dp = def.step ? 100 : 1;
+      if (def.si && new RegExp(def.si.unit.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(unitText)) v = Math.round(v / def.si.factor * dp) / dp;
+      else if (def.id === 'a1c' && /mmol\/mol/i.test(t)) v = Math.round((v * 0.0915 + 2.15) * 10) / 10;
+      if (v < spec.range[0] || v > spec.range[1]) return null;
+      return v;
+    }
+    return null;
+  }
+
+  function parseReport(text) {
+    var lines = String(text || '').replace(/\t/g, '  ').split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+    var values = {}, found = [];
+    LABS.forEach(function (def) {
+      var spec = REPORT[def.id];
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        var m = line.match(spec.re);
+        if (!m || (spec.skip && spec.skip.test(line))) continue;
+        var v = valueAfter(line.slice(m.index + m[0].length), lines.slice(i + 1, i + 3), def, spec);
+        if (v === null) continue;
+        values[def.id] = v;
+        found.push({ id: def.id, label: def.label, value: v, unit: def.unit, line: line });
+        break;
+      }
+    });
+    return { values: values, found: found, date: findDate(text) };
+  }
+
+  var Labs = {
+    SOURCES: SOURCES, LABS: LABS, DEVICES: DEVICES, WEARABLE_FIELDS: WEARABLE_FIELDS, STRESS: STRESS,
+    labDef: labDef, latestLabs: latestLabs, interpret: interpret, analyzeLabs: analyzeLabs,
+    parseCSV: parseCSV, importWearableCSV: importWearableCSV, analyzeWearable: analyzeWearable, parseReport: parseReport, findDate: findDate
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = Labs;
+  else root.FHLabs = Labs;
+})(this);
+</script>
+  <script>
+/*
+ * Family Health Guide — build-a-meal food list.
+ *
+ * Nutrition is per listed serving, rounded from USDA FoodData Central
+ * (cooked weights unless noted). Tags use the same vocabulary as recipes in
+ * knowledge.js, so allergies, diets and conditions are checked the same way.
+ */
+(function (root) {
+  'use strict';
+
+  var CATEGORIES = [
+    { id: 'protein', label: 'Protein', emoji: '🍗', color: '#c0603a', blurb: 'Builds and repairs muscle; keeps you full.' },
+    { id: 'carbs', label: 'Carbs', emoji: '🍚', color: '#b0842a', blurb: 'Energy. Whole grains and starchy veg bring fiber too.' },
+    { id: 'fiber', label: 'Fiber', emoji: '🥦', color: '#2f7d5b', blurb: 'Vegetables, fruit and beans — aim for half the plate.' },
+    { id: 'fat', label: 'Healthy fats', emoji: '🥑', color: '#3d6fb4', blurb: 'Small amounts carry flavor and vitamins A, D, E, K.' }
+  ];
+
+  // f(id, category, emoji, name, serving, kcal, protein g, carbs g, fat g, fiber g, tags)
+  function f(id, cat, emoji, name, serving, kcal, p, c, fat, fib, tags) {
+    return { id: id, cat: cat, emoji: emoji, name: name, serving: serving, kcal: kcal, protein: p, carbs: c, fat: fat, fiber: fib, tags: tags || [] };
+  }
+
+  var FOODS = [
+    // Protein
+    f('chicken', 'protein', '🍗', 'Chicken breast', '4 oz cooked', 187, 35, 0, 4, 0, ['poultry']),
+    f('turkey', 'protein', '🦃', 'Turkey breast', '4 oz roasted', 153, 34, 0, 1, 0, ['poultry']),
+    f('salmon', 'protein', '🐟', 'Salmon', '4 oz cooked', 233, 25, 0, 14, 0, ['fish']),
+    f('cod', 'protein', '🐠', 'Cod', '4 oz cooked', 119, 26, 0, 1, 0, ['fish']),
+    f('tuna', 'protein', '🥫', 'Canned light tuna', '3 oz drained', 73, 17, 0, 1, 0, ['fish']),
+    f('sardines', 'protein', '🐟', 'Sardines', '1 can (3.75 oz)', 191, 23, 0, 11, 0, ['fish', 'high-purine']),
+    f('shrimp', 'protein', '🍤', 'Shrimp', '4 oz cooked', 112, 27, 0, 0, 0, ['shellfish', 'high-purine']),
+    f('eggs', 'protein', '🥚', 'Eggs', '2 large', 143, 13, 1, 10, 0, ['egg']),
+    f('beef', 'protein', '🥩', 'Lean ground beef (93%)', '4 oz cooked', 182, 26, 0, 8, 0, ['meat', 'high-purine']),
+    f('steak', 'protein', '🥩', 'Sirloin steak', '4 oz cooked', 220, 34, 0, 8, 0, ['meat', 'high-purine']),
+    f('pork', 'protein', '🍖', 'Pork tenderloin', '4 oz cooked', 162, 30, 0, 4, 0, ['pork']),
+    f('tofu', 'protein', '🧈', 'Firm tofu', '½ cup', 181, 22, 4, 11, 3, ['soy']),
+    f('tempeh', 'protein', '🟫', 'Tempeh', '½ cup', 160, 17, 8, 9, 0, ['soy']),
+    f('lentils', 'protein', '🫘', 'Lentils', '1 cup cooked', 230, 18, 40, 1, 16, ['high-fodmap', 'high-potassium']),
+    f('edamame', 'protein', '🫛', 'Edamame', '1 cup shelled', 188, 18, 14, 8, 8, ['soy']),
+    f('greek-yogurt', 'protein', '🥣', 'Greek yogurt, plain nonfat', '1 cup', 133, 23, 8, 1, 0, ['milk']),
+    f('cottage', 'protein', '🧀', 'Cottage cheese, low-fat', '1 cup', 163, 28, 6, 2, 0, ['milk', 'high-sodium']),
+
+    // Carbs
+    f('brown-rice', 'carbs', '🍚', 'Brown rice', '1 cup cooked', 218, 5, 46, 2, 4, []),
+    f('white-rice', 'carbs', '🍙', 'White rice', '1 cup cooked', 205, 4, 45, 0, 1, ['refined-carb']),
+    f('quinoa', 'carbs', '🌾', 'Quinoa', '1 cup cooked', 222, 8, 39, 4, 5, []),
+    f('oats', 'carbs', '🥣', 'Rolled oats', '½ cup dry', 150, 5, 27, 3, 4, ['oats']),
+    f('ww-pasta', 'carbs', '🍝', 'Whole-wheat pasta', '1 cup cooked', 174, 8, 37, 1, 6, ['wheat']),
+    f('pasta', 'carbs', '🍝', 'Pasta', '1 cup cooked', 220, 8, 43, 1, 3, ['wheat', 'refined-carb']),
+    f('ww-bread', 'carbs', '🍞', 'Whole-grain bread', '2 slices', 140, 7, 24, 2, 4, ['wheat']),
+    f('sweet-potato', 'carbs', '🍠', 'Sweet potato', '1 medium baked', 103, 2, 24, 0, 4, ['high-potassium']),
+    f('potato', 'carbs', '🥔', 'Baked potato with skin', '1 medium', 161, 4, 37, 0, 4, ['high-potassium']),
+    f('corn-tortilla', 'carbs', '🫓', 'Corn tortillas', '2 small', 104, 3, 22, 1, 3, []),
+    f('rice-noodles', 'carbs', '🍜', 'Rice noodles', '1 cup cooked', 190, 2, 42, 0, 2, ['refined-carb']),
+    f('barley', 'carbs', '🌾', 'Barley', '1 cup cooked', 193, 4, 44, 1, 6, ['gluten']),
+
+    // Fiber: vegetables, fruit, beans
+    f('broccoli', 'fiber', '🥦', 'Broccoli', '1 cup cooked', 55, 4, 11, 1, 5, []),
+    f('spinach', 'fiber', '🥬', 'Spinach', '1 cup cooked', 41, 5, 7, 0, 4, ['high-potassium']),
+    f('salad', 'fiber', '🥗', 'Mixed salad greens', '2 cups', 10, 1, 2, 0, 1, []),
+    f('carrots', 'fiber', '🥕', 'Carrots', '1 cup raw', 52, 1, 12, 0, 4, ['choking']),
+    f('peppers', 'fiber', '🫑', 'Bell peppers', '1 cup', 30, 1, 7, 0, 3, []),
+    f('green-beans', 'fiber', '🫛', 'Green beans', '1 cup cooked', 44, 2, 10, 0, 4, []),
+    f('brussels', 'fiber', '🥬', 'Brussels sprouts', '1 cup cooked', 56, 4, 11, 1, 4, []),
+    f('cauliflower', 'fiber', '🥦', 'Cauliflower', '1 cup cooked', 29, 2, 5, 1, 3, ['high-fodmap']),
+    f('zucchini', 'fiber', '🥒', 'Zucchini', '1 cup cooked', 27, 2, 5, 0, 2, []),
+    f('tomatoes', 'fiber', '🍅', 'Tomatoes', '1 cup', 32, 2, 7, 0, 2, ['acidic']),
+    f('mushrooms', 'fiber', '🍄', 'Mushrooms', '1 cup cooked', 44, 3, 8, 1, 3, ['high-fodmap']),
+    f('black-beans', 'fiber', '🫘', 'Black beans', '1 cup cooked', 227, 15, 41, 1, 15, ['high-fodmap', 'high-potassium']),
+    f('chickpeas', 'fiber', '🧆', 'Chickpeas', '1 cup cooked', 269, 15, 45, 4, 12, ['high-fodmap']),
+    f('berries', 'fiber', '🫐', 'Mixed berries', '1 cup', 70, 1, 17, 0, 5, []),
+    f('apple', 'fiber', '🍎', 'Apple', '1 medium', 95, 0, 25, 0, 4, ['high-fodmap']),
+    f('banana', 'fiber', '🍌', 'Banana', '1 medium', 105, 1, 27, 0, 3, ['high-potassium']),
+    f('orange', 'fiber', '🍊', 'Orange', '1 medium', 62, 1, 15, 0, 3, ['acidic']),
+    f('kiwi', 'fiber', '🥝', 'Kiwi', '2 fruits', 84, 2, 20, 1, 4, []),
+    f('grapes', 'fiber', '🍇', 'Grapes', '1 cup', 104, 1, 27, 0, 1, ['choking']),
+    f('chia', 'fiber', '🌱', 'Chia seeds', '2 Tbsp', 138, 5, 12, 9, 10, []),
+
+    // Healthy fats
+    f('avocado', 'fat', '🥑', 'Avocado', '½ fruit', 160, 2, 9, 15, 7, ['high-potassium']),
+    f('olive-oil', 'fat', '🫒', 'Olive oil', '1 Tbsp', 119, 0, 0, 14, 0, []),
+    f('almonds', 'fat', '🌰', 'Almonds', '1 oz (23 nuts)', 164, 6, 6, 14, 4, ['treenut', 'choking']),
+    f('walnuts', 'fat', '🌰', 'Walnuts', '1 oz', 185, 4, 4, 18, 2, ['treenut', 'choking']),
+    f('peanut-butter', 'fat', '🥜', 'Peanut butter', '2 Tbsp', 190, 7, 8, 16, 2, ['peanut']),
+    f('sunbutter', 'fat', '🌻', 'Sunflower-seed butter', '2 Tbsp', 200, 6, 7, 18, 2, []),
+    f('pumpkin-seeds', 'fat', '🎃', 'Pumpkin seeds', '1 oz', 158, 9, 3, 14, 2, []),
+    f('flax', 'fat', '🌾', 'Ground flaxseed', '2 Tbsp', 75, 3, 4, 6, 4, []),
+    f('hummus', 'fat', '🧆', 'Hummus', '¼ cup', 102, 5, 9, 6, 3, ['sesame', 'high-fodmap']),
+    f('tahini', 'fat', '🥄', 'Tahini', '1 Tbsp', 89, 3, 3, 8, 1, ['sesame']),
+    f('cheddar', 'fat', '🧀', 'Cheddar cheese', '1 oz', 114, 7, 0, 9, 0, ['milk', 'aged-cheese', 'high-sodium', 'high-satfat']),
+    f('butter', 'fat', '🧈', 'Butter', '1 Tbsp', 102, 0, 0, 12, 0, ['milk', 'high-satfat']),
+    f('olives', 'fat', '🫒', 'Olives', '10 large', 50, 0, 3, 5, 1, ['high-sodium'])
+  ];
+
+  // Share of the day's needs each meal should cover.
+  var MEAL_SHARE = { breakfast: 0.25, lunch: 0.30, dinner: 0.35, snack: 0.10 };
+
+  function byId(id) { return FOODS.filter(function (x) { return x.id === id; })[0]; }
+
+  function totals(items) {
+    var t = { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, byCat: { protein: 0, carbs: 0, fiber: 0, fat: 0 } };
+    (items || []).forEach(function (it) {
+      var food = byId(it.foodId);
+      if (!food) return;
+      var q = it.qty || 1;
+      t.kcal += food.kcal * q; t.protein += food.protein * q; t.carbs += food.carbs * q; t.fat += food.fat * q; t.fiber += food.fiber * q;
+      t.byCat[food.cat] += food.kcal * q;
+    });
+    ['kcal', 'protein', 'carbs', 'fat', 'fiber'].forEach(function (k) { t[k] = Math.round(t[k]); });
+    return t;
+  }
+
+  /*
+   * Per-meal targets from the day's calories and weight.
+   * Protein 0.8 g/kg (RDA), carbs 45–65% and fat 20–35% of calories (AMDR),
+   * fiber 14 g per 1,000 kcal (Dietary Guidelines).
+   */
+  function mealTargets(dayKcal, proteinPerDay, meal) {
+    var share = MEAL_SHARE[meal] || 0.3;
+    var kcal = (dayKcal || 2000) * share;
+    return {
+      kcal: Math.round(kcal),
+      protein: Math.round((proteinPerDay || (dayKcal || 2000) * 0.15 / 4) * share),
+      carbsMin: Math.round(kcal * 0.45 / 4), carbsMax: Math.round(kcal * 0.65 / 4),
+      fatMin: Math.round(kcal * 0.20 / 9), fatMax: Math.round(kcal * 0.35 / 9),
+      fiber: Math.round((dayKcal || 2000) / 1000 * 14 * share)
+    };
+  }
+
+  // A playful 0–100 balance score with the reasons behind it.
+  // Protein targets are minimums (RDA), so only very large amounts lose points.
+  function score(items, target) {
+    var t = totals(items);
+    var cats = Object.keys(t.byCat).filter(function (k) { return t.byCat[k] > 0; });
+    var parts = [], s = 0;
+    if (!items || !items.length) return { score: 0, parts: [], badges: [], totals: t };
+    var inRange = function (v, lo, hi) { return v >= lo * 0.85 && v <= hi * 1.15; };
+    var pr = target.protein ? t.protein / target.protein : 0;
+    if (pr >= 0.8 && pr <= 2.5) { s += 20; parts.push('protein covered'); }
+    else if (pr >= 0.5) { s += 10; parts.push(pr < 0.8 ? 'a bit low on protein' : 'a lot of protein'); }
+    else parts.push('add some protein');
+    var fr = target.fiber ? t.fiber / target.fiber : 0;
+    if (fr >= 0.8) { s += 20; parts.push('great fiber'); } else if (fr >= 0.4) { s += 10; parts.push('more fiber would help'); } else parts.push('needs fiber');
+    var kr = target.kcal ? t.kcal / target.kcal : 0;
+    if (kr >= 0.7 && kr <= 1.2) { s += 20; parts.push('energy just right'); }
+    else if (kr >= 0.5 && kr <= 1.5) { s += 10; parts.push(kr < 0.7 ? 'a light meal' : 'a big meal'); }
+    else parts.push(kr < 0.5 ? 'very light' : 'very large');
+    if (inRange(t.fat, target.fatMin, target.fatMax)) { s += 10; } else parts.push(t.fat > target.fatMax ? 'heavy on fat' : 'could use a little healthy fat');
+    if (inRange(t.carbs, target.carbsMin, target.carbsMax)) { s += 10; } else parts.push(t.carbs > target.carbsMax ? 'carb-heavy' : 'light on carbs');
+    if (t.byCat.fiber > 0) { s += 10; parts.push('has veg, fruit or beans'); }
+    if (cats.length >= 3) { s += 10; parts.push(cats.length + ' food groups'); }
+    var badges = [];
+    if (pr >= 0.8) badges.push('💪 Protein power');
+    if (fr >= 0.8) badges.push('🌿 Fiber hero');
+    if (cats.length === 4) badges.push('🌈 All four groups');
+    if (s >= 85) badges.push('⭐ Balanced plate');
+    return { score: Math.min(100, s), parts: parts, badges: badges, totals: t };
+  }
+
+  // Build a balanced plate from foods the eaters can have (for "Surprise me").
+  function surprise(allowedIds, rand) {
+    rand = rand || Math.random;
+    var pick = function (cat) {
+      var opts = FOODS.filter(function (x) { return x.cat === cat && allowedIds.indexOf(x.id) !== -1; });
+      return opts.length ? opts[Math.floor(rand() * opts.length)] : null;
+    };
+    var items = [];
+    var p = pick('protein'), c = pick('carbs'), v1 = pick('fiber'), fat = pick('fat');
+    if (p) items.push({ foodId: p.id, qty: 1 });
+    if (c) items.push({ foodId: c.id, qty: 1 });
+    if (v1) items.push({ foodId: v1.id, qty: 2 });
+    if (fat) items.push({ foodId: fat.id, qty: 1 });
+    return items;
+  }
+
+  var Foods = { CATEGORIES: CATEGORIES, FOODS: FOODS, MEAL_SHARE: MEAL_SHARE, byId: byId, totals: totals, mealTargets: mealTargets, score: score, surprise: surprise };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = Foods;
+  else root.FHFoods = Foods;
+})(this);
+</script>
+  <script>
+/*
+ * Family Health Guide — what makes one person's plan different from another's.
+ *
+ *  - Diet focus: blood-test results, conditions and goals become "focus"
+ *    rules. Each says what was found, which nutrients to favour and which
+ *    food tags to go easy on. The guide, the meal builder and the daily
+ *    targets all read these, so a new blood test changes them all at once.
+ *  - Daily targets: steps, water, active minutes and sleep, sized to the
+ *    person's age, sex, activity, conditions, labs and tracker data.
+ *
+ * Lab-based food rules are for adults; children's ranges differ, so their
+ * results go to the pediatrician instead.
+ */
+(function (root) {
+  'use strict';
+
+  var node = typeof module !== 'undefined' && module.exports;
+  var KB = node ? require('./knowledge.js') : root.FHKnowledge;
+  var Labs = node ? require('./labs.js') : root.FHLabs;
+  var Foods = node ? require('./foods.js') : root.FHFoods;
+
+  function list(v) { return Array.isArray(v) ? v : []; }
+  function has(arr, k) { return list(arr).indexOf(k) !== -1; }
+  function num(v) { return v === undefined || v === null || v === '' || isNaN(Number(v)) ? null : Number(v); }
+
+  // Foods in the meal builder that are good sources of each nutrient
+  // (USDA FoodData Central; "good source" ≈ 10%+ of the daily value per serving).
+  var NUTRIENTS = {
+    solubleFiber: { label: 'soluble fiber', foods: ['oats', 'barley', 'black-beans', 'lentils', 'chickpeas', 'edamame', 'apple', 'berries', 'orange', 'kiwi', 'chia', 'flax', 'brussels', 'sweet-potato', 'avocado', 'carrots'] },
+    omega3: { label: 'omega-3 fats', foods: ['salmon', 'sardines', 'tuna', 'walnuts', 'chia', 'flax'] },
+    nuts: { label: 'nuts & seeds', foods: ['almonds', 'walnuts', 'peanut-butter', 'pumpkin-seeds', 'sunbutter', 'flax'] },
+    unsatFat: { label: 'olive oil & avocado', foods: ['olive-oil', 'avocado', 'olives'] },
+    iron: { label: 'iron', foods: ['beef', 'steak', 'sardines', 'lentils', 'spinach', 'tofu', 'tempeh', 'edamame', 'black-beans', 'chickpeas', 'pumpkin-seeds', 'quinoa'] },
+    vitC: { label: 'vitamin C (helps absorb iron)', foods: ['peppers', 'broccoli', 'kiwi', 'orange', 'berries', 'brussels', 'tomatoes', 'cauliflower'] },
+    vitD: { label: 'vitamin D', foods: ['salmon', 'sardines', 'eggs', 'tuna'] },
+    b12: { label: 'vitamin B12', foods: ['salmon', 'sardines', 'tuna', 'cod', 'beef', 'steak', 'eggs', 'greek-yogurt', 'cottage', 'shrimp', 'turkey'] },
+    calcium: { label: 'calcium', foods: ['greek-yogurt', 'cottage', 'tofu', 'sardines', 'chia', 'broccoli', 'almonds', 'edamame'] },
+    slowCarbs: { label: 'slow-digesting carbs', foods: ['oats', 'barley', 'quinoa', 'lentils', 'black-beans', 'chickpeas', 'ww-pasta', 'ww-bread', 'sweet-potato', 'brown-rice', 'corn-tortilla'] },
+    leanProtein: { label: 'lean protein', foods: ['chicken', 'turkey', 'cod', 'tuna', 'shrimp', 'greek-yogurt', 'cottage', 'pork', 'tofu', 'eggs'] },
+    potassium: { label: 'potassium', foods: ['banana', 'potato', 'sweet-potato', 'spinach', 'avocado', 'black-beans', 'lentils', 'greek-yogurt', 'orange'] },
+    lowFatDairy: { label: 'low-fat dairy', foods: ['greek-yogurt', 'cottage'] },
+    folate: { label: 'folate', foods: ['lentils', 'black-beans', 'chickpeas', 'spinach', 'broccoli', 'edamame', 'avocado', 'orange', 'brussels'] }
+  };
+
+  var SOURCES = {
+    ahaDiet: { title: '2021 Dietary guidance to improve cardiovascular health', org: 'American Heart Association', year: 2021, url: 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001031' },
+    adaNutrition: { title: 'Nutrition therapy for adults with diabetes or prediabetes: a consensus report', org: 'American Diabetes Association', year: 2019, url: 'https://diabetesjournals.org/care/article/42/5/731/40480' },
+    ahaTg: { title: 'Triglycerides and cardiovascular disease: a scientific statement', org: 'American Heart Association', year: 2011, url: 'https://www.ahajournals.org/doi/10.1161/CIR.0b013e3182160726' },
+    odsIron: { title: 'Iron — fact sheet for health professionals', org: 'NIH Office of Dietary Supplements', year: 2024, url: 'https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/' },
+    odsVitD: { title: 'Vitamin D — fact sheet for health professionals', org: 'NIH Office of Dietary Supplements', year: 2024, url: 'https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/' },
+    aaslNafld: { title: 'Practice guidance on the clinical assessment and management of MASLD', org: 'AASLD', year: 2023, url: 'https://journals.lww.com/hep/fulltext/2023/05000/aasld_practice_guidance_on_the_clinical_assessment.31.aspx' },
+    kdigoDiet: { title: 'CKD evaluation and management — diet and lifestyle (sodium under 2 g/day)', org: 'KDIGO', year: 2024, url: 'https://kdigo.org/guidelines/ckd-evaluation-and-management/' },
+    dash: { title: 'DASH eating plan', org: 'NIH National Heart, Lung, and Blood Institute', year: 2021, url: 'https://www.nhlbi.nih.gov/education/dash-eating-plan' },
+    dga: { title: 'Dietary Guidelines for Americans 2020–2025', org: 'USDA & HHS', year: 2020, url: 'https://www.dietaryguidelines.gov/' },
+    pag: { title: 'Physical Activity Guidelines for Americans, 2nd edition', org: 'US Department of Health and Human Services', year: 2018, url: 'https://health.gov/our-work/nutrition-physical-activity/physical-activity-guidelines' },
+    steps: { title: 'Daily steps and all-cause mortality: a meta-analysis of 15 international cohorts (Paluch et al., Lancet Public Health)', org: 'Peer-reviewed meta-analysis', year: 2022, url: 'https://www.thelancet.com/journals/lanpub/article/PIIS2468-2667(21)00302-9/fulltext' },
+    kidSteps: { title: 'How many steps/day are enough? for children and adolescents (Tudor-Locke et al.)', org: 'Int J Behav Nutr Phys Act', year: 2011, url: 'https://ijbnpa.biomedcentral.com/articles/10.1186/1479-5868-8-78' },
+    postMeal: { title: 'Walking after meals lowers post-meal blood sugar more than one daily walk (Reynolds et al., Diabetologia)', org: 'Randomised crossover trial', year: 2016, url: 'https://link.springer.com/article/10.1007/s00125-016-4085-2' },
+    water: { title: 'Dietary Reference Intakes for water, potassium, sodium, chloride and sulfate', org: 'National Academies', year: 2005, url: 'https://nap.nationalacademies.org/catalog/10925' },
+    acsmFluid: { title: 'Exercise and fluid replacement — position stand', org: 'American College of Sports Medicine', year: 2007, url: 'https://journals.lww.com/acsm-msse/fulltext/2007/02000/exercise_and_fluid_replacement.22.aspx' },
+    sleepKids: { title: 'Recommended amount of sleep for pediatric populations', org: 'American Academy of Sleep Medicine', year: 2016, url: 'https://jcsm.aasm.org/doi/10.5664/jcsm.5866' }
+  };
+
+  function lab(latest, id) { return latest[id] ? latest[id].value : null; }
+  function labText(latest, id) {
+    var d = Labs.labDef(id);
+    return d.label + ' ' + latest[id].value + ' ' + d.unit + ' (' + latest[id].date + ')';
+  }
+
+  /*
+   * Focus rules for one person. `weight` ranks how strongly a rule shapes
+   * food picks: blood test 3, diagnosed condition 2, goal or life stage 1.
+   */
+  function focus(member, age) {
+    var conds = list(member.conditions);
+    var latest = (age === null || age >= 18) ? Labs.latestLabs(member) : {};
+    var male = member.sex === 'male';
+    var out = [];
+    function add(r) { out.push(r); }
+
+    // Blood sugar
+    var a1c = lab(latest, 'a1c'), glu = lab(latest, 'glucose');
+    var sugarLab = (a1c !== null && a1c >= 5.7) ? 'a1c' : (glu !== null && glu >= 100) ? 'glucose' : null;
+    var diabetic = has(conds, 'diabetes1') || has(conds, 'diabetes2');
+    if (sugarLab || diabetic || has(conds, 'prediabetes')) {
+      add({ id: 'sugar', icon: '🩸', short: 'steadier blood sugar', weight: sugarLab ? 3 : 2,
+        title: sugarLab ? 'Steady your blood sugar' : 'Blood-sugar friendly eating',
+        because: sugarLab ? labText(latest, sugarLab) + (a1c >= 6.5 || glu >= 126 ? ' — diabetes range' : ' — prediabetes range') : 'Diagnosed ' + (diabetic ? 'diabetes' : 'prediabetes'),
+        boost: ['slowCarbs', 'solubleFiber', 'leanProtein'], caution: ['refined-carb', 'added-sugar'],
+        eatMore: ['Beans, lentils and whole grains instead of white rice, white bread and pasta', 'Protein and vegetables at every meal — they slow how fast sugar rises'],
+        easyOn: ['White rice, white bread, regular pasta', 'Sugary drinks, juice and sweets'],
+        tip: 'A 10–15 minute walk after meals lowers the blood-sugar rise more than one longer walk at another time.',
+        sources: ['adaNutrition', 'postMeal'], lab: !!sugarLab });
+    }
+
+    // LDL / total cholesterol
+    var ldl = lab(latest, 'ldl'), tc = lab(latest, 'tc');
+    var ldlLab = ldl !== null ? (ldl >= 130 ? 'ldl' : null) : (tc !== null && tc >= 240 ? 'tc' : null);
+    if (ldlLab || has(conds, 'cholesterol') || has(conds, 'heart')) {
+      add({ id: 'ldl', icon: '❤️', short: 'lower LDL', weight: ldlLab ? 3 : 2, title: 'Lower your LDL cholesterol',
+        because: ldlLab ? labText(latest, ldlLab) + ' — above the 130 mg/dL goal for most adults' : 'Diagnosed ' + (has(conds, 'heart') ? 'heart disease' : 'high cholesterol'),
+        boost: ['solubleFiber', 'nuts', 'omega3', 'unsatFat'], caution: ['high-satfat'],
+        eatMore: ['Oats, barley, beans and lentils (soluble fiber binds cholesterol)', 'A handful of nuts most days', 'Fish twice a week; olive oil instead of butter'],
+        easyOn: ['Butter, cheese, fatty and processed meats', 'Pastries and fried foods'],
+        tip: 'Diet alone typically lowers LDL by 10–20%. Saturated fat under 6% of calories is the AHA target when LDL is high.',
+        sources: ['ahaDiet', 'accCholesterol'], lab: !!ldlLab, satFatPct: 0.06 });
+    }
+
+    // Triglycerides
+    var tg = lab(latest, 'tg');
+    if (tg !== null && tg >= 150) {
+      add({ id: 'tg', icon: '🫀', short: 'lower triglycerides', weight: 3, title: 'Bring triglycerides down',
+        because: labText(latest, 'tg') + ' — normal is under 150',
+        boost: ['omega3', 'solubleFiber', 'slowCarbs'], caution: ['added-sugar', 'refined-carb', 'alcohol'],
+        eatMore: ['Fatty fish (salmon, sardines) 2+ times a week', 'High-fiber carbs instead of refined ones'],
+        easyOn: ['Sugary drinks and sweets', 'Alcohol', 'White bread, white rice, pasta'],
+        tip: 'Triglycerides respond fastest of all blood fats — cutting added sugar and alcohol can drop them 20–50% in weeks.',
+        sources: ['ahaTg'], lab: true, sugarPct: 0.06 });
+    }
+
+    // HDL
+    var hdl = lab(latest, 'hdl');
+    if (hdl !== null && hdl < (male ? 40 : 50)) {
+      add({ id: 'hdl', icon: '🏃', short: 'raise HDL', weight: 2, title: 'Raise your HDL ("good") cholesterol',
+        because: labText(latest, 'hdl') + ' — goal is ' + (male ? '40' : '50') + '+',
+        boost: ['omega3', 'nuts', 'unsatFat'], caution: [],
+        eatMore: ['Olive oil, nuts, avocado and fish in place of refined carbs'], easyOn: ['Refined carbs and trans fats'],
+        tip: 'Aerobic exercise is the strongest lever — your step goal is nudged up for this.', sources: ['ahaDiet'], lab: true, moreSteps: true });
+    }
+
+    // Iron / anemia
+    var fer = lab(latest, 'ferritin'), hgb = lab(latest, 'hgb');
+    var hgbLow = hgb !== null && hgb < (male ? 13 : 12);
+    var ironLab = fer !== null && fer < 45 ? 'ferritin' : hgbLow ? 'hgb' : null;
+    if (ironLab || has(conds, 'anemia')) {
+      add({ id: 'iron', icon: '🧲', short: 'rebuild iron', weight: ironLab ? 3 : 2, title: 'Rebuild your iron',
+        because: ironLab ? labText(latest, ironLab) + (ironLab === 'ferritin' ? ' — iron stores are low' : ' — below the anemia cut-off') : 'Diagnosed anemia',
+        boost: ['iron', 'vitC'], caution: [],
+        eatMore: ['Lean red meat, sardines, lentils, beans, tofu, spinach', 'Pair them with vitamin C (peppers, citrus, kiwi, broccoli) — it can double plant-iron absorption'],
+        easyOn: ['Tea and coffee with meals (wait 1 hour)', 'Calcium supplements at the same meal as iron-rich food'],
+        tip: 'Food helps keep iron up, but low ferritin usually also needs an iron supplement — ask your doctor about the dose.',
+        sources: ['odsIron', 'agaIron'], lab: !!ironLab });
+    }
+
+    // Vitamin D
+    var vd = lab(latest, 'vitd');
+    if ((vd !== null && vd < 20) || has(conds, 'osteoporosis')) {
+      add({ id: 'vitd', icon: '☀️', short: 'vitamin D & bones', weight: vd !== null && vd < 20 ? 3 : 2, title: vd !== null && vd < 20 ? 'Raise your vitamin D' : 'Protect your bones',
+        because: vd !== null && vd < 20 ? labText(latest, 'vitd') + ' — under 20 ng/mL is too low for bone health' : 'Diagnosed osteoporosis',
+        boost: ['vitD', 'calcium'], caution: [],
+        eatMore: ['Salmon, sardines, eggs; fortified milk or plant milk', 'Calcium foods: yogurt, tofu, sardines, broccoli'], easyOn: [],
+        tip: 'Few foods have much vitamin D — a daily supplement is often needed. Ask your doctor what dose fits your level.',
+        sources: ['odsVitD', 'namVitD'], lab: vd !== null && vd < 20 });
+    }
+
+    // B12
+    var b12 = lab(latest, 'b12');
+    if (b12 !== null && b12 < 300) {
+      add({ id: 'b12', icon: '🧠', short: 'more B12', weight: 3, title: 'Get more vitamin B12',
+        because: labText(latest, 'b12') + (b12 < 200 ? ' — low' : ' — borderline'),
+        boost: ['b12'], caution: [],
+        eatMore: ['Fish, eggs, dairy, lean meat — or B12-fortified cereals and plant milks if plant-based'], easyOn: [],
+        tip: 'Metformin and long-term acid reducers lower B12 absorption — mention them to your doctor.', sources: ['odsB12'], lab: true });
+    }
+
+    // Uric acid / gout
+    var ur = lab(latest, 'uric');
+    if ((ur !== null && ur >= 6.8) || has(conds, 'gout')) {
+      add({ id: 'uric', icon: '🦶', short: 'lower uric acid', weight: ur !== null && ur >= 6.8 ? 3 : 2, title: 'Lower uric acid',
+        because: ur !== null && ur >= 6.8 ? labText(latest, 'uric') + ' — above 6.8, where crystals can form' : 'Diagnosed gout',
+        boost: ['lowFatDairy', 'vitC', 'slowCarbs'], caution: ['high-purine', 'alcohol', 'added-sugar'],
+        eatMore: ['Low-fat yogurt and milk', 'Plenty of water'], easyOn: ['Organ meats, shellfish, sardines, red meat', 'Beer and spirits', 'Sugary drinks (fructose raises uric acid)'],
+        tip: 'Your water target is raised — staying well hydrated helps the kidneys clear uric acid.', sources: ['acrGout'], lab: ur !== null && ur >= 6.8, extraWater: 2 });
+    }
+
+    // Liver (ALT) / fatty liver
+    var alt = lab(latest, 'alt');
+    var altHigh = alt !== null && alt > (male ? 33 : 25);
+    if (altHigh || has(conds, 'fattyliver')) {
+      add({ id: 'liver', icon: '🫒', short: 'liver-friendly', weight: altHigh ? 3 : 2, title: 'Take load off your liver',
+        because: altHigh ? labText(latest, 'alt') + ' — above the healthy range' : 'Diagnosed fatty liver',
+        boost: ['solubleFiber', 'omega3', 'unsatFat'], caution: ['added-sugar', 'refined-carb', 'alcohol'],
+        eatMore: ['Mediterranean-style meals: vegetables, beans, fish, olive oil', 'Coffee (2–3 cups) is linked with healthier livers'],
+        easyOn: ['Sugary drinks and sweets', 'Alcohol', 'Refined carbs'],
+        tip: 'Losing 7–10% of body weight is the most effective treatment for fatty liver.', sources: ['aaslNafld'], lab: altHigh });
+    }
+
+    // Kidneys
+    var egfr = lab(latest, 'egfr'), k = lab(latest, 'potassium');
+    var kidneyLab = egfr !== null && egfr < 60;
+    if (kidneyLab || has(conds, 'ckd')) {
+      add({ id: 'kidney', icon: '🫘', short: 'kidney-friendly', weight: kidneyLab ? 3 : 2, title: 'Go easy on your kidneys',
+        because: kidneyLab ? labText(latest, 'egfr') + ' — below 60' : 'Diagnosed kidney disease',
+        boost: ['unsatFat'], caution: ['high-sodium'],
+        eatMore: ['Fresh home-cooked food (less salt)', 'Moderate protein — not more than you need'], easyOn: ['Salty, processed and restaurant food', 'Salt substitutes (they contain potassium)'],
+        tip: 'Kidney diets are individual — ask for a referral to a renal dietitian.', sources: ['kdigoDiet'], lab: kidneyLab, sodiumMg: 2000 });
+    }
+    if (k !== null && k >= 5.1) {
+      add({ id: 'potassium-high', icon: '🍌', short: 'less potassium', weight: 3, title: 'Limit high-potassium foods for now',
+        because: labText(latest, 'potassium') + ' — above normal',
+        boost: [], caution: ['high-potassium'], eatMore: [], easyOn: ['Bananas, potatoes, oranges, avocado, beans, spinach'],
+        tip: 'Ask your doctor whether a medicine is causing it before changing your diet long-term.', sources: ['potassium'], lab: true });
+    }
+
+    // Blood pressure (condition only; readings are in the log)
+    if (has(conds, 'hypertension')) {
+      var kOk = !(k !== null && k >= 5.1) && !kidneyLab && !has(conds, 'ckd');
+      add({ id: 'bp', icon: '🧂', short: 'lower blood pressure', weight: 2, title: 'Lower your blood pressure (DASH)',
+        because: 'Diagnosed high blood pressure',
+        boost: kOk ? ['potassium', 'lowFatDairy', 'solubleFiber'] : ['lowFatDairy', 'solubleFiber'], caution: ['high-sodium'],
+        eatMore: kOk ? ['Fruit, vegetables and beans (potassium)', 'Low-fat dairy'] : ['Vegetables and low-fat dairy'], easyOn: ['Salty, processed and restaurant food'],
+        tip: 'The DASH diet lowers systolic pressure by about 8–14 points; cutting salt adds another 2–8.', sources: ['dash'], lab: false, sodiumMg: 1500 });
+    }
+
+    // Pregnancy
+    if (has(conds, 'pregnancy')) {
+      add({ id: 'pregnancy', icon: '🤰', short: 'pregnancy needs', weight: 2, title: 'Pregnancy nutrition',
+        because: 'Currently pregnant', boost: ['folate', 'iron', 'omega3', 'calcium'], caution: [],
+        eatMore: ['Beans, leafy greens and citrus (folate)', 'Low-mercury fish 2–3 times a week (salmon, sardines, light tuna)'], easyOn: [],
+        tip: 'Keep taking a prenatal vitamin with folic acid and iron.', sources: ['dga'], lab: false });
+    }
+
+    // Goals and life stage (light touch)
+    if (member.goal === 'lose' && (age === null || age >= 18)) {
+      add({ id: 'goal-lose', icon: '🎯', short: 'filling & lighter', weight: 1, title: 'Stay full on fewer calories',
+        because: 'Your goal: lose weight gradually', boost: ['leanProtein', 'solubleFiber'], caution: [],
+        eatMore: ['Protein and fiber at each meal — both keep you full longer'], easyOn: ['Calorie-dense extras (oils, nut butters, cheese) — measure them'],
+        tip: 'A 500 kcal/day deficit is about 1 lb a week.', sources: ['dga'], lab: false });
+    }
+    if (member.goal === 'gain' || (age !== null && age >= 65)) {
+      add({ id: 'protein', icon: '💪', short: 'more protein', weight: 1, title: member.goal === 'gain' ? 'Build muscle' : 'Keep your muscles strong',
+        because: member.goal === 'gain' ? 'Your goal: gain weight / build muscle' : 'Age 65+: protein needs rise to 1.0–1.2 g/kg',
+        boost: ['leanProtein'], caution: [], eatMore: ['Protein spread across 3 meals (25–30 g each)'], easyOn: [],
+        tip: 'Pair it with strength exercise twice a week.', sources: ['pag'], lab: false });
+    }
+    return out;
+  }
+
+  var WEIGHT_TEXT = { 3: 'your blood test', 2: 'your health', 1: 'your goal' };
+
+  // Per-food fit for one person: { score, reasons: [text], cautions: [text] }.
+  function foodPicks(rules) {
+    var picks = {};
+    Foods.FOODS.forEach(function (fd) { picks[fd.id] = { score: 0, reasons: [], cautions: [] }; });
+    rules.forEach(function (r) {
+      var hit = {};
+      r.boost.forEach(function (n) {
+        (NUTRIENTS[n] ? NUTRIENTS[n].foods : []).forEach(function (id) {
+          if (!picks[id] || hit[id]) return;
+          hit[id] = true;
+          picks[id].score += r.weight;
+          picks[id].reasons.push(r.icon + ' ' + NUTRIENTS[n].label + ' → ' + r.short);
+        });
+      });
+      Foods.FOODS.forEach(function (fd) {
+        var bad = r.caution.filter(function (t) { return fd.tags.indexOf(t) !== -1; });
+        if (bad.length) {
+          picks[fd.id].score -= r.weight;
+          picks[fd.id].cautions.push(r.short + ': ' + bad.map(function (t) { return KB.TAG_LABELS[t] || t; }).join(', '));
+        }
+      });
+    });
+    return picks;
+  }
+
+  function topFoods(rule, blockedTags, n) {
+    var ids = [];
+    rule.boost.forEach(function (b) { (NUTRIENTS[b] ? NUTRIENTS[b].foods : []).forEach(function (id) { if (ids.indexOf(id) === -1) ids.push(id); }); });
+    return ids.map(Foods.byId).filter(function (fd) {
+      return fd && !fd.tags.some(function (t) { return blockedTags.indexOf(t) !== -1 || rule.caution.indexOf(t) !== -1; });
+    }).slice(0, n || 6);
+  }
+
+  // ------------------------------------------------------------ daily goals
+
+  function round(n, step) { return Math.round(n / step) * step; }
+
+  function sleepRange(age) {
+    if (age === null) return null;
+    if (age < 1) return [12, 16];
+    if (age < 3) return [11, 14];
+    if (age < 6) return [10, 13];
+    if (age < 13) return [9, 12];
+    if (age < 18) return [8, 10];
+    if (age >= 65) return [7, 8];
+    return [7, 9];
+  }
+
+  // Average steps from the daily log (last 7 entries with steps), else null.
+  function loggedSteps(member) {
+    var d = member.daily || {};
+    var vals = Object.keys(d).sort().reverse().map(function (k) { return num(d[k].steps); }).filter(function (v) { return v !== null && v > 0; }).slice(0, 7);
+    return vals.length >= 3 ? Math.round(vals.reduce(function (s, v) { return s + v; }, 0) / vals.length) : null;
+  }
+
+  var ACTIVITY_STEPS = { sedentary: 4000, light: 6000, moderate: 8000, active: 10000, athlete: 12000 };
+
+  function daily(member, age, rules) {
+    rules = rules || focus(member, age);
+    var conds = list(member.conditions);
+    var male = member.sex === 'male';
+    var w = member.wearable || {};
+    var hasRule = function (id) { return rules.some(function (r) { return r.id === id; }); };
+    var out = { steps: null, water: null, active: null, sleep: null };
+
+    // ---- steps
+    if (age !== null && age >= 6 && age < 18) {
+      var kid = age < 13 ? (male ? 13000 : 11000) : 10000;
+      out.steps = { goal: kid, base: null, why: ['Kids and teens need 60+ minutes of active play a day; that is about ' + kid.toLocaleString('en-US') + ' steps at this age.'], sources: ['kidSteps', 'pag'] };
+    } else if (age === null || age >= 18) {
+      var tracked = num(w.steps), logged = loggedSteps(member);
+      var base = tracked || logged;
+      var baseFrom = tracked ? 'your tracker' : logged ? 'your last week of logged steps' : null;
+      if (!base) {
+        var ad = num((member.answers || {}).active_days);
+        base = ad !== null ? (ad >= 5 ? 9000 : ad >= 3 ? 7000 : ad >= 1 ? 5500 : 4000) : ACTIVITY_STEPS[member.activity] || 6000;
+      }
+      var plateau = age !== null && age >= 60 ? 7000 : 9000;
+      if (hasRule('hdl') || hasRule('sugar') || hasRule('tg') || member.goal === 'lose') plateau += 1000;
+      var why = [];
+      var goal;
+      var easy = (num(w.recovery) !== null && num(w.recovery) < 50) || (num(w.hrv) && num(w.hrvBaseline) && num(w.hrv) < num(w.hrvBaseline) * 0.8);
+      if (base >= plateau) {
+        goal = round(base, 500);
+        why.push('You average about ' + round(base, 500).toLocaleString('en-US') + ' steps — past the point (' + plateau.toLocaleString('en-US') + ') where the health benefit levels off. Keep it up.');
+      } else if (easy) {
+        goal = round(base, 500);
+        why.push('Your tracker shows low recovery, so the goal holds at your usual ' + goal.toLocaleString('en-US') + ' until it bounces back.');
+      } else {
+        goal = Math.min(plateau, round(base + 1000, 500));
+        why.push((baseFrom ? 'You average about ' + round(base, 500).toLocaleString('en-US') + ' steps (from ' + baseFrom + ').' : 'Estimated from your activity answers — log a few days or add tracker steps to fine-tune it.') +
+          ' Adding 1,000 a day is a step-up most people keep; work toward ' + plateau.toLocaleString('en-US') + '.');
+        why.push('In a 15-study analysis, risk of death fell steadily up to about ' + (age !== null && age >= 60 ? '6,000–8,000 steps for people 60+' : '8,000–10,000 steps for under-60s') + '.');
+      }
+      if (hasRule('sugar')) why.push('Split some of them into 10–15 minute walks after meals — it blunts blood-sugar spikes.');
+      if (hasRule('hdl')) why.push('Brisk walking raises HDL — your goal is set a little higher for this.');
+      if (has(conds, 'heart') || has(conds, 'ckd')) why.push('With a heart or kidney condition, check new exercise plans with your care team.');
+      if (has(conds, 'pregnancy')) why.push('Pregnancy: keep moving at a pace where you can still talk — 150 minutes a week is the goal.');
+      out.steps = { goal: goal, base: base, plateau: plateau, why: why, sources: hasRule('sugar') ? ['steps', 'postMeal'] : ['steps'] };
+    }
+
+    // ---- active minutes
+    if (age !== null && age < 6 && age >= 3) out.active = { text: '3 hours of active play a day, including 1 hour energetic', sources: ['pag'] };
+    else if (age !== null && age < 18 && age >= 6) out.active = { text: '60 minutes a day, with vigorous play and muscle/bone-strengthening 3 days a week', sources: ['pag'] };
+    else if (age === null || age >= 18) out.active = { text: '150 minutes a week of moderate activity (or 75 vigorous), plus strength training 2 days' + (age !== null && age >= 65 ? ', plus balance exercises' : ''), sources: ['pag'] };
+
+    // ---- water (cups of 8 oz from drinks)
+    if (has(conds, 'heart') || (has(conds, 'ckd') && (lab(Labs.latestLabs(member), 'egfr') || 60) < 30)) {
+      out.water = { cups: null, why: ['Your care team may set a fluid limit — follow theirs instead of a general goal.'], sources: ['water'] };
+    } else if (age !== null && age >= 1) {
+      var cups;
+      if (age < 4) cups = 4; else if (age < 9) cups = 5; else if (age < 14) cups = male ? 8 : 7; else if (age < 19) cups = male ? 11 : 8; else cups = male ? 13 : 9;
+      var why2 = ['Base: ' + cups + ' cups — the National Academies\' adequate intake from drinks for ' + (age < 19 ? 'this age' : male ? 'men' : 'women') + ' (food supplies the other ~20%).'];
+      if (has(conds, 'pregnancy')) { cups = 10; why2.push('Pregnancy: 10 cups.'); }
+      if (has(conds, 'breastfeeding')) { cups = 13; why2.push('Breastfeeding: 13 cups.'); }
+      var extra = { moderate: 1, active: 2, athlete: 3 }[member.activity] || 0;
+      if (extra && age >= 9) { cups += extra; why2.push('+' + extra + ' for your activity level — drink more on hot days or long workouts.'); }
+      rules.forEach(function (r) { if (r.extraWater) { cups += r.extraWater; why2.push('+' + r.extraWater + ' to help ' + r.short + '.'); } });
+      if (age >= 70) why2.push('Thirst fades with age — drink on a schedule rather than waiting to feel thirsty.');
+      out.water = { cups: cups, liters: Math.round(cups * 0.237 * 10) / 10, why: why2, sources: ['water'].concat(extra ? ['acsmFluid'] : []) };
+    }
+
+    // ---- sleep
+    var sr = sleepRange(age);
+    if (sr) {
+      var ws = num(w.sleepHours);
+      out.sleep = { min: sr[0], max: sr[1], tracked: ws, sources: [age !== null && age < 18 ? 'sleepKids' : 'sleepAdult'] };
+    }
+    return out;
+  }
+
+  // Tweaks to the guide's daily nutrient targets from the focus rules.
+  function targetTweaks(rules) {
+    var t = {};
+    rules.forEach(function (r) {
+      if (r.satFatPct) t.satFatPct = Math.min(t.satFatPct || 1, r.satFatPct);
+      if (r.sugarPct) t.sugarPct = Math.min(t.sugarPct || 1, r.sugarPct);
+      if (r.sodiumMg) t.sodiumMg = Math.min(t.sodiumMg || 99999, r.sodiumMg);
+    });
+    return t;
+  }
+
+  var Personal = { NUTRIENTS: NUTRIENTS, SOURCES: SOURCES, focus: focus, foodPicks: foodPicks, topFoods: topFoods, daily: daily, sleepRange: sleepRange, targetTweaks: targetTweaks, WEIGHT_TEXT: WEIGHT_TEXT };
+
+  if (node) module.exports = Personal;
+  else root.FHPersonal = Personal;
+})(this);
+</script>
+  <script>
+/*
  * Family Health Guide — engine.
  *
  * Pure functions: profile in, guide out. No DOM, no storage, so the same code
@@ -995,6 +2061,7 @@ ul.plain li { padding: 4px 0; }
   'use strict';
 
   var KB = (typeof module !== 'undefined' && module.exports) ? require('./knowledge.js') : root.FHKnowledge;
+  var Personal = (typeof module !== 'undefined' && module.exports) ? require('./personal.js') : root.FHPersonal;
 
   var DAY_MS = 24 * 60 * 60 * 1000;
   var MEALS = ['breakfast', 'lunch', 'dinner'];
@@ -1157,6 +2224,9 @@ ul.plain li { padding: 4px 0; }
       list(band.caution).forEach(function (t) { addReason(caution, t, band.label); });
     }
     // Anything that's blocked doesn't also need a caution.
+    Personal.focus(member, age).forEach(function (r) {
+      if (r.lab) r.caution.forEach(function (t) { addReason(caution, t, 'blood test: ' + r.short); });
+    });
     Object.keys(block).forEach(function (t) { delete caution[t]; });
 
     return {
@@ -1231,6 +2301,8 @@ ul.plain li { padding: 4px 0; }
     var weight = currentWeightKg(member);
     var height = member.heightCm ? Number(member.heightCm) : null;
     var t = { notes: [] };
+    var focus = Personal.focus(member, age);
+    var tweak = Personal.targetTweaks(focus);
 
     // Calories
     if (member.calorieOverride) {
@@ -1275,13 +2347,14 @@ ul.plain li { padding: 4px 0; }
 
     if (t.kcal) {
       t.fiber = Math.round(t.kcal / 1000 * 14) + ' g';
-      t.addedSugar = age < 2 ? 'None' : 'under ' + Math.round(t.kcal * 0.10 / 4) + ' g';
-      var satPct = (has('cholesterol') || has('heart')) ? 0.06 : 0.10;
+      t.addedSugar = age < 2 ? 'None' : 'under ' + Math.round(t.kcal * (tweak.sugarPct || 0.10) / 4) + ' g';
+      var satPct = Math.min((has('cholesterol') || has('heart')) ? 0.06 : 0.10, tweak.satFatPct || 1);
       t.satFat = 'under ' + Math.round(t.kcal * satPct / 9) + ' g';
     }
     var na = sodiumMg(age);
     if (na) {
       if (has('hypertension') || has('heart') || has('ckd')) na = Math.min(na, 1500);
+      if (tweak.sodiumMg) na = Math.min(na, tweak.sodiumMg);
       t.sodium = 'under ' + na.toLocaleString('en-US') + ' mg';
     }
     var ca = calciumMg(age, sex);
@@ -1291,8 +2364,9 @@ ul.plain li { padding: 4px 0; }
       if (member.diet === 'vegetarian' || member.diet === 'vegan') fe = Math.round(fe * 1.8);
       t.iron = fe + ' mg' + ((member.diet === 'vegetarian' || member.diet === 'vegan') ? ' (plant-based ×1.8)' : '');
     }
-    var cups = fluidsCups(age, sex);
-    if (cups) t.fluids = cups + ' cups';
+    var day = Personal.daily(member, age, focus);
+    if (day.water && day.water.cups) t.fluids = day.water.cups + ' cups (' + day.water.liters + ' L) from drinks';
+    else if (!day.water) { var cups = fluidsCups(age, sex); if (cups) t.fluids = cups + ' cups'; }
     if (has('heart')) t.notes.push('Heart failure: the care team may set a fluid limit — it overrides the fluids guide.');
     if (has('ckd')) t.notes.push('Kidney disease: fluid, potassium and phosphorus limits come from the care team.');
     return t;
@@ -1380,6 +2454,12 @@ ul.plain li { padding: 4px 0; }
     if (list(member.conditions).indexOf('pregnancy') !== -1) addItem(supplements, 'Prenatal vitamin with folic acid, iron & iodine', 'Pregnancy');
 
     // Custom rules typed by the family
+    var focus = Personal.focus(member, age);
+    focus.forEach(function (r) {
+      if (!r.lab) return;
+      r.eatMore.forEach(function (f) { addItem(emphasize, f, 'Blood test: ' + r.short); });
+      r.easyOn.forEach(function (f) { addItem(limit, f, 'Blood test: ' + r.short); });
+    });
     list(member.avoidFoods).forEach(function (f) { if (f) addItem(avoid, f, 'Added by family'); });
     list(member.limitFoods).forEach(function (f) { if (f) addItem(limit, f, 'Added by family'); });
     list(member.favoriteFoods).forEach(function (f) { if (f) addItem(emphasize, f, 'Favorite', { favorite: true }); });
@@ -1460,7 +2540,9 @@ ul.plain li { padding: 4px 0; }
       lifeStageTips: band ? band.tips : [],
       labelWords: labelWords,
       allergies: allergies,
-      rules: rules
+      rules: rules,
+      focus: focus,
+      daily: Personal.daily(member, age, focus)
     };
   }
 
@@ -1704,339 +2786,6 @@ ul.plain li { padding: 4px 0; }
 
   if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
   else root.FHEngine = Engine;
-})(this);
-</script>
-  <script>
-/*
- * Family Health Guide — blood tests and wearable data (Oura, WHOOP, etc.).
- *
- * Lab cut-offs come from the guideline named on each test. Labs differ a
- * little in their reference ranges, so the printed range on a report wins
- * when it disagrees. Wearable numbers are consumer-device estimates: useful
- * for trends, not for diagnosis.
- */
-(function (root) {
-  'use strict';
-
-  var SOURCES = {
-    adaDx: { title: 'Standards of Care in Diabetes — diagnosis (A1C, fasting glucose; confirm with a repeat test)', org: 'American Diabetes Association', year: 2025, url: 'https://diabetesjournals.org/care/article/48/Supplement_1/S27/157566' },
-    accCholesterol: { title: 'Guideline on the management of blood cholesterol', org: 'ACC/AHA', year: 2018, url: 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000625' },
-    atp3: { title: 'Third Report of the NCEP Expert Panel (ATP III) — lipid categories', org: 'NHLBI', year: 2002, url: 'https://www.nhlbi.nih.gov/files/docs/resources/heart/atp3full.pdf' },
-    kdigo: { title: 'Clinical practice guideline for the evaluation and management of CKD', org: 'KDIGO', year: 2024, url: 'https://kdigo.org/guidelines/ckd-evaluation-and-management/' },
-    acgLiver: { title: 'ACG clinical guideline: evaluation of abnormal liver chemistries (healthy ALT ≈ 29–33 U/L men, 19–25 U/L women)', org: 'American College of Gastroenterology', year: 2017, url: 'https://journals.lww.com/ajg/fulltext/2017/01000/acg_clinical_guideline__evaluation_of_abnormal.13.aspx' },
-    ataThyroid: { title: 'Thyroid function tests (typical TSH reference range about 0.4–4.5 mIU/L)', org: 'American Thyroid Association', year: 2024, url: 'https://www.thyroid.org/thyroid-function-tests/' },
-    agaIron: { title: 'Guidelines on the gastrointestinal evaluation of iron deficiency anemia (ferritin cut-off 45 ng/mL)', org: 'American Gastroenterological Association', year: 2020, url: 'https://www.gastrojournal.org/article/S0016-5085(20)35066-0/fulltext' },
-    whoHb: { title: 'Guideline on haemoglobin cutoffs to define anaemia', org: 'World Health Organization', year: 2024, url: 'https://www.who.int/publications/i/item/9789240088542' },
-    namVitD: { title: 'Dietary Reference Intakes for calcium and vitamin D (20 ng/mL meets the needs of 97.5% of people)', org: 'National Academy of Medicine', year: 2011, url: 'https://nap.nationalacademies.org/catalog/13050' },
-    endoVitD: { title: 'Vitamin D for the prevention of disease (no routine testing for healthy adults under 75)', org: 'Endocrine Society', year: 2024, url: 'https://academic.oup.com/jcem/article/109/8/1907/7685305' },
-    odsB12: { title: 'Vitamin B12 — fact sheet for health professionals', org: 'NIH Office of Dietary Supplements', year: 2024, url: 'https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/' },
-    acrGout: { title: 'Guideline for the management of gout (urate saturation ≈ 6.8 mg/dL)', org: 'American College of Rheumatology', year: 2020, url: 'https://rheumatology.org/gout-guideline' },
-    potassium: { title: 'Potassium — fact sheet (normal serum 3.6–5.2 mmol/L in most labs)', org: 'NIH Office of Dietary Supplements', year: 2022, url: 'https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/' },
-    ahaRhr: { title: 'All about heart rate (normal resting 60–100 bpm)', org: 'American Heart Association', year: 2024, url: 'https://www.heart.org/en/health-topics/high-blood-pressure/the-facts-about-high-blood-pressure/all-about-heart-rate-pulse' },
-    rhrMeta: { title: 'Resting heart rate and all-cause and cardiovascular mortality: meta-analysis (Zhang et al., CMAJ)', org: 'Peer-reviewed meta-analysis', year: 2016, url: 'https://www.cmaj.ca/content/188/3/E53' },
-    deviceSleep: { title: 'Performance of seven consumer sleep-tracking devices compared with polysomnography (Chinoy et al., Sleep)', org: 'Peer-reviewed validation study', year: 2021, url: 'https://academic.oup.com/sleep/article/44/5/zsaa291/6055610' },
-    sleepAdult: { title: 'Recommended amount of sleep for a healthy adult (joint consensus)', org: 'AASM & Sleep Research Society', year: 2015, url: 'https://aasm.org/resources/pdf/pressroom/adult-sleep-duration-consensus.pdf' },
-    fdaOximeter: { title: 'Pulse oximeter accuracy and limitations', org: 'FDA', year: 2024, url: 'https://www.fda.gov/medical-devices/safety-communications/pulse-oximeter-accuracy-and-limitations-fda-safety-communication' },
-    apaStress: { title: 'Stress effects on the body', org: 'American Psychological Association', year: 2023, url: 'https://www.apa.org/topics/stress/body' },
-    hrvReview: { title: 'An overview of heart rate variability metrics and norms (Shaffer & Ginsberg, Frontiers in Public Health) — HRV is individual; compare with your own baseline', org: 'Peer-reviewed review', year: 2017, url: 'https://www.frontiersin.org/articles/10.3389/fpubh.2017.00258/full' }
-  };
-
-  var STRENGTH = {
-    guideline: 'National guideline',
-    lab: 'Lab reference range',
-    moderate: 'Moderate evidence (consistent observational studies)',
-    device: 'Consumer-device estimate — good for trends, not diagnosis'
-  };
-
-  // US units; `si` converts US → SI for metric display.
-  var LABS = [
-    { id: 'a1c', label: 'Hemoglobin A1C', unit: '%', step: 0.1, group: 'Blood sugar' },
-    { id: 'glucose', label: 'Fasting glucose', unit: 'mg/dL', si: { unit: 'mmol/L', factor: 1 / 18 }, group: 'Blood sugar' },
-    { id: 'tc', label: 'Total cholesterol', unit: 'mg/dL', si: { unit: 'mmol/L', factor: 1 / 38.67 }, group: 'Cholesterol' },
-    { id: 'ldl', label: 'LDL cholesterol', unit: 'mg/dL', si: { unit: 'mmol/L', factor: 1 / 38.67 }, group: 'Cholesterol' },
-    { id: 'hdl', label: 'HDL cholesterol', unit: 'mg/dL', si: { unit: 'mmol/L', factor: 1 / 38.67 }, group: 'Cholesterol' },
-    { id: 'tg', label: 'Triglycerides', unit: 'mg/dL', si: { unit: 'mmol/L', factor: 1 / 88.57 }, group: 'Cholesterol' },
-    { id: 'egfr', label: 'eGFR (kidney filtering)', unit: 'mL/min/1.73m²', group: 'Kidney & liver' },
-    { id: 'alt', label: 'ALT (liver enzyme)', unit: 'U/L', group: 'Kidney & liver' },
-    { id: 'potassium', label: 'Potassium', unit: 'mmol/L', step: 0.1, group: 'Kidney & liver' },
-    { id: 'hgb', label: 'Hemoglobin', unit: 'g/dL', step: 0.1, group: 'Blood count & iron' },
-    { id: 'ferritin', label: 'Ferritin (iron stores)', unit: 'ng/mL', group: 'Blood count & iron' },
-    { id: 'tsh', label: 'TSH (thyroid)', unit: 'mIU/L', step: 0.01, group: 'Vitamins & hormones' },
-    { id: 'vitd', label: 'Vitamin D, 25-OH', unit: 'ng/mL', si: { unit: 'nmol/L', factor: 2.5 }, group: 'Vitamins & hormones' },
-    { id: 'b12', label: 'Vitamin B12', unit: 'pg/mL', si: { unit: 'pmol/L', factor: 0.738 }, group: 'Vitamins & hormones' },
-    { id: 'uric', label: 'Uric acid', unit: 'mg/dL', step: 0.1, si: { unit: 'µmol/L', factor: 59.48 }, group: 'Vitamins & hormones' }
-  ];
-
-  function labDef(id) { return LABS.filter(function (l) { return l.id === id; })[0]; }
-
-  function list(v) { return Array.isArray(v) ? v : []; }
-
-  // Latest value of each test across all lab entries, with its date.
-  function latestLabs(member) {
-    var out = {};
-    list(member.labs).slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; }).forEach(function (entry) {
-      Object.keys(entry.values || {}).forEach(function (k) {
-        var v = entry.values[k];
-        if (v !== null && v !== undefined && v !== '' && !isNaN(Number(v))) out[k] = { value: Number(v), date: entry.date };
-      });
-    });
-    return out;
-  }
-
-  // Interprets one value: { level: ok|low|high|watch|alert, text }.
-  function interpret(id, v, sex, pregnant) {
-    var male = sex === 'male';
-    switch (id) {
-      case 'a1c': return v >= 6.5 ? { level: 'alert', text: 'In the diabetes range (6.5%+)' } : v >= 5.7 ? { level: 'watch', text: 'Prediabetes range (5.7–6.4%)' } : { level: 'ok', text: 'Normal (under 5.7%)' };
-      case 'glucose': return v >= 126 ? { level: 'alert', text: 'In the diabetes range (126+ fasting)' } : v >= 100 ? { level: 'watch', text: 'Prediabetes range (100–125)' } : v < 70 ? { level: 'watch', text: 'Low (under 70)' } : { level: 'ok', text: 'Normal (70–99 fasting)' };
-      case 'tc': return v >= 240 ? { level: 'high', text: 'High (240+)' } : v >= 200 ? { level: 'watch', text: 'Borderline high (200–239)' } : { level: 'ok', text: 'Desirable (under 200)' };
-      case 'ldl': return v >= 190 ? { level: 'alert', text: 'Very high (190+)' } : v >= 160 ? { level: 'high', text: 'High (160–189)' } : v >= 130 ? { level: 'watch', text: 'Borderline high (130–159)' } : v >= 100 ? { level: 'ok', text: 'Near optimal (100–129)' } : { level: 'ok', text: 'Optimal (under 100)' };
-      case 'hdl': return v < (male ? 40 : 50) ? { level: 'watch', text: 'Low (under ' + (male ? 40 : 50) + ')' } : v >= 60 ? { level: 'ok', text: 'Protective (60+)' } : { level: 'ok', text: 'Normal' };
-      case 'tg': return v >= 500 ? { level: 'alert', text: 'Very high (500+) — pancreatitis risk' } : v >= 200 ? { level: 'high', text: 'High (200–499)' } : v >= 150 ? { level: 'watch', text: 'Borderline high (150–199)' } : { level: 'ok', text: 'Normal (under 150)' };
-      case 'egfr': return v < 30 ? { level: 'alert', text: 'Severely reduced (under 30)' } : v < 60 ? { level: 'high', text: 'Reduced (under 60)' } : v < 90 ? { level: 'ok', text: 'Mildly reduced or normal for age (60–89)' } : { level: 'ok', text: 'Normal (90+)' };
-      case 'alt': return v > (male ? 33 : 25) * 2 ? { level: 'high', text: 'Raised (more than twice the healthy upper limit)' } : v > (male ? 33 : 25) ? { level: 'watch', text: 'Above the healthy upper limit (' + (male ? 33 : 25) + ')' } : { level: 'ok', text: 'Normal' };
-      case 'potassium': return v >= 6 || v < 3 ? { level: 'alert', text: v >= 6 ? 'Dangerously high (6.0+)' : 'Dangerously low (under 3.0)' } : v > 5.2 || v < 3.5 ? { level: 'high', text: v > 5.2 ? 'High (over 5.2)' : 'Low (under 3.5)' } : { level: 'ok', text: 'Normal (3.5–5.2)' };
-      case 'hgb':
-        var cut = pregnant ? 11 : male ? 13 : 12;
-        return v < cut - 2 ? { level: 'alert', text: 'Anemia, moderate or worse (under ' + (cut - 2) + ')' } : v < cut ? { level: 'high', text: 'Anemia (under ' + cut + ')' } : { level: 'ok', text: 'Normal' };
-      case 'ferritin': return v < 30 ? { level: 'high', text: 'Low iron stores (under 30)' } : v < 45 ? { level: 'watch', text: 'Possibly low iron stores (30–44)' } : v > 300 ? { level: 'watch', text: 'High (over 300) — can be inflammation or iron overload' } : { level: 'ok', text: 'Normal' };
-      case 'tsh': return v > 10 ? { level: 'high', text: 'High (over 10)' } : v > 4.5 ? { level: 'watch', text: 'Above typical range (over 4.5)' } : v < 0.4 ? { level: 'watch', text: 'Below typical range (under 0.4)' } : { level: 'ok', text: 'Typical range (0.4–4.5)' };
-      case 'vitd': return v < 12 ? { level: 'high', text: 'Deficient (under 12)' } : v < 20 ? { level: 'watch', text: 'Inadequate for some people (12–19)' } : v > 50 ? { level: 'watch', text: 'High (over 50) — check supplement dose' } : { level: 'ok', text: 'Adequate (20–50)' };
-      case 'b12': return v < 200 ? { level: 'high', text: 'Low (under 200)' } : v < 300 ? { level: 'watch', text: 'Borderline (200–300)' } : { level: 'ok', text: 'Normal' };
-      case 'uric': return v > 6.8 ? { level: 'watch', text: 'Above the level where crystals can form (6.8)' } : { level: 'ok', text: 'Normal' };
-    }
-    return { level: 'ok', text: '' };
-  }
-
-  var LAB_SOURCES = { a1c: 'adaDx', glucose: 'adaDx', tc: 'atp3', ldl: 'accCholesterol', hdl: 'atp3', tg: 'accCholesterol', egfr: 'kdigo', alt: 'acgLiver',
-    potassium: 'potassium', hgb: 'whoHb', ferritin: 'agaIron', tsh: 'ataThyroid', vitd: 'namVitD', b12: 'odsB12', uric: 'acrGout' };
-
-  // Advice for each test when out of range: [level, title, todo[], suggestion?]
-  function adviceFor(id, r, v, member) {
-    var conds = list(member.conditions);
-    var has = function (c) { return conds.indexOf(c) !== -1; };
-    switch (id) {
-      case 'a1c':
-      case 'glucose':
-        if (has('diabetes1') || has('diabetes2')) return null;
-        if (r.level === 'alert') return ['doctor', 'Blood sugar in the diabetes range', ['A diagnosis needs a second abnormal test (unless there are clear symptoms) — book a follow-up to confirm.', 'If confirmed, ask about diabetes education and nutrition counseling.'], { kind: 'condition', key: 'diabetes2', label: 'Type 2 diabetes — confirm with a repeat test', checked: false }];
-        if (r.level === 'watch' && (id === 'a1c' ? v >= 5.7 : v >= 100)) return ['doctor', 'Blood sugar in the prediabetes range', ['Losing 5–7% of body weight and 150 minutes a week of activity cut progression to diabetes by about half.', 'Retest yearly.'], { kind: 'condition', key: 'prediabetes', label: 'Prediabetes (from lab result)', checked: true }];
-        return null;
-      case 'ldl':
-        if (r.level === 'alert') return ['doctor', 'Very high LDL cholesterol (190+)', ['At this level guidelines recommend a statin regardless of other risks, and checking family members for inherited high cholesterol.'], { kind: 'condition', key: 'cholesterol', label: 'High cholesterol (from lab result)', checked: true }];
-        if (r.level === 'high') return ['doctor', 'High LDL cholesterol', ['Ask for a 10-year heart-risk estimate to decide about treatment.', 'Cut saturated fat, add soluble fiber (oats, beans) and move more.'], { kind: 'condition', key: 'cholesterol', label: 'High cholesterol (from lab result)', checked: true }];
-        if (r.level === 'watch') return ['change', 'LDL a little high', ['Diet changes can lower LDL 10–20%: less saturated fat, more soluble fiber, nuts and plant sterols.']];
-        return null;
-      case 'tc':
-        return null;
-      case 'hdl':
-        return r.level === 'watch' ? ['change', 'Low HDL ("good") cholesterol', ['Regular aerobic exercise, not smoking and losing extra weight raise HDL.']] : null;
-      case 'tg':
-        if (r.level === 'alert') return ['urgent', 'Very high triglycerides (500+)', ['Call your doctor soon — this level raises the risk of pancreatitis.', 'Avoid alcohol and sugary drinks until it\'s rechecked.']];
-        if (r.level === 'high' || r.level === 'watch') return ['change', 'Triglycerides above normal', ['Cut sugary drinks, refined carbs and alcohol; eat fatty fish; lose extra weight.']];
-        return null;
-      case 'egfr':
-        if (r.level === 'alert' || r.level === 'high') return ['doctor', 'Reduced kidney function (eGFR ' + v + ')', ['Kidney disease is confirmed when eGFR stays under 60 for 3+ months — ask about a repeat test and a urine albumin test.', 'Don\'t start potassium supplements or salt substitutes without your doctor.'], { kind: 'condition', key: 'ckd', label: 'Chronic kidney disease — confirm with a repeat test', checked: false }];
-        return null;
-      case 'alt':
-        if (r.level === 'high' || r.level === 'watch') return [r.level === 'high' ? 'doctor' : 'change', 'Liver enzyme (ALT) above the healthy range', ['The most common cause is fatty liver; others include alcohol, medicines and hepatitis — mention it to your doctor.', 'Cutting alcohol and sugary drinks and losing extra weight lowers ALT.']];
-        return null;
-      case 'potassium':
-        if (r.level === 'alert') return ['urgent', 'Potassium dangerously ' + (v >= 6 ? 'high' : 'low'), ['Call your doctor today — this can affect heart rhythm.']];
-        if (r.level === 'high') return ['doctor', 'Potassium out of range', ['Ask your doctor whether medicines or diet need adjusting.']];
-        return null;
-      case 'hgb':
-        if (r.level === 'alert' || r.level === 'high') return ['doctor', 'Hemoglobin shows anemia', ['Ask what\'s causing it — iron, B12 or folate tests are usually next.'], { kind: 'condition', key: 'anemia', label: 'Anemia (from lab result)', checked: true }];
-        return null;
-      case 'ferritin':
-        if (r.level === 'high') return ['doctor', 'Low iron stores (ferritin ' + v + ')', ['Ask your doctor about iron treatment and the cause (heavy periods, diet, gut absorption).', 'Eat iron-rich foods with vitamin C; keep tea and coffee away from meals.'], { kind: 'condition', key: 'anemia', label: 'Iron deficiency (from lab result)', checked: false }];
-        if (r.level === 'watch' && v < 45) return ['change', 'Iron stores on the low side', ['Iron-rich foods with vitamin C; recheck at your next blood test.']];
-        if (r.level === 'watch') return ['doctor', 'High ferritin', ['Ask your doctor whether it reflects inflammation or iron overload.']];
-        return null;
-      case 'tsh':
-        if (r.level === 'high' || r.level === 'watch') return ['doctor', 'Thyroid test (TSH) out of the typical range', ['TSH can shift with illness and some supplements (biotin) — a repeat test with free T4 confirms it.']];
-        return null;
-      case 'vitd':
-        if (r.level === 'high' && v < 12) return ['doctor', 'Vitamin D deficient', ['Ask your doctor about a supplement dose.', 'Food sources: fatty fish, fortified milk or plant milk, eggs.']];
-        if (r.level === 'watch' && v < 20) return ['change', 'Vitamin D on the low side', ['Fortified foods, fatty fish and some sunlight; ask whether a standard supplement makes sense for you.']];
-        if (r.level === 'watch') return ['change', 'High vitamin D', ['Check your supplement dose — over 4,000 IU a day long-term isn\'t advised without a doctor.']];
-        return null;
-      case 'b12':
-        if (r.level === 'high') return ['doctor', 'Low vitamin B12', ['Ask about treatment; low B12 can cause tiredness, anemia and nerve damage.']];
-        if (r.level === 'watch') return ['change', 'Borderline vitamin B12', ['Ask whether a follow-up test (methylmalonic acid) is needed; B12-fortified foods help.']];
-        return null;
-      case 'uric':
-        return r.level === 'watch' ? ['change', 'High uric acid', ['Limit beer, spirits, sugary drinks and organ meats; stay hydrated. Treatment is usually only needed with gout attacks or kidney stones.']] : null;
-    }
-    return null;
-  }
-
-  function analyzeLabs(member, age) {
-    var latest = latestLabs(member);
-    var findings = [], suggestions = [], good = [];
-    if (age !== null && age < 18 && Object.keys(latest).length) {
-      findings.push({ id: 'labs-kids', level: 'doctor', title: 'Children\'s lab results need child reference ranges', because: ['Normal ranges for children differ by age.'],
-        todo: ['Ask the pediatrician to go over the results.'], strength: STRENGTH.lab, sources: ['whoHb'] });
-      return { findings: findings, suggestions: suggestions, good: good, latest: latest };
-    }
-    var pregnant = list(member.conditions).indexOf('pregnancy') !== -1;
-    var normal = [];
-    Object.keys(latest).forEach(function (id) {
-      var def = labDef(id);
-      if (!def) return;
-      var v = latest[id].value;
-      var r = interpret(id, v, member.sex, pregnant);
-      var adv = adviceFor(id, r, v, member);
-      if (adv) {
-        findings.push({ id: 'lab-' + id, level: adv[0], title: adv[1],
-          because: [def.label + ' ' + v + ' ' + def.unit + ' on ' + latest[id].date + ': ' + r.text + '.'],
-          todo: adv[2], strength: STRENGTH.lab, sources: [LAB_SOURCES[id]] });
-        if (adv[3]) suggestions.push(adv[3]);
-      } else if (r.level === 'ok') normal.push(def.label);
-    });
-    if (normal.length) good.push({ text: 'In range: ' + normal.join(', '), source: 'atp3' });
-    return { findings: findings, suggestions: suggestions, good: good, latest: latest };
-  }
-
-  // ------------------------------------------------------------- wearables
-
-  var DEVICES = [['none', 'No wearable'], ['oura', 'Oura Ring'], ['whoop', 'WHOOP'], ['apple', 'Apple Watch'], ['fitbit', 'Fitbit / Google'], ['garmin', 'Garmin'], ['samsung', 'Samsung'], ['other', 'Other']];
-
-  var WEARABLE_FIELDS = [
-    { id: 'sleepHours', label: 'Average sleep per night', unit: 'hours', step: 0.1, hint: 'Total sleep time, last 30 days' },
-    { id: 'sleepScore', label: 'Sleep score', unit: '/ 100', hint: 'Oura sleep score, WHOOP sleep performance %' },
-    { id: 'restingHr', label: 'Resting heart rate', unit: 'bpm' },
-    { id: 'hrv', label: 'HRV (average)', unit: 'ms', hint: 'Heart rate variability' },
-    { id: 'hrvBaseline', label: 'Your usual HRV (optional)', unit: 'ms', hint: 'From a few months ago, to spot a drop' },
-    { id: 'recovery', label: 'Readiness / recovery', unit: '/ 100', hint: 'Oura readiness, WHOOP recovery %, Garmin Body Battery' },
-    { id: 'spo2', label: 'Night-time blood oxygen (SpO2)', unit: '%', step: 0.1 },
-    { id: 'stressScore', label: 'Daytime stress score (optional)', unit: '/ 100', hint: 'Garmin or Samsung stress average' }
-  ];
-
-  var STRESS = [['low', 'Mostly calm / restored'], ['normal', 'Normal'], ['high', 'Often stressed (most days)']];
-
-  // Minimal CSV parser that handles quoted fields.
-  function parseCSV(text) {
-    var rows = [], row = [], field = '', q = false;
-    for (var i = 0; i < text.length; i++) {
-      var ch = text[i];
-      if (q) {
-        if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
-        else if (ch === '"') q = false;
-        else field += ch;
-      } else if (ch === '"') q = true;
-      else if (ch === ',') { row.push(field); field = ''; }
-      else if (ch === '\n' || ch === '\r') {
-        if (ch === '\r' && text[i + 1] === '\n') i++;
-        row.push(field); rows.push(row); row = []; field = '';
-      } else field += ch;
-    }
-    if (field !== '' || row.length) { row.push(field); rows.push(row); }
-    return rows.filter(function (r) { return r.some(function (c) { return c.trim() !== ''; }); });
-  }
-
-  var COLUMN_PATTERNS = [
-    ['date', /^(date|day|summary_date|cycle start time|start time|calendar date)/i],
-    ['sleepDur', /(total sleep( duration)?|asleep duration|sleep duration|time asleep|total_sleep_duration)/i],
-    ['sleepScore', /(sleep score|sleep performance|sleep_score)/i],
-    ['restingHr', /(resting heart rate|lowest resting|average resting|rhr|resting_heart_rate)/i],
-    ['hrv', /(hrv|heart rate variability)/i],
-    ['recovery', /(recovery score|readiness score|readiness|body battery|recovery)/i],
-    ['spo2', /(spo2|blood oxygen|oxygen saturation)/i],
-    ['stressScore', /(stress score|average stress|stress level)/i]
-  ];
-
-  /*
-   * Reads an Oura / WHOOP / Garmin style CSV export and averages the last
-   * `days` rows. Columns are matched by name, so it is tolerant of format changes.
-   */
-  function importWearableCSV(text, days) {
-    days = days || 30;
-    var rows = parseCSV(text);
-    if (rows.length < 2) throw new Error('No data rows found in that file.');
-    var header = rows[0].map(function (h) { return h.trim(); });
-    var cols = {};
-    COLUMN_PATTERNS.forEach(function (p) {
-      for (var i = 0; i < header.length; i++) {
-        if (p[1].test(header[i]) && Object.keys(cols).map(function (k) { return cols[k]; }).indexOf(i) === -1) { cols[p[0]] = i; break; }
-      }
-    });
-    if (Object.keys(cols).filter(function (k) { return k !== 'date'; }).length === 0) throw new Error('Couldn\'t recognise any sleep or heart columns. Expected names like "Total Sleep Duration", "Resting Heart Rate", "HRV", "Recovery score".');
-    var data = rows.slice(1);
-    if (cols.date !== undefined) data.sort(function (a, b) { return String(a[cols.date]) < String(b[cols.date]) ? -1 : 1; });
-    data = data.slice(-days);
-    function avg(key) {
-      if (cols[key] === undefined) return null;
-      var vals = data.map(function (r) { return parseFloat(String(r[cols[key]]).replace('%', '')); }).filter(function (v) { return !isNaN(v); });
-      return vals.length ? vals.reduce(function (s, v) { return s + v; }, 0) / vals.length : null;
-    }
-    var out = { importedRows: data.length, columns: Object.keys(cols).map(function (k) { return k + ' ← "' + header[cols[k]] + '"'; }) };
-    var sd = avg('sleepDur');
-    if (sd !== null) {
-      var h = header[cols.sleepDur];
-      // Oura exports seconds, WHOOP minutes; some apps hours.
-      var hours = /\(min/i.test(h) || (sd > 24 && sd < 1440) ? sd / 60 : sd >= 1440 ? sd / 3600 : sd;
-      out.sleepHours = Math.round(hours * 10) / 10;
-    }
-    ['sleepScore', 'restingHr', 'hrv', 'recovery', 'spo2', 'stressScore'].forEach(function (k) {
-      var v = avg(k);
-      if (v !== null) out[k] = Math.round(v * 10) / 10;
-    });
-    return out;
-  }
-
-  function analyzeWearable(member, age) {
-    var w = member.wearable || {};
-    var findings = [], good = [];
-    if (!w.device || w.device === 'none') return { findings: findings, good: good };
-    var num = function (v) { return v === undefined || v === null || v === '' ? null : Number(v); };
-    var sleep = num(w.sleepHours), rhr = num(w.restingHr), hrv = num(w.hrv), base = num(w.hrvBaseline), rec = num(w.recovery), spo2 = num(w.spo2), score = num(w.sleepScore), stress = num(w.stressScore);
-    var adult = age === null || age >= 18;
-
-    if (sleep !== null && adult) {
-      if (sleep < 7) findings.push({ id: 'w-sleep', level: 'change', title: 'Your tracker shows short sleep (' + sleep + ' h a night)',
-        because: ['Adults need 7+ hours. Consumer trackers measure total sleep reasonably well (usually within about 20–30 minutes of a sleep lab), though they tend to overestimate a little.'],
-        todo: ['Same wake time every day; aim to get into bed 30–45 minutes earlier.', 'Use the tracker\'s trend, not single nights, to see if changes help.'],
-        strength: STRENGTH.device, sources: ['sleepAdult', 'deviceSleep'] });
-      else good.push({ text: 'Tracker sleep ' + sleep + ' h a night', source: 'sleepAdult' });
-    }
-    if (score !== null && score < 70) findings.push({ id: 'w-sleepscore', level: 'change', title: 'Sleep score usually below 70',
-      because: ['Sleep scores are each company\'s own formula (not medically validated), but a consistently low score usually reflects short, broken or late sleep.'],
-      todo: ['Look at which part drags the score down (total sleep, timing, restfulness) in the app and target that.'], strength: STRENGTH.device, sources: ['deviceSleep'] });
-    if (rhr !== null && adult) {
-      if (rhr > 100) findings.push({ id: 'w-rhr-high', level: 'doctor', title: 'Resting heart rate above 100 bpm',
-        because: ['A resting rate over 100 is called tachycardia; it can come from illness, dehydration, thyroid problems, anemia or heart-rhythm problems.'],
-        todo: ['Mention it to your doctor, especially with dizziness, palpitations or shortness of breath.'], strength: STRENGTH.guideline, sources: ['ahaRhr'] });
-      else if (rhr >= 80) findings.push({ id: 'w-rhr', level: 'change', title: 'Resting heart rate on the high side (' + rhr + ' bpm)',
-        because: ['Normal is 60–100, but in large studies each 10 bpm higher resting rate was linked to about 9% higher risk of death from any cause.'],
-        todo: ['Regular aerobic exercise, better sleep and less alcohol all lower resting heart rate over weeks to months.'], strength: STRENGTH.moderate, sources: ['ahaRhr', 'rhrMeta'] });
-      else good.push({ text: 'Resting heart rate ' + rhr + ' bpm', source: 'ahaRhr' });
-    }
-    if (hrv !== null && base !== null && base > 0 && hrv < base * 0.8) findings.push({ id: 'w-hrv', level: 'change', title: 'HRV is ' + Math.round((1 - hrv / base) * 100) + '% below your usual',
-      because: ['HRV varies hugely between people, so it only means something compared with your own baseline. A sustained drop often follows poor sleep, stress, alcohol, illness or overtraining.'],
-      todo: ['Prioritise sleep, ease off hard training for a few days, skip alcohol, and watch whether it recovers.'], strength: STRENGTH.device, sources: ['hrvReview'] });
-    if (rec !== null && rec < 50) findings.push({ id: 'w-recovery', level: 'change', title: 'Readiness / recovery usually low (' + rec + ')',
-      because: ['These are proprietary device scores built from HRV, resting heart rate, sleep and temperature. They\'re useful for spotting strain, not for diagnosis.'],
-      todo: ['Treat low-recovery days as easier days; look for the pattern (late meals, alcohol, short sleep, stress).'], strength: STRENGTH.device, sources: ['hrvReview'] });
-    if (spo2 !== null && spo2 < 92) findings.push({ id: 'w-spo2', level: 'doctor', title: 'Night-time blood oxygen averages ' + spo2 + '%',
-      because: ['A low night-time average can be a sign of sleep apnea or lung problems. Finger and ring sensors are less accurate than medical oximeters, especially on darker skin.'],
-      todo: ['Mention it to your doctor and ask whether a sleep study is worthwhile — particularly if you snore or wake unrefreshed.'], strength: STRENGTH.device, sources: ['fdaOximeter'] });
-    var highStress = w.stress === 'high' || (stress !== null && stress >= 50);
-    if (highStress) findings.push({ id: 'w-stress', level: 'change', title: 'Stress is high most days',
-      because: ['Long-running stress raises blood pressure, disrupts sleep and drives cravings for sugary, salty food.'],
-      todo: ['Regular exercise, consistent sleep and short daily relaxation (breathing, walks, mindfulness) have good evidence.', 'If it\'s affecting daily life, talk to a doctor or counselor — the mood questions are a good starting point.'],
-      strength: STRENGTH.moderate, sources: ['apaStress'] });
-    return { findings: findings, good: good };
-  }
-
-  var Labs = {
-    SOURCES: SOURCES, LABS: LABS, DEVICES: DEVICES, WEARABLE_FIELDS: WEARABLE_FIELDS, STRESS: STRESS,
-    labDef: labDef, latestLabs: latestLabs, interpret: interpret, analyzeLabs: analyzeLabs,
-    parseCSV: parseCSV, importWearableCSV: importWearableCSV, analyzeWearable: analyzeWearable
-  };
-
-  if (typeof module !== 'undefined' && module.exports) module.exports = Labs;
-  else root.FHLabs = Labs;
 })(this);
 </script>
   <script>
@@ -2912,188 +3661,6 @@ ul.plain li { padding: 4px 0; }
 </script>
   <script>
 /*
- * Family Health Guide — build-a-meal food list.
- *
- * Nutrition is per listed serving, rounded from USDA FoodData Central
- * (cooked weights unless noted). Tags use the same vocabulary as recipes in
- * knowledge.js, so allergies, diets and conditions are checked the same way.
- */
-(function (root) {
-  'use strict';
-
-  var CATEGORIES = [
-    { id: 'protein', label: 'Protein', emoji: '🍗', color: '#c0603a', blurb: 'Builds and repairs muscle; keeps you full.' },
-    { id: 'carbs', label: 'Carbs', emoji: '🍚', color: '#b0842a', blurb: 'Energy. Whole grains and starchy veg bring fiber too.' },
-    { id: 'fiber', label: 'Fiber', emoji: '🥦', color: '#2f7d5b', blurb: 'Vegetables, fruit and beans — aim for half the plate.' },
-    { id: 'fat', label: 'Healthy fats', emoji: '🥑', color: '#3d6fb4', blurb: 'Small amounts carry flavor and vitamins A, D, E, K.' }
-  ];
-
-  // f(id, category, emoji, name, serving, kcal, protein g, carbs g, fat g, fiber g, tags)
-  function f(id, cat, emoji, name, serving, kcal, p, c, fat, fib, tags) {
-    return { id: id, cat: cat, emoji: emoji, name: name, serving: serving, kcal: kcal, protein: p, carbs: c, fat: fat, fiber: fib, tags: tags || [] };
-  }
-
-  var FOODS = [
-    // Protein
-    f('chicken', 'protein', '🍗', 'Chicken breast', '4 oz cooked', 187, 35, 0, 4, 0, ['poultry']),
-    f('turkey', 'protein', '🦃', 'Turkey breast', '4 oz roasted', 153, 34, 0, 1, 0, ['poultry']),
-    f('salmon', 'protein', '🐟', 'Salmon', '4 oz cooked', 233, 25, 0, 14, 0, ['fish']),
-    f('cod', 'protein', '🐠', 'Cod', '4 oz cooked', 119, 26, 0, 1, 0, ['fish']),
-    f('tuna', 'protein', '🥫', 'Canned light tuna', '3 oz drained', 73, 17, 0, 1, 0, ['fish']),
-    f('sardines', 'protein', '🐟', 'Sardines', '1 can (3.75 oz)', 191, 23, 0, 11, 0, ['fish', 'high-purine']),
-    f('shrimp', 'protein', '🍤', 'Shrimp', '4 oz cooked', 112, 27, 0, 0, 0, ['shellfish', 'high-purine']),
-    f('eggs', 'protein', '🥚', 'Eggs', '2 large', 143, 13, 1, 10, 0, ['egg']),
-    f('beef', 'protein', '🥩', 'Lean ground beef (93%)', '4 oz cooked', 182, 26, 0, 8, 0, ['meat', 'high-purine']),
-    f('steak', 'protein', '🥩', 'Sirloin steak', '4 oz cooked', 220, 34, 0, 8, 0, ['meat', 'high-purine']),
-    f('pork', 'protein', '🍖', 'Pork tenderloin', '4 oz cooked', 162, 30, 0, 4, 0, ['pork']),
-    f('tofu', 'protein', '🧈', 'Firm tofu', '½ cup', 181, 22, 4, 11, 3, ['soy']),
-    f('tempeh', 'protein', '🟫', 'Tempeh', '½ cup', 160, 17, 8, 9, 0, ['soy']),
-    f('lentils', 'protein', '🫘', 'Lentils', '1 cup cooked', 230, 18, 40, 1, 16, ['high-fodmap', 'high-potassium']),
-    f('edamame', 'protein', '🫛', 'Edamame', '1 cup shelled', 188, 18, 14, 8, 8, ['soy']),
-    f('greek-yogurt', 'protein', '🥣', 'Greek yogurt, plain nonfat', '1 cup', 133, 23, 8, 1, 0, ['milk']),
-    f('cottage', 'protein', '🧀', 'Cottage cheese, low-fat', '1 cup', 163, 28, 6, 2, 0, ['milk', 'high-sodium']),
-
-    // Carbs
-    f('brown-rice', 'carbs', '🍚', 'Brown rice', '1 cup cooked', 218, 5, 46, 2, 4, []),
-    f('white-rice', 'carbs', '🍙', 'White rice', '1 cup cooked', 205, 4, 45, 0, 1, ['refined-carb']),
-    f('quinoa', 'carbs', '🌾', 'Quinoa', '1 cup cooked', 222, 8, 39, 4, 5, []),
-    f('oats', 'carbs', '🥣', 'Rolled oats', '½ cup dry', 150, 5, 27, 3, 4, ['oats']),
-    f('ww-pasta', 'carbs', '🍝', 'Whole-wheat pasta', '1 cup cooked', 174, 8, 37, 1, 6, ['wheat']),
-    f('pasta', 'carbs', '🍝', 'Pasta', '1 cup cooked', 220, 8, 43, 1, 3, ['wheat', 'refined-carb']),
-    f('ww-bread', 'carbs', '🍞', 'Whole-grain bread', '2 slices', 140, 7, 24, 2, 4, ['wheat']),
-    f('sweet-potato', 'carbs', '🍠', 'Sweet potato', '1 medium baked', 103, 2, 24, 0, 4, ['high-potassium']),
-    f('potato', 'carbs', '🥔', 'Baked potato with skin', '1 medium', 161, 4, 37, 0, 4, ['high-potassium']),
-    f('corn-tortilla', 'carbs', '🫓', 'Corn tortillas', '2 small', 104, 3, 22, 1, 3, []),
-    f('rice-noodles', 'carbs', '🍜', 'Rice noodles', '1 cup cooked', 190, 2, 42, 0, 2, ['refined-carb']),
-    f('barley', 'carbs', '🌾', 'Barley', '1 cup cooked', 193, 4, 44, 1, 6, ['gluten']),
-
-    // Fiber: vegetables, fruit, beans
-    f('broccoli', 'fiber', '🥦', 'Broccoli', '1 cup cooked', 55, 4, 11, 1, 5, []),
-    f('spinach', 'fiber', '🥬', 'Spinach', '1 cup cooked', 41, 5, 7, 0, 4, ['high-potassium']),
-    f('salad', 'fiber', '🥗', 'Mixed salad greens', '2 cups', 10, 1, 2, 0, 1, []),
-    f('carrots', 'fiber', '🥕', 'Carrots', '1 cup raw', 52, 1, 12, 0, 4, ['choking']),
-    f('peppers', 'fiber', '🫑', 'Bell peppers', '1 cup', 30, 1, 7, 0, 3, []),
-    f('green-beans', 'fiber', '🫛', 'Green beans', '1 cup cooked', 44, 2, 10, 0, 4, []),
-    f('brussels', 'fiber', '🥬', 'Brussels sprouts', '1 cup cooked', 56, 4, 11, 1, 4, []),
-    f('cauliflower', 'fiber', '🥦', 'Cauliflower', '1 cup cooked', 29, 2, 5, 1, 3, ['high-fodmap']),
-    f('zucchini', 'fiber', '🥒', 'Zucchini', '1 cup cooked', 27, 2, 5, 0, 2, []),
-    f('tomatoes', 'fiber', '🍅', 'Tomatoes', '1 cup', 32, 2, 7, 0, 2, ['acidic']),
-    f('mushrooms', 'fiber', '🍄', 'Mushrooms', '1 cup cooked', 44, 3, 8, 1, 3, ['high-fodmap']),
-    f('black-beans', 'fiber', '🫘', 'Black beans', '1 cup cooked', 227, 15, 41, 1, 15, ['high-fodmap', 'high-potassium']),
-    f('chickpeas', 'fiber', '🧆', 'Chickpeas', '1 cup cooked', 269, 15, 45, 4, 12, ['high-fodmap']),
-    f('berries', 'fiber', '🫐', 'Mixed berries', '1 cup', 70, 1, 17, 0, 5, []),
-    f('apple', 'fiber', '🍎', 'Apple', '1 medium', 95, 0, 25, 0, 4, ['high-fodmap']),
-    f('banana', 'fiber', '🍌', 'Banana', '1 medium', 105, 1, 27, 0, 3, ['high-potassium']),
-    f('orange', 'fiber', '🍊', 'Orange', '1 medium', 62, 1, 15, 0, 3, ['acidic']),
-    f('kiwi', 'fiber', '🥝', 'Kiwi', '2 fruits', 84, 2, 20, 1, 4, []),
-    f('grapes', 'fiber', '🍇', 'Grapes', '1 cup', 104, 1, 27, 0, 1, ['choking']),
-    f('chia', 'fiber', '🌱', 'Chia seeds', '2 Tbsp', 138, 5, 12, 9, 10, []),
-
-    // Healthy fats
-    f('avocado', 'fat', '🥑', 'Avocado', '½ fruit', 160, 2, 9, 15, 7, ['high-potassium']),
-    f('olive-oil', 'fat', '🫒', 'Olive oil', '1 Tbsp', 119, 0, 0, 14, 0, []),
-    f('almonds', 'fat', '🌰', 'Almonds', '1 oz (23 nuts)', 164, 6, 6, 14, 4, ['treenut', 'choking']),
-    f('walnuts', 'fat', '🌰', 'Walnuts', '1 oz', 185, 4, 4, 18, 2, ['treenut', 'choking']),
-    f('peanut-butter', 'fat', '🥜', 'Peanut butter', '2 Tbsp', 190, 7, 8, 16, 2, ['peanut']),
-    f('sunbutter', 'fat', '🌻', 'Sunflower-seed butter', '2 Tbsp', 200, 6, 7, 18, 2, []),
-    f('pumpkin-seeds', 'fat', '🎃', 'Pumpkin seeds', '1 oz', 158, 9, 3, 14, 2, []),
-    f('flax', 'fat', '🌾', 'Ground flaxseed', '2 Tbsp', 75, 3, 4, 6, 4, []),
-    f('hummus', 'fat', '🧆', 'Hummus', '¼ cup', 102, 5, 9, 6, 3, ['sesame', 'high-fodmap']),
-    f('tahini', 'fat', '🥄', 'Tahini', '1 Tbsp', 89, 3, 3, 8, 1, ['sesame']),
-    f('cheddar', 'fat', '🧀', 'Cheddar cheese', '1 oz', 114, 7, 0, 9, 0, ['milk', 'aged-cheese', 'high-sodium', 'high-satfat']),
-    f('butter', 'fat', '🧈', 'Butter', '1 Tbsp', 102, 0, 0, 12, 0, ['milk', 'high-satfat']),
-    f('olives', 'fat', '🫒', 'Olives', '10 large', 50, 0, 3, 5, 1, ['high-sodium'])
-  ];
-
-  // Share of the day's needs each meal should cover.
-  var MEAL_SHARE = { breakfast: 0.25, lunch: 0.30, dinner: 0.35, snack: 0.10 };
-
-  function byId(id) { return FOODS.filter(function (x) { return x.id === id; })[0]; }
-
-  function totals(items) {
-    var t = { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, byCat: { protein: 0, carbs: 0, fiber: 0, fat: 0 } };
-    (items || []).forEach(function (it) {
-      var food = byId(it.foodId);
-      if (!food) return;
-      var q = it.qty || 1;
-      t.kcal += food.kcal * q; t.protein += food.protein * q; t.carbs += food.carbs * q; t.fat += food.fat * q; t.fiber += food.fiber * q;
-      t.byCat[food.cat] += food.kcal * q;
-    });
-    ['kcal', 'protein', 'carbs', 'fat', 'fiber'].forEach(function (k) { t[k] = Math.round(t[k]); });
-    return t;
-  }
-
-  /*
-   * Per-meal targets from the day's calories and weight.
-   * Protein 0.8 g/kg (RDA), carbs 45–65% and fat 20–35% of calories (AMDR),
-   * fiber 14 g per 1,000 kcal (Dietary Guidelines).
-   */
-  function mealTargets(dayKcal, proteinPerDay, meal) {
-    var share = MEAL_SHARE[meal] || 0.3;
-    var kcal = (dayKcal || 2000) * share;
-    return {
-      kcal: Math.round(kcal),
-      protein: Math.round((proteinPerDay || (dayKcal || 2000) * 0.15 / 4) * share),
-      carbsMin: Math.round(kcal * 0.45 / 4), carbsMax: Math.round(kcal * 0.65 / 4),
-      fatMin: Math.round(kcal * 0.20 / 9), fatMax: Math.round(kcal * 0.35 / 9),
-      fiber: Math.round((dayKcal || 2000) / 1000 * 14 * share)
-    };
-  }
-
-  // A playful 0–100 balance score with the reasons behind it.
-  // Protein targets are minimums (RDA), so only very large amounts lose points.
-  function score(items, target) {
-    var t = totals(items);
-    var cats = Object.keys(t.byCat).filter(function (k) { return t.byCat[k] > 0; });
-    var parts = [], s = 0;
-    if (!items || !items.length) return { score: 0, parts: [], badges: [], totals: t };
-    var inRange = function (v, lo, hi) { return v >= lo * 0.85 && v <= hi * 1.15; };
-    var pr = target.protein ? t.protein / target.protein : 0;
-    if (pr >= 0.8 && pr <= 2.5) { s += 20; parts.push('protein covered'); }
-    else if (pr >= 0.5) { s += 10; parts.push(pr < 0.8 ? 'a bit low on protein' : 'a lot of protein'); }
-    else parts.push('add some protein');
-    var fr = target.fiber ? t.fiber / target.fiber : 0;
-    if (fr >= 0.8) { s += 20; parts.push('great fiber'); } else if (fr >= 0.4) { s += 10; parts.push('more fiber would help'); } else parts.push('needs fiber');
-    var kr = target.kcal ? t.kcal / target.kcal : 0;
-    if (kr >= 0.7 && kr <= 1.2) { s += 20; parts.push('energy just right'); }
-    else if (kr >= 0.5 && kr <= 1.5) { s += 10; parts.push(kr < 0.7 ? 'a light meal' : 'a big meal'); }
-    else parts.push(kr < 0.5 ? 'very light' : 'very large');
-    if (inRange(t.fat, target.fatMin, target.fatMax)) { s += 10; } else parts.push(t.fat > target.fatMax ? 'heavy on fat' : 'could use a little healthy fat');
-    if (inRange(t.carbs, target.carbsMin, target.carbsMax)) { s += 10; } else parts.push(t.carbs > target.carbsMax ? 'carb-heavy' : 'light on carbs');
-    if (t.byCat.fiber > 0) { s += 10; parts.push('has veg, fruit or beans'); }
-    if (cats.length >= 3) { s += 10; parts.push(cats.length + ' food groups'); }
-    var badges = [];
-    if (pr >= 0.8) badges.push('💪 Protein power');
-    if (fr >= 0.8) badges.push('🌿 Fiber hero');
-    if (cats.length === 4) badges.push('🌈 All four groups');
-    if (s >= 85) badges.push('⭐ Balanced plate');
-    return { score: Math.min(100, s), parts: parts, badges: badges, totals: t };
-  }
-
-  // Build a balanced plate from foods the eaters can have (for "Surprise me").
-  function surprise(allowedIds, rand) {
-    rand = rand || Math.random;
-    var pick = function (cat) {
-      var opts = FOODS.filter(function (x) { return x.cat === cat && allowedIds.indexOf(x.id) !== -1; });
-      return opts.length ? opts[Math.floor(rand() * opts.length)] : null;
-    };
-    var items = [];
-    var p = pick('protein'), c = pick('carbs'), v1 = pick('fiber'), fat = pick('fat');
-    if (p) items.push({ foodId: p.id, qty: 1 });
-    if (c) items.push({ foodId: c.id, qty: 1 });
-    if (v1) items.push({ foodId: v1.id, qty: 2 });
-    if (fat) items.push({ foodId: fat.id, qty: 1 });
-    return items;
-  }
-
-  var Foods = { CATEGORIES: CATEGORIES, FOODS: FOODS, MEAL_SHARE: MEAL_SHARE, byId: byId, totals: totals, mealTargets: mealTargets, score: score, surprise: surprise };
-
-  if (typeof module !== 'undefined' && module.exports) module.exports = Foods;
-  else root.FHFoods = Foods;
-})(this);
-</script>
-  <script>
-/*
  * Family Health Guide — health records (PDFs, photos of lab reports, notes).
  *
  * Files are kept in the browser's IndexedDB on this device; localStorage is
@@ -3478,13 +4045,13 @@ ul.plain li { padding: 4px 0; }
       activity: 'light', goal: 'maintain', bloodType: '', allergies: {}, otherAllergies: [], intolerances: [],
       conditions: [], otherConditions: [], medications: [], diet: 'omnivore', dietRules: [], dislikes: [],
       avoidFoods: [], limitFoods: [], favoriteFoods: [], calorieOverride: null, doctor: '', emergencyContact: '',
-      notes: '', log: [], labs: [], links: [], wearable: {}, answers: {}, answersUpdatedAt: '', reviewedAt: '', createdAt: '', updatedAt: ''
+      notes: '', log: [], labs: [], links: [], daily: {}, wearable: {}, answers: {}, answersUpdatedAt: '', reviewedAt: '', createdAt: '', updatedAt: ''
     }, m, {
       allergies: (m && typeof m.allergies === 'object' && !Array.isArray(m.allergies)) ? m.allergies : {},
       otherAllergies: arr(m && m.otherAllergies), intolerances: arr(m && m.intolerances), conditions: arr(m && m.conditions),
       otherConditions: arr(m && m.otherConditions), medications: arr(m && m.medications), dietRules: arr(m && m.dietRules),
       dislikes: arr(m && m.dislikes), avoidFoods: arr(m && m.avoidFoods), limitFoods: arr(m && m.limitFoods),
-      favoriteFoods: arr(m && m.favoriteFoods), log: arr(m && m.log), labs: arr(m && m.labs), links: arr(m && m.links),
+      favoriteFoods: arr(m && m.favoriteFoods), log: arr(m && m.log), labs: arr(m && m.labs), links: arr(m && m.links), daily: (m && m.daily && typeof m.daily === 'object' && !Array.isArray(m.daily)) ? m.daily : {},
       answers: (m && m.answers && typeof m.answers === 'object' && !Array.isArray(m.answers)) ? m.answers : {}
     });
   }
@@ -3618,6 +4185,7 @@ ul.plain li { padding: 4px 0; }
   var Labs = window.FHLabs;
   var Docs = window.FHDocs;
   var Shop = window.FHShop;
+  var P = window.FHPersonal;
 
   var state = Store.load();
   var app = document.getElementById('app');
@@ -3625,6 +4193,8 @@ ul.plain li { padding: 4px 0; }
   var MEAL_LABELS = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack' };
   var STATUS_TEXT = { ok: 'Good to go', caution: 'OK — note', swap: 'Needs a swap', no: 'Can\'t eat' };
   var recipeFilter = 'all';
+  var labPrefill = null; // numbers read from a report, waiting for review
+  var labFlash = null;   // what the last added results changed
 
   // ---------------------------------------------------------------- helpers
 
@@ -3696,6 +4266,7 @@ ul.plain li { padding: 4px 0; }
     var parts = (location.hash || '#/').replace(/^#\/?/, '').split('/');
     var tab = 'family';
     var html;
+    if (parts[2] !== 'check') labFlash = null;
     if (parts[0] === 'plan') { tab = 'plan'; html = viewBuilder(); }
     else if (parts[0] === 'week') { tab = 'plan'; html = viewWeek(); }
     else if (parts[0] === 'shop') { tab = 'plan'; html = viewShop(parts[1]); }
@@ -3858,6 +4429,8 @@ ul.plain li { padding: 4px 0; }
       '<a class="btn" href="#/member/' + esc(m.id) + '/records">Records</a>' +
       '<button class="btn" data-action="print">Print</button></div></div></section>' +
       (alerts ? '<section>' + alerts + '</section>' : '') +
+      todayCard(m, g) +
+      focusCard(m, g) +
       healthCheckCard(m, g.age) +
       '<div class="grid grid-2"><section class="card"><h2>Daily targets</h2>' + targetsHtml + '</section>' + emergency + '</div>' +
       '<div class="grid grid-3">' +
@@ -4101,6 +4674,22 @@ ul.plain li { padding: 4px 0; }
     return { per: per, status: no.length ? 'no' : caution.length ? 'caution' : 'ok', no: no, caution: caution };
   }
 
+  // Foods that help the eaters' blood-test results, conditions and goals.
+  function personalPicks(eaters) {
+    var multi = eaters.length > 1, out = {}, rules = [];
+    Foods.FOODS.forEach(function (fd) { out[fd.id] = { score: 0, reasons: [] }; });
+    eaters.forEach(function (m) {
+      var focus = P.focus(m, ageOf(m));
+      focus.forEach(function (r) { rules.push({ member: m, rule: r }); });
+      var pk = P.foodPicks(focus);
+      Object.keys(pk).forEach(function (id) {
+        out[id].score += pk[id].score;
+        pk[id].reasons.forEach(function (why) { out[id].reasons.push((multi ? m.name + ': ' : '') + why); });
+      });
+    });
+    return { byFood: out, rules: rules };
+  }
+
   function fitReason(fit) {
     var bits = [];
     fit.no.forEach(function (p) {
@@ -4139,6 +4728,25 @@ ul.plain li { padding: 4px 0; }
       '<div class="bar bar-' + status + '"><span style="width:' + pct + '%"></span></div></div>';
   }
 
+  function picksStrip(b, eaters, picks, fits) {
+    var names = eaters.length > 1 ? 'your family' : esc(eaters[0].name);
+    if (!picks.rules.length) {
+      var adults = eaters.filter(function (m) { var a = ageOf(m); return a === null || a >= 18; });
+      if (!adults.length) return '';
+      return '<div class="picks picks-empty"><span>⭐ Want picks made for ' + names + '?</span> <a href="#/member/' + esc(adults[0].id) + '/check/' + labsStep(adults[0]) + '">Add a blood test</a> or set a goal — foods that help get starred.</div>';
+    }
+    var top = Foods.FOODS.filter(function (fd) { return picks.byFood[fd.id].score > 0 && fits[fd.id].status !== 'no' && (b.cat === 'all' || fd.cat === b.cat); })
+      .sort(function (a, z) { return picks.byFood[z.id].score - picks.byFood[a.id].score; }).slice(0, 8);
+    var seen = {};
+    var why = picks.rules.filter(function (x) { var k = x.rule.id; if (seen[k]) return false; seen[k] = true; return true; })
+      .map(function (x) { return '<span class="badge">' + x.rule.icon + ' ' + esc(x.rule.short) + (eaters.length > 1 ? ' · ' + esc(x.member.name) : '') + '</span>'; }).join('');
+    return '<div class="picks"><div class="picks-head"><strong>⭐ Picked for ' + names + '</strong><div class="picks-why">' + why + '</div></div>' +
+      '<div class="picks-row">' + top.map(function (fd) {
+        var pk = picks.byFood[fd.id];
+        return '<button class="pick" data-action="b-add" data-id="' + fd.id + '" title="' + esc(pk.reasons.join('\n')) + '"><span class="food-emoji">' + fd.emoji + '</span><span>' + esc(fd.name) + '</span><small>' + esc(pk.reasons[0].replace(/^[^:]*: /, '')) + '</small></button>';
+      }).join('') + '</div></div>';
+  }
+
   function viewBuilder() {
     if (!state.members.length) return '<section class="card empty"><h1>Build a meal</h1><p class="muted">Add family members first — the builder checks every food against their allergies and needs.</p><a class="btn primary" href="#/new">Add a person</a></section>';
     var b = builder();
@@ -4147,6 +4755,12 @@ ul.plain li { padding: 4px 0; }
     var sc = Foods.score(b.items, target);
     var t = sc.totals;
     var q = (b.search || '').toLowerCase();
+    var picks = personalPicks(eaters);
+    var fits = {};
+    Foods.FOODS.forEach(function (fd) { fits[fd.id] = foodFit(fd, eaters); });
+    // Star only the strongest matches so the stars mean something.
+    var topScore = Math.max.apply(null, Foods.FOODS.map(function (fd) { return fits[fd.id].status === 'no' ? 0 : picks.byFood[fd.id].score; }));
+    var starAt = Math.max(1, Math.ceil(topScore * 0.5));
 
     var whoChips = (state.members.length > 1 ? ['family'] : []).concat(state.members.map(function (m) { return m.id; })).map(function (id) {
       var label = id === 'family' ? '👨‍👩‍👧 Whole family' : esc(member(id).name);
@@ -4165,16 +4779,24 @@ ul.plain li { padding: 4px 0; }
     var cats = b.cat === 'all' ? Foods.CATEGORIES : Foods.CATEGORIES.filter(function (c) { return c.id === b.cat; });
     var grids = cats.map(function (cat) {
       var foods = Foods.FOODS.filter(function (fd) { return fd.cat === cat.id && (!q || fd.name.toLowerCase().indexOf(q) !== -1); });
+      // Best for these eaters first; the original order breaks ties.
+      foods = foods.map(function (fd, i) { return { fd: fd, i: i }; }).sort(function (a, z) {
+        return (picks.byFood[z.fd.id].score - picks.byFood[a.fd.id].score) || (a.i - z.i);
+      }).map(function (x) { return x.fd; });
       var cards = foods.map(function (fd) {
-        var fit = foodFit(fd, eaters);
+        var fit = fits[fd.id];
+        var pk = picks.byFood[fd.id];
         if (b.safeOnly && fit.status === 'no') return '';
         var onPlate = b.items.filter(function (it) { return it.foodId === fd.id; })[0];
         var reason = fitReason(fit);
-        return '<div class="food-card fit-' + fit.status + (onPlate ? ' picked' : '') + '" style="--cat:' + cat.color + '">' +
+        var good = pk.score >= starAt && fit.status !== 'no';
+        return '<div class="food-card fit-' + fit.status + (onPlate ? ' picked' : '') + (good ? ' for-you' : '') + '" style="--cat:' + cat.color + '">' +
+          (good ? '<span class="pick-star" title="' + esc(pk.reasons.join('\n')) + '">★</span>' : '') +
           '<button class="food-add" data-action="b-add" data-id="' + fd.id + '"' + (fit.status === 'no' ? ' disabled' : '') + ' title="' + esc(fit.status === 'no' ? 'Not for ' + reason : 'Add to plate') + '">' +
           '<span class="food-emoji">' + fd.emoji + '</span><span class="food-name">' + esc(fd.name) + '</span><span class="food-serving">' + esc(fd.serving) + ' · ' + fd.kcal + ' kcal</span>' +
           '<span class="macros"><span>P ' + fd.protein + '</span><span>C ' + fd.carbs + '</span><span>F ' + fd.fat + '</span><span>Fib ' + fd.fiber + '</span></span>' +
           (onPlate ? '<span class="on-plate">×' + onPlate.qty + ' on plate</span>' : '') + '</button>' +
+          (good ? '<div class="pick-note" title="' + esc(pk.reasons.join('\n')) + '">' + esc(pk.reasons[0]) + (pk.reasons.length > 1 ? ' +' + (pk.reasons.length - 1) : '') + '</div>' : '') +
           (fit.status !== 'ok' ? '<div class="fit-note">' + (fit.status === 'no' ? '✕ ' : '! ') + esc(reason) + '</div>' : '') +
           '<a class="shop-link" href="#/shop/' + fd.id + '" title="Where to buy & which brand">🛒</a></div>';
       }).join('');
@@ -4218,6 +4840,7 @@ ul.plain li { padding: 4px 0; }
       '<div class="builder-foods"><div class="cat-tabs">' + tabs + '</div>' +
       '<div class="row" style="margin:10px 0"><input type="text" id="food-search" placeholder="Search foods…" value="' + esc(b.search || '') + '" style="max-width:260px">' +
       '<label class="chip-check"><input type="checkbox" data-action="b-safe"' + (b.safeOnly ? ' checked' : '') + '> Hide foods someone can\'t eat</label></div>' +
+      picksStrip(b, eaters, picks, fits) +
       grids + '</div>' + plate + '</div>' +
       '<button class="mini-plate" data-action="b-scroll">🍽️ ' + b.items.length + ' item' + (b.items.length === 1 ? '' : 's') + ' · ' + t.kcal + ' kcal · score <strong>' + sc.score + '</strong> <span>View plate ↑</span></button>' +
       '<div id="confetti" aria-hidden="true"></div>';
@@ -4403,6 +5026,113 @@ ul.plain li { padding: 4px 0; }
 
   function ageOf(m) { return E.ageYears(m.birthdate, today()); }
 
+  // ------------------------------------------------------- today & focus
+
+  function dayKey(d) { return E.isoDate(d || today()); }
+
+  function dayEntry(m, key) {
+    m.daily = m.daily || {};
+    if (!m.daily[key]) m.daily[key] = {};
+    // Keep about two months of history.
+    var keys = Object.keys(m.daily).sort();
+    while (keys.length > 62) delete m.daily[keys.shift()];
+    return m.daily[key];
+  }
+
+  function ring(pct, label, sub, color) {
+    var r = 34, c = 2 * Math.PI * r, p = Math.max(0, Math.min(1, pct));
+    return '<svg class="ring" viewBox="0 0 84 84" role="img" aria-label="' + esc(label + ' ' + sub) + '">' +
+      '<circle cx="42" cy="42" r="' + r + '" class="ring-bg"/>' +
+      '<circle cx="42" cy="42" r="' + r + '" class="ring-fg" stroke="' + color + '" stroke-dasharray="' + (p * c) + ' ' + c + '" transform="rotate(-90 42 42)"/>' +
+      '<text x="42" y="40" text-anchor="middle" class="ring-num">' + esc(label) + '</text><text x="42" y="56" text-anchor="middle" class="ring-sub">' + esc(sub) + '</text></svg>';
+  }
+
+  function weekStrip(m, d) {
+    var cells = '';
+    for (var i = 6; i >= 0; i--) {
+      var dt = new Date(today().getTime() - i * 86400000), k = dayKey(dt), e = (m.daily || {})[k] || {};
+      var water = d.water && d.water.cups && e.water >= d.water.cups, steps = d.steps && e.steps >= d.steps.goal;
+      cells += '<div class="wk-day' + (i === 0 ? ' today' : '') + '" title="' + esc(k) + '"><span>' + 'MTWTFSS'.charAt((dt.getDay() + 6) % 7) + '</span>' +
+        '<i class="' + (water ? 'hit-w' : '') + '"></i><i class="' + (steps ? 'hit-s' : '') + '"></i></div>';
+    }
+    return '<div class="wk-strip" aria-label="Last 7 days">' + cells + '<div class="wk-key small muted"><i class="hit-w"></i> water <i class="hit-s"></i> steps</div></div>';
+  }
+
+  function todayCard(m, g) {
+    var d = g.daily;
+    if (!d || (!d.water && !d.steps)) return '';
+    var e = (m.daily || {})[dayKey()] || {};
+    var idx = [];
+    var cols = [];
+    if (d.water) {
+      if (d.water.cups) {
+        var n = e.water || 0, cups = '';
+        for (var i = 0; i < Math.max(d.water.cups, n); i++) cups += '<button class="cup' + (i < n ? ' full' : '') + '" data-action="water-set" data-id="' + esc(m.id) + '" data-n="' + (i + 1 === n ? i : i + 1) + '" aria-label="' + (i + 1) + ' cups">💧</button>';
+        cols.push('<div class="today-col">' + ring(n / d.water.cups, n + '/' + d.water.cups, 'cups', '#3d6fb4') +
+          '<div><h3>Water</h3><div class="muted small">' + d.water.cups + ' cups ≈ ' + d.water.liters + ' L from drinks</div>' +
+          '<div class="cups">' + cups + '</div><div class="row"><button class="btn small" data-action="water-add" data-id="' + esc(m.id) + '" data-d="-1" aria-label="One cup less">−</button>' +
+          '<button class="btn small primary" data-action="water-add" data-id="' + esc(m.id) + '" data-d="1">+ 1 cup</button></div></div></div>');
+      } else {
+        cols.push('<div class="today-col"><div><h3>Water</h3><p class="small">' + esc(d.water.why[0]) + '</p></div></div>');
+      }
+    }
+    if (d.steps) {
+      var st = e.steps || 0;
+      cols.push('<div class="today-col">' + ring(st / d.steps.goal, st >= 1000 ? (Math.round(st / 100) / 10) + 'k' : String(st), 'of ' + (Math.round(d.steps.goal / 100) / 10) + 'k', '#2f7d5b') +
+        '<div><h3>Steps</h3><div class="muted small">Goal ' + d.steps.goal.toLocaleString('en-US') + ' a day' + (d.steps.plateau && d.steps.goal < d.steps.plateau ? ' · working up to ' + d.steps.plateau.toLocaleString('en-US') : '') + '</div>' +
+        '<div class="row" style="margin-top:6px"><input type="number" min="0" step="100" id="steps-today" data-id="' + esc(m.id) + '" value="' + (e.steps || '') + '" placeholder="Today\'s steps" style="max-width:150px">' +
+        '<button class="btn small primary" data-action="steps-save" data-id="' + esc(m.id) + '">Save</button></div></div></div>');
+    }
+    var why = [];
+    if (d.water && d.water.why) why.push('<h4>💧 Water</h4><ul>' + d.water.why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul><p class="small">' + sourceLinks(d.water.sources, idx) + '</p>');
+    if (d.steps) why.push('<h4>👟 Steps</h4><ul>' + d.steps.why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul><p class="small">' + sourceLinks(d.steps.sources, idx) + '</p>');
+    if (d.active) why.push('<h4>🏃 Activity</h4><p>' + esc(d.active.text) + '</p>');
+    if (d.sleep) why.push('<h4>😴 Sleep</h4><p>' + d.sleep.min + '–' + d.sleep.max + ' hours' + (d.sleep.tracked ? ' · your tracker averages ' + d.sleep.tracked + ' h' : '') + '</p><p class="small">' + sourceLinks(d.sleep.sources, idx) + '</p>');
+    return '<section class="card today"><div class="spread"><h2>Today for ' + esc(m.name) + '</h2>' + weekStrip(m, d) + '</div>' +
+      '<div class="today-grid">' + cols.join('') + '</div>' +
+      '<details class="why"><summary>Why these goals? (set for ' + esc(m.name) + ')</summary>' + why.join('') + '</details></section>';
+  }
+
+  var FOCUS_KIND = { 3: ['Blood test', 'danger'], 2: ['Health', 'warn'], 1: ['Goal', 'ok'] };
+
+  function labsStep(m) {
+    var secs = Q.visibleSections(Q.context(m, m.answers || {}, ageOf(m)));
+    for (var i = 0; i < secs.length; i++) if (secs[i].id === 'labs') return i;
+    return 0;
+  }
+
+  function focusCard(m, g) {
+    var hasLabs = (m.labs || []).length > 0;
+    var adult = g.age === null || g.age >= 18;
+    var addLabs = adult ? '<a class="btn' + (hasLabs ? '' : ' primary') + ' no-print" href="#/member/' + esc(m.id) + '/check/' + labsStep(m) + '">' + (hasLabs ? 'Add newer results' : 'Add blood test results') + '</a>' : '';
+    if (!g.focus.length) {
+      if (!adult) return '';
+      return '<section class="card focus-empty"><div class="spread"><div><h2>Make it personal</h2><p class="muted" style="margin:0">' +
+        (hasLabs ? 'Your latest blood test is in range — nothing in the food plan needs to change. 🎉' :
+          'Add a blood test (upload the PDF, paste the text or type a few numbers) and ' + esc(m.name) + '\'s foods, picks and daily goals adjust to the results.') +
+        '</p></div>' + addLabs + '</div></section>';
+    }
+    var blocked = Object.keys(g.rules.block);
+    var idx = [];
+    var items = g.focus.map(function (r) {
+      var kind = r.lab ? FOCUS_KIND[3] : FOCUS_KIND[r.weight] || FOCUS_KIND[1];
+      var foods = P.topFoods(r, blocked, 6).map(function (fd) { return '<span class="food-chip">' + fd.emoji + ' ' + esc(fd.name) + '</span>'; }).join('');
+      return '<div class="focus-item"><div class="focus-head"><span class="focus-icon">' + r.icon + '</span><div><h3>' + esc(r.title) + ' <span class="badge ' + kind[1] + '">' + kind[0] + '</span></h3>' +
+        '<div class="muted small">' + esc(r.because) + '</div></div></div>' +
+        (foods ? '<div class="focus-row"><strong>Eat more</strong><div class="food-chips">' + foods + '</div></div>' : '') +
+        (r.easyOn.length ? '<div class="focus-row"><strong>Go easy on</strong><span class="small">' + esc(r.easyOn.join(' · ')) + '</span></div>' : '') +
+        '<p class="small" style="margin:6px 0 0">💡 ' + esc(r.tip) + '</p>' +
+        '<p class="small muted" style="margin:4px 0 0">' + sourceLinks(r.sources, idx) + '</p></div>';
+    }).join('');
+    var latest = (m.labs || []).map(function (l) { return l.date; }).sort().pop();
+    return '<section class="card focus"><div class="spread"><div><h2>Built around ' + esc(m.name) + '</h2><p class="muted small" style="margin:0">' +
+      (latest ? 'Using the blood test from ' + esc(latest) + '. ' : '') + 'The meal builder\'s picks, the food lists and the daily goals all follow these.</p></div>' +
+      '<div class="row no-print">' + addLabs + '<button class="btn primary" data-action="b-for" data-id="' + esc(m.id) + '">Build a meal for ' + esc(m.name) + ' →</button></div></div>' +
+      '<div class="focus-list">' + items + '</div></section>';
+  }
+
+  // ---------------------------------------------------------------- health check
+
   function healthCheckCard(m, age) {
     var prog = Q.progress(m, age);
     if (!prog.done) {
@@ -4453,11 +5183,13 @@ ul.plain li { padding: 4px 0; }
   }
 
   function labsInput(m) {
+    var prefill = labPrefill && labPrefill.memberId === m.id ? labPrefill : null;
     var groups = {};
     Labs.LABS.forEach(function (l) { (groups[l.group] = groups[l.group] || []).push(l); });
     var form = Object.keys(groups).map(function (g) {
       return '<div class="lab-group"><div class="hint">' + esc(g) + '</div><div class="fields">' + groups[g].map(function (l) {
-        return '<div><label>' + esc(l.label) + '</label><div class="inline"><input type="number" min="0" step="any" name="lab-' + l.id + '"><span class="unit">' + esc(labUnit(l)) + '</span></div></div>';
+        var pre = prefill && prefill.values[l.id] !== undefined ? labShow(l, prefill.values[l.id]) : '';
+        return '<div><label>' + esc(l.label) + '</label><div class="inline"><input type="number" min="0" step="any" name="lab-' + l.id + '" value="' + esc(pre) + '"' + (pre !== '' ? ' class="prefilled"' : '') + '><span class="unit">' + esc(labUnit(l)) + '</span></div></div>';
       }).join('') + '</div></div>';
     }).join('');
     var latest = Labs.latestLabs(m);
@@ -4473,13 +5205,124 @@ ul.plain li { padding: 4px 0; }
         ' <button type="button" class="btn small ghost" data-action="lab-del" data-id="' + esc(e.id) + '">Remove</button></li>';
     }).join('');
     var labLinks = linksList(m, 'lab');
-    return (labLinks ? '<h3>Results online</h3>' + labLinks : '') + linkBox(m, 'lab') +
+    return labFlashHtml(m) + readerBox(m) +
+      (labLinks ? '<h3>Results online</h3>' + labLinks : '') + linkBox(m, 'lab') +
       (rows ? '<h3>Latest results</h3><div class="table-wrap"><table><thead><tr><th>Test</th><th>Result</th><th>Meaning</th><th>Date</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
       '<p class="hint">' + ((ageOf(m) !== null && ageOf(m) < 18) ? 'Children\'s ranges differ — the pediatrician should interpret these. ' : '') + 'Ranges from ADA, ACC/AHA, KDIGO, WHO and NIH guidance. If your report\'s printed range differs, trust the report.</p>' : '') +
-      '<div class="lab-entry"><h3>Add results</h3><div class="fields"><div><label>Date of the blood test</label><input type="date" name="lab-date" value="' + E.isoDate(new Date()) + '"></div>' +
-      '<div><label>Where from (optional)</label><input type="text" name="lab-note" placeholder="e.g. annual physical, Quest"></div></div>' + form +
+      '<div class="lab-entry"><h3>Add results</h3>' +
+      (prefill ? '<div class="alert info"><div>Found <strong>' + prefill.found.length + '</strong> result' + (prefill.found.length === 1 ? '' : 's') + (prefill.source ? ' in ' + esc(prefill.source) : '') + ' — highlighted below. Check them against the report, then press <strong>Add these results</strong>.</div></div>' : '') +
+      '<div class="fields"><div><label>Date of the blood test</label><input type="date" name="lab-date" value="' + esc((prefill && prefill.date) || E.isoDate(new Date())) + '"></div>' +
+      '<div><label>Where from (optional)</label><input type="text" name="lab-note" placeholder="e.g. annual physical, Quest" value="' + esc((prefill && prefill.source) || '') + '"></div></div>' + form +
       '<div class="row" style="justify-content:flex-end;margin-top:10px"><button type="button" class="btn primary" data-action="lab-add">Add these results</button></div></div>' +
       (entries ? '<h3>All entries</h3><ul class="plain">' + entries + '</ul>' : '');
+  }
+
+
+  // What the last results changed — shown right where they were added.
+  function labFlashHtml(m) {
+    if (!labFlash || labFlash.memberId !== m.id) return '';
+    var f = labFlash;
+    var body = f.rules.length ? '<ul class="plain">' + f.rules.map(function (r) {
+      return '<li>' + r.icon + ' <strong>' + esc(r.title) + '</strong>' + (f.added.indexOf(r.id) !== -1 ? ' <span class="badge danger">new</span>' : '') + '<div class="small muted">' + esc(r.because) + '</div></li>';
+    }).join('') + '</ul>' : '<p>Everything entered is in range — no food changes needed. 🎉</p>';
+    return '<div class="flash card"><h3>✅ ' + f.count + ' result' + (f.count === 1 ? '' : 's') + ' saved — ' + esc(m.name) + '\'s plan is updated</h3>' + body +
+      (f.water ? '<p class="small">💧 Water goal: <strong>' + f.water + ' cups</strong> · 👟 Steps goal: <strong>' + (f.steps ? f.steps.toLocaleString('en-US') : '—') + '</strong></p>' : '') +
+      '<div class="row"><a class="btn" href="#/member/' + esc(m.id) + '">See ' + esc(m.name) + '\'s guide</a><button type="button" class="btn primary" data-action="b-for" data-id="' + esc(m.id) + '">Build a meal with the new picks →</button></div></div>';
+  }
+
+  function readerBox(m) {
+    return '<div class="reader-box drop-zone" data-member="' + esc(m.id) + '"><div class="link-head"><span class="drop-icon">📄</span><div><strong>Read my lab report</strong>' +
+      '<div class="hint">Upload the PDF from your patient portal (MyChart, Quest, Labcorp…) or copy all the text on the results page and paste it here. The numbers fill in below for you to check. A PDF is also saved to Health records.</div></div></div>' +
+      '<div class="row"><label class="btn">Choose PDF<input type="file" accept="application/pdf,.pdf,.txt,image/*" data-action="report-file" hidden></label>' +
+      '<span class="muted small">or drop it here</span></div>' +
+      '<textarea name="report-text" rows="3" placeholder="…or paste the results text here (Ctrl/⌘+A, Ctrl/⌘+C on the results page)"></textarea>' +
+      '<div class="row" style="justify-content:flex-end;margin-top:8px"><button type="button" class="btn" data-action="report-read">Fill in the numbers</button></div>' +
+      '<div class="reader-status small" aria-live="polite"></div></div>';
+  }
+
+  var PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+
+  function loadPdfJs() {
+    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+    return new Promise(function (resolve, reject) {
+      var sc = document.createElement('script');
+      sc.src = PDFJS + 'pdf.min.js';
+      sc.onload = function () {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js';
+        resolve(window.pdfjsLib);
+      };
+      sc.onerror = function () { reject(new Error('The PDF reader needs an internet connection the first time. Paste the text instead, or type the numbers.')); };
+      document.head.appendChild(sc);
+    });
+  }
+
+  // Text of a PDF, one line per row of the page (items grouped by height).
+  function pdfText(file) {
+    return loadPdfJs().then(function (lib) {
+      return file.arrayBuffer().then(function (buf) { return lib.getDocument({ data: new Uint8Array(buf) }).promise; });
+    }).then(function (pdf) {
+      var pages = [];
+      for (var i = 1; i <= Math.min(pdf.numPages, 20); i++) {
+        pages.push(pdf.getPage(i).then(function (pg) { return pg.getTextContent(); }).then(function (tc) {
+          var rows = {};
+          tc.items.forEach(function (it) {
+            if (!it.str || !it.str.trim()) return;
+            var y = Math.round(it.transform[5] / 3) * 3;
+            (rows[y] = rows[y] || []).push(it);
+          });
+          return Object.keys(rows).map(Number).sort(function (a, z) { return z - a; }).map(function (y) {
+            return rows[y].sort(function (a, z) { return a.transform[4] - z.transform[4]; }).map(function (it) { return it.str.trim(); }).join('   ');
+          }).join('\n');
+        }));
+      }
+      return Promise.all(pages).then(function (t) { return t.join('\n'); });
+    });
+  }
+
+  function fileText(file) {
+    if (/pdf$/i.test(file.type) || /\.pdf$/i.test(file.name)) return pdfText(file);
+    if (/^text\//.test(file.type) || /\.txt$/i.test(file.name)) return file.text();
+    return Promise.reject(new Error('Photos can\'t be read automatically yet. Paste the text from your patient portal, or type the numbers below.'));
+  }
+
+  function applyReport(m, text, source) {
+    var r = Labs.parseReport(text);
+    if (!r.found.length) return null;
+    labPrefill = { memberId: m.id, values: r.values, found: r.found, date: r.date, source: source || '' };
+    labFlash = null;
+    return r;
+  }
+
+  function readReport(box, file) {
+    var m = member(box.getAttribute('data-member'));
+    var status = box.querySelector('.reader-status');
+    var text = box.querySelector('[name="report-text"]');
+    var say = function (msg, cls) { status.className = 'reader-status small ' + (cls || ''); status.textContent = msg; };
+    var done = function (r) {
+      if (!r) { say('Couldn\'t find blood-test numbers in that. Try pasting the results text, or type them below.', 'warn-text'); return; }
+      toast('Found ' + r.found.length + ' result' + (r.found.length === 1 ? '' : 's') + ' — check and add them');
+      keepScroll();
+      var entry = document.querySelector('.lab-entry');
+      if (entry) entry.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    if (!file) {
+      if (!text.value.trim()) { say('Paste the results text first, or choose a PDF.', 'warn-text'); return; }
+      done(applyReport(m, text.value, ''));
+      return;
+    }
+    say('Reading ' + file.name + '…');
+    fileText(file).then(function (t) {
+      if (/pdf$/i.test(file.type) || /\.pdf$/i.test(file.name)) {
+        // Keep the report itself in Health records too.
+        Docs.add(m.id, file, { kind: 'lab', title: file.name.replace(/\.[^.]+$/, ''), date: Labs.findDate(t) || E.isoDate(new Date()) }).catch(function () {});
+      }
+      done(applyReport(m, t, file.name.replace(/\.[^.]+$/, '')));
+    }).catch(function (e) { say(friendlyReadError(e), 'warn-text'); });
+  }
+
+  function friendlyReadError(e) {
+    if (/internet|Photos/.test(e.message)) return e.message;
+    return 'Couldn\'t read numbers from this file (it may be a scanned image). Paste the results text, or type the numbers on the Blood test results step.';
   }
 
   function kindLabel(k) { return (Docs.KINDS.filter(function (x) { return x[0] === k; })[0] || [k, k])[1]; }
@@ -4517,7 +5360,8 @@ ul.plain li { padding: 4px 0; }
       '<div><label>Date on the document</label><input type="date" name="doc-date" value="' + E.isoDate(new Date()) + '"></div>' +
       '<div><label>Title (optional)</label><input type="text" name="doc-title" placeholder="e.g. Annual blood work"></div></div>' +
       '<label class="btn primary" style="margin-top:12px">📎 Choose file (PDF or photo)<input type="file" accept=".pdf,image/*,.txt,.csv" data-action="doc-upload" hidden></label>' +
-      '<p class="hint">Stored only in this browser on this device and included in exported backups. The app doesn\'t read the file itself yet — copy key numbers into Blood test results.</p></div>' +
+      '<div class="reader-note small" aria-live="polite"></div>' +
+      '<p class="hint">Stored only in this browser on this device and included in exported backups. Lab report PDFs are read automatically so the numbers can update the plan; photos can\'t be read yet — type those numbers on the Blood test results step.</p></div>' +
       linkBox(m, 'lab') +
       '<h3>Saved records</h3><div id="link-list">' + linksList(m) + '</div>' +
       '<div id="doc-list" data-member="' + esc(m.id) + '"><p class="muted small">Loading records…</p></div>';
@@ -4664,7 +5508,8 @@ ul.plain li { padding: 4px 0; }
 
   function sourceLinks(ids, index) {
     return ids.map(function (id) {
-      var s = Q.SOURCES[id];
+      var s = Q.SOURCES[id] || P.SOURCES[id];
+      if (!s) return '';
       if (index.indexOf(id) === -1) index.push(id);
       return '<a href="' + esc(s.url) + '" target="_blank" rel="noopener" title="' + esc(s.title) + '">[' + (index.indexOf(id) + 1) + '] ' + esc(s.org) + ' ' + s.year + '</a>';
     }).join(' · ');
@@ -4805,6 +5650,7 @@ ul.plain li { padding: 4px 0; }
     var id = el.getAttribute('data-id');
     if (action === 'b-scroll') { var pp = document.querySelector('.plate-panel'); if (pp) pp.scrollIntoView({ behavior: 'smooth' }); return; }
     var before = Foods.score(b.items, builderTargets(b, eatersFor(b))).score;
+    if (action === 'b-for') { b.who = id; persist(); go('#/plan'); return; }
     if (action === 'b-who') b.who = id;
     else if (action === 'b-meal') b.meal = id;
     else if (action === 'b-cat') b.cat = id;
@@ -4818,7 +5664,15 @@ ul.plain li { padding: 4px 0; }
     } else if (action === 'b-clear') { b.items = []; b.name = ''; b.editing = null; }
     else if (action === 'b-surprise') {
       var eaters = eatersFor(b);
-      var allowed = Foods.FOODS.filter(function (fd) { return foodFit(fd, eaters).status === 'ok'; }).map(function (fd) { return fd.id; });
+      var ok = Foods.FOODS.filter(function (fd) { return foodFit(fd, eaters).status === 'ok'; });
+      var pp = personalPicks(eaters).byFood;
+      // Prefer foods that help these eaters, category by category.
+      var allowed = [];
+      Foods.CATEGORIES.forEach(function (c) {
+        var inCat = ok.filter(function (fd) { return fd.cat === c.id; });
+        var best = inCat.filter(function (fd) { return pp[fd.id].score > 0; });
+        (best.length ? best : inCat).forEach(function (fd) { allowed.push(fd.id); });
+      });
       b.items = Foods.surprise(allowed);
       b.name = '';
     } else if (action === 'b-save') {
@@ -4874,7 +5728,7 @@ ul.plain li { padding: 4px 0; }
       try {
         var out = Labs.importWearableCSV(String(reader.result), 30);
         m.wearable = m.wearable || {};
-        ['sleepHours', 'sleepScore', 'restingHr', 'hrv', 'recovery', 'spo2', 'stressScore'].forEach(function (k) { if (out[k] !== undefined) m.wearable[k] = out[k]; });
+        ['sleepHours', 'sleepScore', 'restingHr', 'hrv', 'recovery', 'spo2', 'stressScore', 'steps'].forEach(function (k) { if (out[k] !== undefined) m.wearable[k] = out[k]; });
         m.wearable.importNote = 'Imported ' + out.importedRows + ' days from ' + file.name + '. Matched: ' + out.columns.join(', ') + '. Check the numbers below look right.';
         m.wearable.updatedAt = new Date().toISOString();
         persist('Tracker data imported');
@@ -4899,10 +5753,33 @@ ul.plain li { padding: 4px 0; }
     });
     if (!Object.keys(values).length) { if (!silent) toast('Type at least one result first'); return; }
     m.labs = m.labs || [];
+    var labIds = function () { return P.focus(m, ageOf(m)).filter(function (r) { return r.lab; }).map(function (r) { return r.id; }); };
+    var before = labIds();
     m.labs.push({ id: 'lab' + Date.now().toString(36), date: f['lab-date'].value || E.isoDate(new Date()), note: f['lab-note'].value.trim(), values: values });
     m.updatedAt = new Date().toISOString();
+    var focusNow = P.focus(m, ageOf(m));
+    var day = P.daily(m, ageOf(m), focusNow);
+    labPrefill = null;
+    labFlash = { memberId: m.id, count: Object.keys(values).length, rules: focusNow.filter(function (r) { return r.lab; }),
+      added: labIds().filter(function (id) { return before.indexOf(id) === -1; }),
+      water: day.water && day.water.cups, steps: day.steps && day.steps.goal };
     persist(Object.keys(values).length + ' result' + (Object.keys(values).length === 1 ? '' : 's') + ' added');
-    if (!silent) keepScroll();
+    if (!silent) {
+      keepScroll();
+      var fl = document.querySelector('.flash');
+      if (fl) fl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  function saveSteps(input) {
+    if (!input) return;
+    var sm = member(input.getAttribute('data-id'));
+    var v = Number(input.value);
+    if (input.value === '' || isNaN(v) || v < 0 || v > 150000) { toast('Type today\'s steps (e.g. 6500)'); return; }
+    var goal = (P.daily(sm, ageOf(sm)).steps || {}).goal;
+    dayEntry(sm, dayKey()).steps = Math.round(v);
+    persist(goal && v >= goal ? '👟 Step goal reached — great job!' : 'Steps saved');
+    keepScroll();
   }
 
   function uploadDoc(el) {
@@ -4941,6 +5818,18 @@ ul.plain li { padding: 4px 0; }
       box.querySelector('[name="doc-title"]').value = '';
       if (done) done();
       fillDocList();
+      // A lab report PDF: offer to pull the numbers into the plan.
+      var m = member(memberId);
+      if (!m || !(/pdf$/i.test(file.type) || /\.pdf$/i.test(file.name)) || ['lab', 'other'].indexOf(meta.kind) === -1) return;
+      var note = box.querySelector('.reader-note');
+      if (note) note.textContent = 'Looking for blood-test numbers in ' + meta.title + '…';
+      pdfText(file).then(function (t) {
+        var r = applyReport(m, t, meta.title);
+        if (!note) return;
+        if (!r) { note.textContent = meta.kind === 'lab' ? 'Saved. No blood-test numbers found automatically — you can type them on the Blood test results step.' : ''; return; }
+        note.innerHTML = '🧪 Found <strong>' + r.found.length + '</strong> blood-test result' + (r.found.length === 1 ? '' : 's') + ' (' + esc(r.found.map(function (x) { return x.label.split(' (')[0]; }).slice(0, 4).join(', ')) + (r.found.length > 4 ? '…' : '') + '). ' +
+          '<a class="btn small primary" href="#/member/' + esc(m.id) + '/check/' + labsStep(m) + '">Review &amp; add to ' + esc(m.name) + '\'s plan →</a>';
+      }).catch(function (e) { if (note) note.textContent = 'Saved. ' + friendlyReadError(e); });
     }).catch(function (e) { alert(e.message); });
   }
 
@@ -5019,6 +5908,17 @@ ul.plain li { padding: 4px 0; }
       keepScroll();
     } else if (action === 'lab-add') {
       addLabEntry(el);
+    } else if (action === 'report-read') {
+      readReport(el.closest('.reader-box'));
+    } else if (action === 'water-add' || action === 'water-set') {
+      var wm = member(id), we = dayEntry(wm, dayKey());
+      var goalCups = (P.daily(wm, ageOf(wm)).water || {}).cups;
+      var was = we.water || 0;
+      we.water = action === 'water-add' ? Math.max(0, was + Number(el.getAttribute('data-d'))) : Number(el.getAttribute('data-n'));
+      persist(goalCups && we.water >= goalCups && was < goalCups ? '💧 Water goal reached — nice!' : null);
+      keepScroll();
+    } else if (action === 'steps-save') {
+      saveSteps(document.getElementById('steps-today'));
     } else if (action === 'lab-del') {
       var lm = member(el.closest('form').getAttribute('data-id'));
       lm.labs = (lm.labs || []).filter(function (x) { return x.id !== id; });
@@ -5054,9 +5954,11 @@ ul.plain li { padding: 4px 0; }
     var el = ev.target;
     if (el.type === 'file' && el.getAttribute('data-action') === 'wearable-csv') { importWearable(el); return; }
     if (el.type === 'file' && el.getAttribute('data-action') === 'doc-upload') { uploadDoc(el); return; }
+    if (el.type === 'file' && el.getAttribute('data-action') === 'report-file') { if (el.files[0]) readReport(el.closest('.reader-box'), el.files[0]); el.value = ''; return; }
+    if (el.id === 'steps-today') return;
     if (el.getAttribute('data-action') === 'b-safe') { builder().safeOnly = el.checked; persist(); keepScroll(); return; }
     // Record/link boxes and the lab form keep their own state until their button is pressed.
-    if (el.closest && el.closest('.link-box, .upload-box, .lab-entry')) return;
+    if (el.closest && el.closest('.link-box, .upload-box, .lab-entry, .reader-box')) return;
     var checkForm = el.form && el.form.id === 'check-form' ? el.form : null;
     if (checkForm) {
       // "None of these" is exclusive with the other choices.
@@ -5184,6 +6086,7 @@ ul.plain li { padding: 4px 0; }
 
   document.addEventListener('keydown', function (ev) {
     if (ev.key === 'Enter' && ev.target.name === 'link-url') { ev.preventDefault(); addLink(ev.target.closest('.link-box')); }
+    if (ev.key === 'Enter' && ev.target.id === 'steps-today') { ev.preventDefault(); saveSteps(ev.target); }
   });
 
   // Drag a link or a file onto a records box.
@@ -5203,6 +6106,7 @@ ul.plain li { padding: 4px 0; }
     ev.preventDefault();
     zone.classList.remove('dragging');
     var dt = ev.dataTransfer;
+    if (dt.files && dt.files.length && zone.classList.contains('reader-box')) { readReport(zone, dt.files[0]); return; }
     if (dt.files && dt.files.length) {
       // Files always go to the upload box, wherever they're dropped.
       var upload = zone.classList.contains('upload-box') ? zone : document.querySelector('.upload-box');
