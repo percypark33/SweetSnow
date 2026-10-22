@@ -867,7 +867,9 @@
       return '<li>' + esc(e.date) + ' — ' + Object.keys(e.values).length + ' result' + (Object.keys(e.values).length === 1 ? '' : 's') + (e.note ? ' · ' + esc(e.note) : '') +
         ' <button type="button" class="btn small ghost" data-action="lab-del" data-id="' + esc(e.id) + '">Remove</button></li>';
     }).join('');
-    return (rows ? '<h3>Latest results</h3><div class="table-wrap"><table><thead><tr><th>Test</th><th>Result</th><th>Meaning</th><th>Date</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    var labLinks = linksList(m, 'lab');
+    return (labLinks ? '<h3>Results online</h3>' + labLinks : '') + linkBox(m, 'lab') +
+      (rows ? '<h3>Latest results</h3><div class="table-wrap"><table><thead><tr><th>Test</th><th>Result</th><th>Meaning</th><th>Date</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
       '<p class="hint">' + ((ageOf(m) !== null && ageOf(m) < 18) ? 'Children\'s ranges differ — the pediatrician should interpret these. ' : '') + 'Ranges from ADA, ACC/AHA, KDIGO, WHO and NIH guidance. If your report\'s printed range differs, trust the report.</p>' : '') +
       '<div class="lab-entry"><h3>Add results</h3><div class="fields"><div><label>Date of the blood test</label><input type="date" name="lab-date" value="' + E.isoDate(new Date()) + '"></div>' +
       '<div><label>Where from (optional)</label><input type="text" name="lab-note" placeholder="e.g. annual physical, Quest"></div></div>' + form +
@@ -875,13 +877,44 @@
       (entries ? '<h3>All entries</h3><ul class="plain">' + entries + '</ul>' : '');
   }
 
+  function kindLabel(k) { return (Docs.KINDS.filter(function (x) { return x[0] === k; })[0] || [k, k])[1]; }
+
+  // Paste or drop a link to results in a patient portal or shared folder.
+  function linkBox(m, kind) {
+    return '<div class="link-box drop-zone" data-member="' + esc(m.id) + '">' +
+      '<div class="link-head"><span class="drop-icon">🔗</span><div><strong>Drop or paste a link to your results</strong>' +
+      '<div class="hint">MyChart, Quest, Labcorp, Kaiser, Google Drive, Dropbox, iCloud… Drag a link from your browser onto this box, or paste it below.</div></div></div>' +
+      '<div class="link-row"><input type="url" name="link-url" inputmode="url" autocomplete="off" placeholder="https://mychart.example.org/… or a shared-file link">' +
+      '<button type="button" class="btn primary" data-action="link-add">Add link</button></div>' +
+      '<div class="fields link-meta">' +
+      '<div><label>What is it?</label><select name="link-kind">' + Docs.KINDS.map(function (k) { return opt(k[0], k[1], kind || 'lab'); }).join('') + '</select></div>' +
+      '<div><label>Date of the results</label><input type="date" name="link-date" value="' + E.isoDate(new Date()) + '"></div>' +
+      '<div><label>Title (optional)</label><input type="text" name="link-title" placeholder="e.g. 2026 annual blood work"></div></div>' +
+      '<p class="hint">Portal links usually need you to sign in, so the app keeps the link but can\'t read the results behind it — copy key numbers into Blood test results. ' +
+      'Be careful with "anyone with the link" sharing on Google Drive or Dropbox: anyone who gets the link can open the file.</p></div>';
+  }
+
+  function linksList(m, onlyKind) {
+    var links = (m.links || []).filter(function (l) { return !onlyKind || l.kind === onlyKind; }).slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    if (!links.length) return '';
+    return '<ul class="doc-list">' + links.map(function (l) {
+      var info = Docs.linkInfo(l.url);
+      return '<li><span class="doc-icon">' + info.icon + '</span><div><strong>' + esc(l.title) + '</strong><div class="small muted">' + esc(info.source) + ' · ' + esc(kindLabel(l.kind)) + ' · ' + esc(l.date) + '</div></div>' +
+        '<div class="row"><a class="btn small" href="' + esc(l.url) + '" target="_blank" rel="noopener noreferrer">Open ↗</a>' +
+        '<button type="button" class="btn small ghost" data-action="link-del" data-member="' + esc(m.id) + '" data-id="' + esc(l.id) + '">Remove</button></div></li>';
+    }).join('') + '</ul>';
+  }
+
   function recordsInput(m) {
-    return '<div class="upload-box"><div class="fields">' +
+    return '<div class="upload-box drop-zone" data-member="' + esc(m.id) + '"><div class="link-head"><span class="drop-icon">📎</span><div><strong>Upload a file</strong>' +
+      '<div class="hint">PDF or photo of a lab report, visit note, prescription or vaccine record — or drag it onto this box.</div></div></div><div class="fields">' +
       '<div><label>What is it?</label><select name="doc-kind">' + Docs.KINDS.map(function (k) { return opt(k[0], k[1], 'lab'); }).join('') + '</select></div>' +
       '<div><label>Date on the document</label><input type="date" name="doc-date" value="' + E.isoDate(new Date()) + '"></div>' +
       '<div><label>Title (optional)</label><input type="text" name="doc-title" placeholder="e.g. Annual blood work"></div></div>' +
       '<label class="btn primary" style="margin-top:12px">📎 Choose file (PDF or photo)<input type="file" accept=".pdf,image/*,.txt,.csv" data-action="doc-upload" hidden></label>' +
       '<p class="hint">Stored only in this browser on this device and included in exported backups. The app doesn\'t read the file itself yet — copy key numbers into Blood test results.</p></div>' +
+      linkBox(m, 'lab') +
+      '<h3>Saved records</h3><div id="link-list">' + linksList(m) + '</div>' +
       '<div id="doc-list" data-member="' + esc(m.id) + '"><p class="muted small">Loading records…</p></div>';
   }
 
@@ -1270,8 +1303,29 @@
   function uploadDoc(el) {
     var file = el.files && el.files[0];
     if (!file) return;
-    var box = el.closest('.upload-box');
-    var memberId = (document.getElementById('doc-list') || {}).getAttribute ? document.getElementById('doc-list').getAttribute('data-member') : null;
+    uploadFile(file, el.closest('.upload-box'), function () { el.value = ''; });
+  }
+
+  function addLink(box, rawUrl) {
+    var m = member(box.getAttribute('data-member'));
+    var url = Docs.normalizeUrl(rawUrl !== undefined ? rawUrl : box.querySelector('[name="link-url"]').value);
+    if (!url) { toast('That doesn\'t look like a web link — paste the full address (https://…)'); return; }
+    m.links = m.links || [];
+    if (m.links.some(function (l) { return l.url === url; })) { toast('That link is already saved'); return; }
+    var info = Docs.linkInfo(url);
+    var kind = box.querySelector('[name="link-kind"]').value;
+    var short = { lab: 'results', visit: 'visit note', prescription: 'prescription', imaging: 'imaging report', vaccine: 'vaccine record', allergy: 'allergy results', insurance: 'insurance card', other: 'record' };
+    var title = box.querySelector('[name="link-title"]').value.trim() || (info.source + ' ' + (short[kind] || 'record'));
+    m.links.push({ id: 'ln' + Date.now().toString(36), url: url, title: title, kind: kind, date: box.querySelector('[name="link-date"]').value || E.isoDate(new Date()), addedAt: new Date().toISOString() });
+    m.updatedAt = new Date().toISOString();
+    persist('Link saved: ' + info.source);
+    var form = box.closest('form');
+    if (form && form.id === 'check-form') readCheckForm(form, m);
+    keepScroll();
+  }
+
+  function uploadFile(file, box, done) {
+    var memberId = box.getAttribute('data-member') || (document.getElementById('doc-list') || { getAttribute: function () { return null; } }).getAttribute('data-member');
     var meta = {
       kind: box.querySelector('[name="doc-kind"]').value,
       date: box.querySelector('[name="doc-date"]').value,
@@ -1280,7 +1334,7 @@
     Docs.add(memberId, file, meta).then(function () {
       toast('Saved ' + meta.title);
       box.querySelector('[name="doc-title"]').value = '';
-      el.value = '';
+      if (done) done();
       fillDocList();
     }).catch(function (e) { alert(e.message); });
   }
@@ -1351,6 +1405,13 @@
       (state.ratings[id] || []).splice(Number(el.getAttribute('data-i')), 1);
       persist('Rating removed');
       route();
+    } else if (action === 'link-add') {
+      addLink(el.closest('.link-box'));
+    } else if (action === 'link-del') {
+      var lkm = member(el.getAttribute('data-member'));
+      lkm.links = (lkm.links || []).filter(function (x) { return x.id !== id; });
+      persist('Link removed');
+      keepScroll();
     } else if (action === 'lab-add') {
       addLabEntry(el);
     } else if (action === 'lab-del') {
@@ -1389,6 +1450,8 @@
     if (el.type === 'file' && el.getAttribute('data-action') === 'wearable-csv') { importWearable(el); return; }
     if (el.type === 'file' && el.getAttribute('data-action') === 'doc-upload') { uploadDoc(el); return; }
     if (el.getAttribute('data-action') === 'b-safe') { builder().safeOnly = el.checked; persist(); keepScroll(); return; }
+    // Record/link boxes and the lab form keep their own state until their button is pressed.
+    if (el.closest && el.closest('.link-box, .upload-box, .lab-entry')) return;
     var checkForm = el.form && el.form.id === 'check-form' ? el.form : null;
     if (checkForm) {
       // "None of these" is exclusive with the other choices.
@@ -1512,6 +1575,40 @@
       persist('Recipe added — it can now appear in the meal plan');
       route();
     }
+  });
+
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter' && ev.target.name === 'link-url') { ev.preventDefault(); addLink(ev.target.closest('.link-box')); }
+  });
+
+  // Drag a link or a file onto a records box.
+  document.addEventListener('dragover', function (ev) {
+    var zone = ev.target.closest && ev.target.closest('.drop-zone');
+    if (!zone) return;
+    ev.preventDefault();
+    zone.classList.add('dragging');
+  });
+  document.addEventListener('dragleave', function (ev) {
+    var zone = ev.target.closest && ev.target.closest('.drop-zone');
+    if (zone && !zone.contains(ev.relatedTarget)) zone.classList.remove('dragging');
+  });
+  document.addEventListener('drop', function (ev) {
+    var zone = ev.target.closest && ev.target.closest('.drop-zone');
+    if (!zone) return;
+    ev.preventDefault();
+    zone.classList.remove('dragging');
+    var dt = ev.dataTransfer;
+    if (dt.files && dt.files.length) {
+      // Files always go to the upload box, wherever they're dropped.
+      var upload = zone.classList.contains('upload-box') ? zone : document.querySelector('.upload-box');
+      if (upload) Array.prototype.forEach.call(dt.files, function (file) { uploadFile(file, upload); });
+      else toast('Upload files on the Health records step');
+      return;
+    }
+    var url = Docs.urlFromTransfer(dt);
+    var linkZone = zone.classList.contains('link-box') ? zone : document.querySelector('.link-box');
+    if (url && linkZone) addLink(linkZone, url);
+    else toast('Drop a web link (https://…) or a file');
   });
 
   document.addEventListener('input', function (ev) {

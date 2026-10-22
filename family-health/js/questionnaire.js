@@ -246,11 +246,11 @@
       questions: [{ id: 'wearable', type: 'wearable', optional: true }]
     },
     {
-      id: 'labs', title: 'Blood test results', intro: 'Copy numbers from your latest blood work (the patient portal or a printed report). Enter only what you have — even one value helps.',
+      id: 'labs', title: 'Blood test results', intro: 'Copy numbers from your latest blood work (the patient portal or a printed report), and drop in a link to the results so they\'re one tap away. Enter only what you have — even one value helps.',
       questions: [{ id: 'labs', type: 'labs', optional: true }]
     },
     {
-      id: 'records', title: 'Health records', intro: 'Keep lab reports, doctor\'s notes, prescriptions and vaccine records in one place. Files stay on this device.',
+      id: 'records', title: 'Health records', intro: 'Keep lab reports, doctor\'s notes, prescriptions and vaccine records in one place — upload files or drop in links to your patient portal or shared files. Everything stays on this device.',
       questions: [{ id: 'records', type: 'records', optional: true }]
     }
   ];

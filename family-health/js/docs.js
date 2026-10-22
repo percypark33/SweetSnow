@@ -113,5 +113,61 @@
     return (n / 1024 / 1024).toFixed(1) + ' MB';
   }
 
-  root.FHDocs = { KINDS: KINDS, add: add, listFor: listFor, all: all, get: get, remove: remove, removeFor: removeFor, exportAll: exportAll, importAll: importAll, clear: clear, prettySize: prettySize };
+  // ------------------------------------------------------------------ links
+  // Links to results in patient portals or shared files. Only http(s) is
+  // accepted so a pasted "javascript:" or "file:" link can never run.
+
+  var LINK_SOURCES = [
+    [/mychart|epic\.com/i, 'MyChart', '🏥'],
+    [/questdiagnostics|myquest/i, 'Quest Diagnostics', '🧪'],
+    [/labcorp/i, 'Labcorp', '🧪'],
+    [/kaiserpermanente|kp\.org/i, 'Kaiser Permanente', '🏥'],
+    [/followmyhealth/i, 'FollowMyHealth', '🏥'],
+    [/healow/i, 'healow', '🏥'],
+    [/onemedical/i, 'One Medical', '🏥'],
+    [/athenahealth|patientportal/i, 'Patient portal', '🏥'],
+    [/myhealth\.va\.gov|va\.gov/i, 'VA My HealtheVet', '🏥'],
+    [/drive\.google|docs\.google/i, 'Google Drive', '📁'],
+    [/dropbox/i, 'Dropbox', '📁'],
+    [/icloud/i, 'iCloud', '📁'],
+    [/onedrive|sharepoint|1drv\.ms/i, 'OneDrive', '📁'],
+    [/function\.health|insidetracker|everlywell|letsgetchecked/i, 'Testing service', '🧪'],
+    [/ouraring|whoop/i, 'Tracker', '⌚']
+  ];
+
+  // Returns a clean https URL, or null if it isn't a usable web link.
+  function normalizeUrl(text) {
+    var t = String(text || '').trim().split(/\s+/)[0];
+    if (!t) return null;
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(t)) t = 'https://' + t;
+    var u;
+    try { u = new URL(t); } catch (e) { return null; }
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
+    if (!/\./.test(u.hostname)) return null;
+    return u.href;
+  }
+
+  function linkInfo(url) {
+    var host = '';
+    try { host = new URL(url).hostname.replace(/^www\./, ''); } catch (e) { host = url; }
+    for (var i = 0; i < LINK_SOURCES.length; i++) {
+      if (LINK_SOURCES[i][0].test(host)) return { source: LINK_SOURCES[i][1], icon: LINK_SOURCES[i][2], host: host };
+    }
+    return { source: host, icon: '🔗', host: host };
+  }
+
+  // Pulls a URL out of a drag-and-drop or paste.
+  function urlFromTransfer(dt) {
+    if (!dt) return null;
+    var list = dt.getData && (dt.getData('text/uri-list') || dt.getData('text/plain') || dt.getData('URL'));
+    if (!list) return null;
+    var first = list.split(/\r?\n/).filter(function (l) { return l && l.charAt(0) !== '#'; })[0];
+    return normalizeUrl(first);
+  }
+
+  var Docs = { KINDS: KINDS, add: add, listFor: listFor, all: all, get: get, remove: remove, removeFor: removeFor, exportAll: exportAll, importAll: importAll, clear: clear, prettySize: prettySize,
+    normalizeUrl: normalizeUrl, linkInfo: linkInfo, urlFromTransfer: urlFromTransfer };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = Docs;
+  else root.FHDocs = Docs;
 })(this);

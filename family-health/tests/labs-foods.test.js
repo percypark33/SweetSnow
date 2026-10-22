@@ -141,3 +141,22 @@ test('a fat-heavy plate is not called balanced', () => {
   assert.ok(!s.badges.includes('⭐ Balanced plate'), JSON.stringify(s));
   assert.ok(s.parts.includes('heavy on fat'));
 });
+
+const D = require('../js/docs.js');
+
+test('links: only real web addresses are accepted', () => {
+  assert.equal(D.normalizeUrl('mychart.example.org/results/123'), 'https://mychart.example.org/results/123');
+  assert.equal(D.normalizeUrl('  https://drive.google.com/file/d/abc/view  '), 'https://drive.google.com/file/d/abc/view');
+  assert.equal(D.normalizeUrl('javascript:alert(1)'), null);
+  assert.equal(D.normalizeUrl('file:///Users/me/labs.pdf'), null);
+  assert.equal(D.normalizeUrl('not a link'), null);
+  assert.equal(D.normalizeUrl(''), null);
+});
+
+test('links: the source is recognised from the address', () => {
+  assert.equal(D.linkInfo('https://mychart.sutterhealth.org/MyChart/Results').source, 'MyChart');
+  assert.equal(D.linkInfo('https://my.questdiagnostics.com/web/results').source, 'Quest Diagnostics');
+  assert.equal(D.linkInfo('https://patient.labcorp.com/results').source, 'Labcorp');
+  assert.equal(D.linkInfo('https://drive.google.com/file/d/x').source, 'Google Drive');
+  assert.equal(D.linkInfo('https://www.example-clinic.com/r/1').source, 'example-clinic.com');
+});

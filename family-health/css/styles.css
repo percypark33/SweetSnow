@@ -155,7 +155,7 @@ fieldset { border: 1px solid var(--line); border-radius: var(--radius); padding:
 legend { font-weight: 700; padding: 0 6px; }
 label { display: block; font-weight: 600; font-size: .88rem; margin-bottom: 4px; }
 .hint { font-weight: 400; color: var(--muted); font-size: .8rem; }
-input[type=text], input[type=date], input[type=number], select, textarea {
+input[type=text], input[type=url], input[type=date], input[type=number], select, textarea {
   width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px;
   background: var(--bg); color: var(--text); font: inherit; font-size: .95rem;
 }
@@ -362,3 +362,13 @@ ul.plain li { padding: 4px 0; }
   main { padding-bottom: 90px; }
 }
 @media (max-width: 900px) { #toast { bottom: 84px; } }
+
+/* ---------- links & drop zones ---------- */
+.link-box { padding: 14px 16px; margin: 14px 0; border: 1px dashed var(--line); border-radius: var(--radius); background: var(--bg); }
+.link-head { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+.drop-icon { font-size: 1.6rem; line-height: 1; }
+.link-row { display: flex; gap: 8px; }
+.link-row input { flex: 1; min-width: 0; }
+.link-meta { margin-top: 10px; }
+.drop-zone { transition: border-color .15s, background .15s; }
+.drop-zone.dragging { border-color: var(--brand); border-style: solid; background: var(--brand-soft); }

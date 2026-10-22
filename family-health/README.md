@@ -79,7 +79,11 @@ All scoring lives in `js/questionnaire.js` and is covered by
   ACC/AHA, KDIGO, WHO, AGA and NIH cut-offs. Metric units are converted. One abnormal
   diabetes-range result is offered unticked because a diagnosis needs a repeat test.
 - **Health records step** — upload PDFs and photos (lab reports, visit notes, vaccine
-  records). Stored in the browser's IndexedDB on this device and included in backups.
+  records), or drop/paste links to results in a patient portal or shared folder
+  (MyChart, Quest, Labcorp, Kaiser, Google Drive, Dropbox, iCloud are recognised).
+  Files live in the browser's IndexedDB and links in the profile; both are in backups.
+  Only http(s) links are accepted, and they open in a new tab without sharing the app's
+  address. Portal links need a sign-in, so the app stores them but can't read the results.
 - **Build meals** (replaces the pre-made plan) — choose who's eating and which meal, then
   pick foods from Protein / Carbs / Fiber / Healthy-fat tabs. Every food card shows
   whether each person can eat it. The plate shows a live chart, macro bars against
