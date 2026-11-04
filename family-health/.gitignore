@@ -1,0 +1,4 @@
+# Backups contain private health data, never commit them
+family-health-backup-*.json
+backups/
+.DS_Store

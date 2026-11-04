@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Three directions</title>
+  <style>
+    :root { --bg: #f6f5f1; --card: #fff; --ink: #1f2421; --muted: #5f6762; --line: #e2e0d8; }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #141715; --card: #1d211f; --ink: #e8ece9; --muted: #a3aca6; --line: #333a36; } }
+    :root[data-theme="dark"] { --bg: #141715; --card: #1d211f; --ink: #e8ece9; --muted: #a3aca6; --line: #333a36; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 -apple-system, system-ui, sans-serif; }
+    main { max-width: 1040px; margin: 0 auto; padding: 32px 16px; }
+    h1 { margin: 0 0 4px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; margin-top: 20px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
+    .swatch { height: 120px; display: grid; place-items: center; font-size: 2.2rem; font-weight: 800; letter-spacing: -.02em; }
+    .body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+    .body h2 { margin: 0 0 4px; }
+    .who { color: var(--muted); font-size: .9rem; margin-bottom: 10px; }
+    ul { padding-left: 18px; margin: 0 0 14px; font-size: .93rem; }
+    .go { margin-top: auto; display: inline-block; padding: 10px 16px; border-radius: 999px; background: var(--ink); color: var(--bg); text-decoration: none; font-weight: 600; text-align: center; }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Three directions for the app</h1>
+  <p class="muted">Same family, same science, three different products. Each is a working prototype reading your saved family (or the demo family). <a href="../index.html">Back to the current app</a>.</p>
+  <div class="grid">
+    <div class="card"><div class="swatch" style="background:#0b0d10;color:#b6f36a">◎ Pulse</div><div class="body"><h2>Pulse — the daily coach</h2><div class="who">For: busy adults who want one screen a day. Feel: WHOOP / Apple Fitness.</div>
+      <ul><li>Phone-first, dark, bottom tab bar</li><li>Water, steps and workout rings with one-tap logging</li><li>Today's training session and a dinner idea front and center</li><li>Health focus as a single coaching card</li></ul><a class="go" href="pulse.html">Open Pulse →</a></div></div>
+    <div class="card"><div class="swatch" style="background:#0f2a3d;color:#cfe0ec">Chart</div><div class="body"><h2>Chart — the family health record</h2><div class="who">For: the parent who manages everyone's care. Feel: a calm patient portal.</div>
+      <ul><li>Desktop dashboard with a family sidebar and alert counts</li><li>Lab table with interpretations, items to review, care plan</li><li>Intake targets and activity prescription as tables</li><li>Prints as a one-page summary for doctor visits</li></ul><a class="go" href="chart.html">Open Chart →</a></div></div>
+    <div class="card"><div class="swatch" style="background:#fbf6ec;color:#d9542b;font-family:Georgia,serif">Table</div><div class="body"><h2>Table — the family food magazine</h2><div class="who">For: whoever cooks. Feel: NYT Cooking meets a family cookbook.</div>
+      <ul><li>Editorial layout, serif type, warm paper colors</li><li>"Tonight" hero: one menu cooked for everyone at the table</li><li>Diet-book amounts as a magazine spread per person</li><li>Kitchen shelf toggles that steer the menu</li></ul><a class="go" href="table.html">Open Table →</a></div></div>
+  </div>
+</main>
+</body>
+</html>
