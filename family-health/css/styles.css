@@ -572,3 +572,28 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
   .rank .lr-bar { display: none; }
   .food-hero { flex-direction: column; }
 }
+
+/* ---------- honest reviews ---------- */
+.verdict { display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: .85rem; }
+.verdict.mini { padding: 1px 8px; font-size: .72rem; font-weight: 600; }
+.v-star { background: var(--ok-soft); color: var(--ok); }
+.v-good { background: #e7f0dc; color: #4d7a25; }
+.v-moderate { background: var(--warn-soft); color: var(--warn); }
+.v-limit { background: var(--danger-soft); color: var(--danger); }
+.v-none { background: var(--surface-2); color: var(--muted); }
+.rv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 4px 22px; }
+.rv-grid h3, .rv-personal h3 { margin-bottom: 4px; }
+.rv-good li::marker { content: '✓  '; color: var(--ok); }
+.rv-list { padding-left: 20px; }
+.rv-list li { margin-bottom: 6px; }
+.rv-caution::marker { content: '⚠  '; color: var(--danger); }
+.rv-note::marker { content: '•  '; color: var(--muted); }
+.rv-caution { color: var(--text); }
+.rv-personal { background: var(--warn-soft); border-radius: 12px; padding: 4px 14px 6px; margin-top: 8px; }
+.rv-myth { background: var(--surface-2); border-radius: 12px; padding: 10px 14px; margin: 10px 0 0; font-size: .92rem; }
+.rv-count { color: var(--warn); font-weight: 600; }
+.rv-count.personal { color: var(--danger); }
+.warn-link { position: absolute; top: 6px; right: 52px; text-decoration: none; font-size: .9rem; color: var(--warn); }
+.warn-link.personal { color: var(--danger); font-weight: 800; }
+.food-card .pick-star { right: 72px; }
+.learn-food .verdict.mini { margin-right: 4px; }

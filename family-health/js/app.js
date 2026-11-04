@@ -18,6 +18,7 @@
   var W = window.FHWorkout;
   var Planner = window.FHPlanner;
   var N = window.FHNutrition;
+  var Rev = window.FHReviews;
 
   var state = Store.load();
   Foods.setCustom(state.customIngredients);
@@ -625,6 +626,20 @@
         (s0.unknown ? '<p class="small muted">' + s0.unknown + ' of your own ingredients have no vitamin data, so they only count for calories and macros.</p>' : '') : '') };
   }
 
+  // A ⚠ on food cards when the honest review has something important for these eaters.
+  function cardWarn(fd, eaters) {
+    var texts = [];
+    eaters.forEach(function (m) {
+      var rv = Rev.review(fd, reviewCtx(m));
+      rv.personal.filter(function (x) { return x.level === 'caution'; }).forEach(function (x) { var t2 = (eaters.length > 1 ? m.name + ': ' : '') + x.text; if (texts.indexOf(t2) === -1) texts.push(t2); });
+    });
+    var g0 = Rev.review(fd);
+    var gen = g0.data.filter(function (x) { return x.level === 'caution'; }).map(function (x) { return x.text; });
+    var all = texts.concat(gen);
+    if (!all.length) return '';
+    return '<a class="warn-link' + (texts.length ? ' personal' : '') + '" href="#/learn/food/' + fd.id + '" title="' + esc(all.join('\n\n')) + '">⚠</a>';
+  }
+
   function picksStrip(b, eaters, picks, fits) {
     var names = eaters.length > 1 ? 'your family' : esc(eaters[0].name);
     if (!picks.rules.length) {
@@ -697,7 +712,7 @@
           (onPlate ? '<span class="on-plate">×' + onPlate.qty + ' on plate</span>' : '') + '</button>' +
           (good ? '<div class="pick-note" title="' + esc(pk.reasons.join('\n')) + '">' + esc(pk.reasons[0]) + (pk.reasons.length > 1 ? ' +' + (pk.reasons.length - 1) : '') + '</div>' : '') +
           (fit.status !== 'ok' ? '<div class="fit-note">' + (fit.status === 'no' ? '✕ ' : '! ') + esc(reason) + '</div>' : '') +
-          '<a class="shop-link" href="#/shop/' + fd.id + '" title="Where to buy & which brand">🛒</a><a class="info-link" href="#/learn/food/' + fd.id + '" title="What\'s in it">ⓘ</a></div>';
+          '<a class="shop-link" href="#/shop/' + fd.id + '" title="Where to buy & which brand">🛒</a><a class="info-link" href="#/learn/food/' + fd.id + '" title="What\'s in it — and an honest review">ⓘ</a>' + cardWarn(fd, eaters) + '</div>';
       }).join('');
       return '<section class="food-section"><h2 style="--cat:' + cat.color + '"><span>' + cat.emoji + '</span> ' + cat.label + '</h2><p class="muted small">' + esc(cat.blurb) + '</p>' +
         '<div class="food-grid">' + (cards || '<p class="muted">No matches.</p>') + '</div></section>';
@@ -2211,13 +2226,44 @@
     var foods = Foods.FOODS.filter(function (fd) { return !q || fd.name.toLowerCase().indexOf(q) !== -1; }).slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).map(function (fd) {
       var gr = N.foodGrade(fd, need);
       var rich = N.NUTRIENTS.filter(function (n) { return need.weights[n.id] && (fd[n.id] || 0) / need.amounts[n.id] >= 0.2; }).map(function (n) { return n.label; }).slice(0, 3);
-      return '<a class="learn-food" href="#/learn/food/' + fd.id + '"><span class="food-emoji">' + fd.emoji + '</span><span><strong>' + esc(fd.name) + '</strong><span class="small muted">' + esc(fd.serving) + ' · ' + fd.kcal + ' kcal' + (rich.length ? ' · rich in ' + esc(rich.join(', ').toLowerCase()) : '') + '</span></span><span class="grade-pill g-' + gr.grade + '">' + gr.grade + '</span></a>';
+      var rv = Rev.review(fd, reviewCtx(m));
+      return '<a class="learn-food" href="#/learn/food/' + fd.id + '"><span class="food-emoji">' + fd.emoji + '</span><span><strong>' + esc(fd.name) + '</strong><span class="small muted">' + esc(fd.serving) + ' · ' + fd.kcal + ' kcal' + (rich.length ? ' · rich in ' + esc(rich.map(function (x) { return /^Vitamin/.test(x) ? x.replace('Vitamin', 'vitamin') : x.toLowerCase(); }).join(', ')) : '') + '</span>' +
+        '<span class="small"><span class="verdict mini v-' + rv.verdictKey + '">' + esc(rv.verdict) + '</span>' + (rv.cautions ? ' <span class="rv-count">⚠ ' + rv.cautions + ' to know</span>' : '') + (rv.personal.length ? ' <span class="rv-count personal">' + rv.personal.length + ' for ' + esc(m.name) + '</span>' : '') + '</span></span><span class="grade-pill g-' + gr.grade + '">' + gr.grade + '</span></a>';
     }).join('');
     return '<div class="spread" style="margin-bottom:8px"><div><h1>Learn</h1><div class="muted">What each nutrient does for your body, how much you need, and what every food actually contains.</div></div></div>' +
       '<section class="card">' + whoBar() + '</section>' +
       '<section class="card"><h2>What your body needs</h2><p class="small muted">Tap a nutrient to see what it does, what happens if you\'re low, and the foods richest in it.</p><div class="learn-grid">' + cards + '</div></section>' +
       '<section class="card"><div class="spread"><h2>What\'s in each food</h2><input type="text" id="learn-search" placeholder="Search foods…" value="' + esc(state.learnSearch || '') + '" style="max-width:240px"></div>' +
       '<p class="small muted">Grades A–E show how much of ' + esc(m ? m.name + '\'s' : 'your') + ' needs a food covers per calorie, minus sodium, saturated fat and added sugar.</p><div class="learn-foods">' + foods + '</div></section>';
+  }
+
+  // Who's viewing, for personal warnings in food reviews.
+  function reviewCtx(m) {
+    if (!m) return null;
+    var meds = [];
+    E.matchMedications(m.medications).forEach(function (x) { x.rules.forEach(function (r) { if (meds.indexOf(r.id) === -1) meds.push(r.id); }); });
+    var conds = (m.conditions || []).slice();
+    var allergies = Object.keys(E.profileRules(m, today()).block);
+    return { name: m.name, age: ageOf(m), conds: conds, meds: meds, allergies: allergies, pregnant: conds.indexOf('pregnancy') !== -1 };
+  }
+
+  function reviewHtml(fd, m) {
+    var rv = Rev.review(fd, reviewCtx(m)), idx = [];
+    var li = function (x) { return '<li class="' + (x.level === 'caution' ? 'rv-caution' : 'rv-note') + '">' + esc(x.text) + (x.source ? ' <span class="small">' + rvSource(x.source, idx) + '</span>' : '') + '</li>'; };
+    var watch = rv.general.concat(rv.data);
+    return '<section class="card review"><div class="spread"><h2>Honest review</h2><span class="verdict v-' + rv.verdictKey + '">' + esc(rv.verdict) + '</span></div>' +
+      (rv.verdictText ? '<p class="muted small" style="margin-top:0">' + esc(rv.verdictText) + '</p>' : '') +
+      '<div class="rv-grid"><div><h3>✓ Good for you</h3><ul class="rv-good">' + rv.pros.map(function (p2) { return '<li>' + esc(p2) + '</li>'; }).join('') + '</ul></div>' +
+      '<div><h3>⚠ Watch out</h3>' + (watch.length ? '<ul class="rv-list">' + watch.map(li).join('') + '</ul>' : '<p class="small muted">No real downsides for most people.</p>') + '</div></div>' +
+      (m ? '<div class="rv-personal"><h3>For ' + esc(m.name) + '</h3>' + (rv.personal.length ? '<ul class="rv-list">' + rv.personal.map(li).join('') + '</ul>' : '<p class="small muted">Nothing specific to ' + esc(m.name) + '\'s allergies, conditions, medicines or age.</p>') + '</div>' : '') +
+      (rv.myth ? '<p class="rv-myth">💡 <strong>Myth check:</strong> ' + esc(rv.myth) + (rv.mythSource ? ' <span class="small">' + rvSource(rv.mythSource, idx) + '</span>' : '') + '</p>' : '') + '</section>';
+  }
+
+  function rvSource(id, idx) {
+    var sr = Rev.SOURCES[id];
+    if (!sr) return '';
+    if (idx.indexOf(id) === -1) idx.push(id);
+    return '<a href="' + esc(sr.url) + '" target="_blank" rel="noopener" title="' + esc(sr.title) + '">[' + esc(sr.org) + ']</a>';
   }
 
   function viewFood(id) {
@@ -2243,6 +2289,7 @@
       '<div class="row" style="margin-top:6px"><span class="grade-pill big g-' + gr.grade + '">' + gr.grade + '</span><span class="small">' + (gr.grade === 'A' || gr.grade === 'B' ? 'Lots of nutrients for its calories' : gr.grade === 'C' ? 'Some useful nutrients' : 'Few nutrients for its calories — fine in small amounts') + '</span></div>' +
       (rich.length ? '<p><strong>Rich in:</strong> ' + rich.map(function (n) { return '<a class="chip" href="#/learn/n/' + n.id + '">' + esc(n.label) + '</a>'; }).join(' ') + '</p>' : '') +
       (fit && fit.status !== 'ok' ? '<div class="alert ' + (fit.status === 'no' ? 'danger' : 'warn') + '"><div>' + esc(fitReason(fit)) + '</div></div>' : '') + '</div></section>' +
+      reviewHtml(fd, m) +
       '<section class="card"><h2>Nutrition facts — one serving</h2>' + whoBar() +
       '<div class="macro-line"><span><b>' + fd.protein + ' g</b> protein</span><span><b>' + fd.carbs + ' g</b> carbs</span><span><b>' + fd.fat + ' g</b> fat</span><span><b>' + fd.fiber + ' g</b> fiber</span></div>' +
       '<p class="small muted">% = share of ' + esc(who) + '\'s daily need from one serving. 10–19% is a good source, 20%+ excellent (FDA labeling rules). Tap any row to see what it does for your body.</p>' +

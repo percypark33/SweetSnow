@@ -95,6 +95,16 @@ All scoring lives in `js/questionnaire.js` and is covered by
   logged) + 1,000 a day, working up to where benefits level off (Paluch 2022:
   ~9,000 under 60, ~7,000 for 60+; higher for blood-sugar/lipid goals); held steady on
   low-recovery days; kids 10,000–13,000. Also activity minutes and sleep hours by age.
+- **Honest food reviews** (`js/reviews.js`) — every food has a verdict (everyday star,
+  good choice, fine in moderation, limit), what it's genuinely good for, and every downside
+  worth knowing, each with a source: mercury (FDA/EPA), arsenic in rice (FDA), red and
+  processed meat (IARC), food-safety temperatures (USDA), outbreak-prone foods (CDC/FDA),
+  oxalate, FODMAPs, choking hazards (AAP), hidden sodium, saturated fat and added sugar.
+  Personal warnings match the person viewing — allergies, conditions (CKD potassium, gout
+  purines, IBS, GERD, celiac), medicines (warfarin and vitamin K, levothyroxine and soy,
+  MAOIs and tyramine), pregnancy and young children — plus a "myth check" where the
+  evidence contradicts a common worry. Food cards in the builder show ⚠ for personal or
+  high-sodium/saturated-fat warnings.
 - **Learn** tab — a nutrition label for every food (each nutrient per serving and the share
   of the chosen person's daily need, with "good source" 10–19% and "excellent source" 20%+
   per FDA labeling rules) and a page per nutrient: what it does for the body, what too
@@ -204,6 +214,7 @@ family-health/
   js/engine.js          pure logic: profile → guide, meal plan, grocery list (no UI)
   js/questionnaire.js   everyday questions + validated screening scores
   js/labs.js            blood-test interpretation, lab-report reading, tracker CSV import
+  js/reviews.js         honest per-food reviews with personal warnings
   js/nutrition.js       nutrient needs (DRIs), meal score, food grades, gap fillers
   js/dietbook.js        diet book amounts and chapters
   js/workout.js         per-person weekly workout split

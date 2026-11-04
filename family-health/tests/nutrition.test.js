@@ -80,3 +80,31 @@ test('every tracked nutrient explains what it does and what too little or too mu
   for (const n of N.LIMITS) assert.ok(N.INFO[n.id].high, n.id);
   for (const id of ['carbs', 'fat', 'water', 'kcal', 'vegetables', 'fruits', 'meats', 'plants', 'dairy']) assert.ok(N.INFO[id] && N.INFO[id].does, id);
 });
+
+const Rv = require('../js/reviews.js');
+
+test('every food has an honest review with sourced downsides', () => {
+  for (const fd of F.FOODS) {
+    const r = Rv.REVIEWS[fd.id];
+    assert.ok(r && Rv.VERDICT[r.v] && r.pros.length && r.cons.length, fd.id);
+    for (const c of r.cons) {
+      assert.ok(['caution', 'note'].includes(c[1]), fd.id);
+      if (c[3]) assert.ok(Rv.SOURCES[c[3]], fd.id + ' ' + c[3]);
+    }
+  }
+});
+
+test('reviews flag what matters for the person viewing', () => {
+  const spinach = Rv.review(F.byId('spinach'), { age: 72, conds: ['ckd'], meds: ['warfarin'], allergies: [] });
+  assert.ok(spinach.personal.some((x) => /vitamin K/.test(x.text)));
+  assert.ok(spinach.personal.some((x) => /potassium/.test(x.text)));
+  assert.ok(spinach.general.some((x) => /oxalate/.test(x.text)));
+  assert.equal(Rv.review(F.byId('spinach'), { age: 30, conds: [], meds: [], allergies: [] }).personal.length, 0);
+  assert.ok(Rv.review(F.byId('grapes'), { age: 2, conds: [], meds: [], allergies: [] }).personal.some((x) => /choking/.test(x.text)));
+  assert.ok(Rv.review(F.byId('tofu'), { age: 50, conds: [], meds: ['levothyroxine'], allergies: [] }).personal.some((x) => /levothyroxine/.test(x.text)));
+  assert.ok(Rv.review(F.byId('almonds'), { age: 9, conds: [], meds: [], allergies: ['treenut'] }).personal.some((x) => /allergy/.test(x.text)));
+  const cottage = Rv.review(F.byId('cottage'));
+  assert.ok(cottage.data.some((x) => /High in sodium/.test(x.text)));
+  assert.equal(Rv.review(F.byId('beef')).verdict, 'Fine in moderation');
+  assert.ok(Rv.review(F.byId('beef')).general.some((x) => /IARC/.test(x.text)));
+});
