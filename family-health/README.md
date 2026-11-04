@@ -95,6 +95,25 @@ All scoring lives in `js/questionnaire.js` and is covered by
   logged) + 1,000 a day, working up to where benefits level off (Paluch 2022:
   ~9,000 under 60, ~7,000 for 60+; higher for blood-sugar/lipid goals); held steady on
   low-recovery days; kids 10,000–13,000. Also activity minutes and sleep hours by age.
+- **Diet Book** tab — each person's daily amounts by chapter: vegetables, fruits,
+  meat/poultry/fish/eggs, plant proteins, carbs & grains, fats & oils, protein, fiber,
+  dairy, water and a workout split. Sized from age, sex, height, weight and activity
+  (USDA Healthy US-Style patterns, DRIs/AMDR, WCRF/IARC meat limits, FDA/EPA fish advice),
+  with serving guides, facts with sources, "For <name>" notes from blood-test focus, an
+  age/sex appendix and a print layout. "Enter numbers" works for anyone.
+- **Workout split** (`js/workout.js`) — full body, upper/lower or push/pull/legs by days
+  and experience; exercises for no equipment, dumbbells or a gym; cardio filled to the
+  150-minute guideline; balance work at 65+; kids' activity; cautions for blood pressure,
+  diabetes, pregnancy, heart/kidney disease and low-recovery days.
+- **Planner** tab (`js/planner.js`) — an editable ingredient library (in my kitchen, love,
+  never — per person or household; add your own ingredients with nutrition and allergen
+  tags) and preferences (days, meals, cuisine, time, budget). ⚡ Smart plan runs offline;
+  ✨ Plan with Claude uses your own Anthropic API key (model `claude-opus-5-5`, JSON
+  schema output) and re-checks every recipe against allergies before showing it.
+- **Three design directions** (`directions/`, bundled as `Direction-A-Pulse.html`,
+  `Direction-B-Chart.html`, `Direction-C-Table.html`) — working prototypes on the same
+  data: Pulse (dark daily coach), Chart (family health record), Table (family food
+  magazine).
 - **Health records step** — upload PDFs and photos (lab reports, visit notes, vaccine
   records), or drop/paste links to results in a patient portal or shared folder
   (MyChart, Quest, Labcorp, Kaiser, Google Drive, Dropbox, iCloud are recognised).
@@ -164,6 +183,10 @@ family-health/
   js/engine.js          pure logic: profile → guide, meal plan, grocery list (no UI)
   js/questionnaire.js   everyday questions + validated screening scores
   js/labs.js            blood-test interpretation, lab-report reading, tracker CSV import
+  js/dietbook.js        diet book amounts and chapters
+  js/workout.js         per-person weekly workout split
+  js/planner.js         ingredient library, smart planner, Claude planner
+  directions/           three UI directions (prototypes)
   js/personal.js        per-person diet focus from labs/conditions/goals; water & step goals
   js/foods.js           build-a-meal foods (USDA nutrition), targets, balance score
   js/shop.js            nearby stores (OpenStreetMap) and products (Open Food Facts)

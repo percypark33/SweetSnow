@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chart — family health record</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f6f8; --panel: #ffffff; --side: #0f2a3d; --side-text: #cfe0ec; --line: #dde3e9; --text: #1b2733; --muted: #5d6b78;
+      --accent: #1f6fb2; --ok: #2e7d4f; --ok-bg: #e5f3ea; --warn: #9a6400; --warn-bg: #fff3d9; --bad: #b3261e; --bad-bg: #fbe7e5;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) { --bg: #0e141a; --panel: #151d25; --side: #0a1218; --line: #26323d; --text: #e3eaf0; --muted: #98a6b3; --accent: #6db3f2; --ok-bg: #173325; --warn-bg: #3a2e14; --bad-bg: #3a1a18; --ok: #6fd39a; --warn: #f2c35b; --bad: #ff8a80; }
+    }
+    :root[data-theme="dark"] { --bg: #0e141a; --panel: #151d25; --side: #0a1218; --line: #26323d; --text: #e3eaf0; --muted: #98a6b3; --accent: #6db3f2; --ok-bg: #173325; --warn-bg: #3a2e14; --bad-bg: #3a1a18; --ok: #6fd39a; --warn: #f2c35b; --bad: #ff8a80; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 "IBM Plex Sans", -apple-system, system-ui, sans-serif; }
+    .layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 100vh; }
+    aside { background: var(--side); color: var(--side-text); padding: 20px 14px; }
+    .logo { font-weight: 600; color: #fff; margin: 0 6px 22px; letter-spacing: .02em; }
+    .logo small { display: block; font-weight: 400; color: var(--side-text); opacity: .7; }
+    .member { display: flex; gap: 10px; align-items: center; width: 100%; padding: 10px; border-radius: 10px; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-align: left; }
+    .member:hover { background: rgba(255,255,255,.06); }
+    .member.on { background: rgba(255,255,255,.12); color: #fff; }
+    .ini { width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,.14); display: grid; place-items: center; font-weight: 600; flex: none; }
+    .member small { display: block; opacity: .7; font-size: .78rem; }
+    .flag { margin-left: auto; min-width: 22px; height: 22px; border-radius: 6px; font-size: .75rem; display: grid; place-items: center; background: var(--bad); color: #fff; }
+    main { padding: 24px 28px 40px; min-width: 0; }
+    .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+    h1 { margin: 0; font-size: 1.6rem; font-weight: 600; }
+    .sub { color: var(--muted); }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 18px; }
+    .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+    .kpi .lbl { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+    .kpi .val { font: 500 1.35rem "IBM Plex Mono", ui-monospace, monospace; margin-top: 2px; }
+    .kpi .val small { font-size: .8rem; color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px; }
+    section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+    h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th { text-align: left; font-weight: 500; color: var(--muted); font-size: .78rem; border-bottom: 1px solid var(--line); padding: 6px 8px; }
+    td { border-bottom: 1px solid var(--line); padding: 8px; vertical-align: top; }
+    tr:last-child td { border-bottom: 0; }
+    .num { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+    .pill { display: inline-block; padding: 1px 8px; border-radius: 6px; font-size: .78rem; font-weight: 500; white-space: nowrap; }
+    .p-ok { background: var(--ok-bg); color: var(--ok); } .p-warn { background: var(--warn-bg); color: var(--warn); } .p-bad { background: var(--bad-bg); color: var(--bad); }
+    .wrap { overflow-x: auto; }
+    .muted { color: var(--muted); } .small { font-size: .82rem; }
+    .btn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--text); font: 500 .9rem inherit; cursor: pointer; text-decoration: none; }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .demo { background: var(--warn-bg); color: var(--warn); padding: 8px 12px; border-radius: 8px; font-size: .85rem; margin-bottom: 14px; }
+    .week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+    .wd { border: 1px solid var(--line); border-radius: 8px; padding: 6px; font-size: .75rem; min-height: 70px; }
+    .wd b { display: block; font-size: .8rem; }
+    .wd.strength { border-top: 3px solid var(--accent); } .wd.cardio, .wd.walk, .wd.vigorous { border-top: 3px solid var(--ok); } .wd.rest { opacity: .6; }
+    .mobile-pick { display: none; }
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+      aside { display: none; }
+      .mobile-pick { display: block; margin-bottom: 14px; }
+      main { padding: 16px; }
+      .grid { grid-template-columns: minmax(0, 1fr); }
+      .week { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    @media print { aside, .mobile-pick, .btn { display: none !important; } .layout { grid-template-columns: 1fr; } section { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <div class="layout"><aside id="side"></aside><main id="main"></main></div>
+  <script src="../js/knowledge.js"></script>
+  <script src="../js/labs.js"></script>
+  <script src="../js/foods.js"></script>
+  <script src="../js/personal.js"></script>
+  <script src="../js/engine.js"></script>
+  <script src="../js/questionnaire.js"></script>
+  <script src="../js/dietbook.js"></script>
+  <script src="../js/workout.js"></script>
+  <script src="../js/planner.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../sample/demo-family.js"></script>
+  <script src="shared.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var D = window.Dir, esc = D.esc, Q = window.FHQuestionnaire;
+    var who = D.state.members[0].id;
+    var LEVEL = { ok: ['In range', 'p-ok'], low: ['Low', 'p-warn'], high: ['Out of range', 'p-bad'], watch: ['Borderline', 'p-warn'], alert: ['Act now', 'p-bad'] };
+    var FIND = { urgent: ['Urgent', 'p-bad'], doctor: ['See doctor', 'p-warn'], change: ['Lifestyle', 'p-ok'] };
+
+    function flags(m) { var age = D.E.ageYears(m.birthdate, new Date()); return Q.analyze(m, age).findings.filter(function (f) { return f.level !== 'change'; }).length; }
+
+    function side() {
+      document.getElementById('side').innerHTML = '<div class="logo">Chart<small>Family health record</small></div>' + D.state.members.map(function (m) {
+        var n = flags(m), age = D.E.ageYears(m.birthdate, new Date());
+        return '<button class="member' + (m.id === who ? ' on' : '') + '" data-who="' + esc(m.id) + '"><span class="ini">' + esc(D.initials(m.name)) + '</span><span>' + esc(m.name) + '<small>' + esc([m.relation, age !== null ? age + ' y' : ''].filter(Boolean).join(' · ')) + '</small></span>' + (n ? '<span class="flag" title="' + n + ' items for the doctor">' + n + '</span>' : '') + '</button>';
+      }).join('');
+    }
+
+    function main() {
+      var m = D.state.members.filter(function (p) { return p.id === who; })[0];
+      var x = D.person(m), g = x.g, t = g.targets, a = x.a;
+      var r = Q.analyze(m, g.age);
+      var kpi = function (l, v, u) { return '<div class="kpi"><div class="lbl">' + l + '</div><div class="val">' + v + (u ? ' <small>' + u + '</small>' : '') + '</div></div>'; };
+      var kpis = kpi('Energy', t.kcal ? t.kcal.toLocaleString('en-US') : '—', 'kcal') + kpi('Protein', a.protein ? a.protein.min + (a.protein.max !== a.protein.min ? '–' + a.protein.max : '') : '—', 'g') +
+        kpi('Fiber', a.fiber ? a.fiber.grams : '—', 'g') + kpi('Sat. fat', t.satFat ? t.satFat.replace('under ', '<') : '—', '') + kpi('Sodium', t.sodium ? t.sodium.replace('under ', '<').replace(' mg', '') : '—', 'mg') +
+        kpi('Water', x.day.water && x.day.water.cups ? x.day.water.cups : '—', 'cups') + kpi('Steps', x.day.steps ? x.day.steps.goal.toLocaleString('en-US') : '—', '/day') + kpi('BMI', g.bmi || '—', '');
+
+      var labs = Object.keys(x.labs).map(function (id) {
+        var d = D.Labs.labDef(id), it = D.Labs.interpret(id, x.labs[id].value, m.sex, (m.conditions || []).indexOf('pregnancy') !== -1), lv = LEVEL[it.level] || ['', ''];
+        return '<tr><td>' + esc(d.label) + '</td><td class="num">' + x.labs[id].value + ' ' + esc(d.unit) + '</td><td><span class="pill ' + lv[1] + '">' + esc(it.text) + '</span></td><td class="num muted">' + esc(x.labs[id].date) + '</td></tr>';
+      }).join('');
+      var findings = r.findings.slice(0, 8).map(function (f) {
+        var lv = FIND[f.level] || ['', ''];
+        return '<tr><td><span class="pill ' + lv[1] + '">' + lv[0] + '</span></td><td>' + esc(f.title) + '<div class="small muted">' + esc((f.todo || [])[0] || '') + '</div></td><td class="small muted">' + esc(f.strength || '') + '</td></tr>';
+      }).join('');
+      var focus = g.focus.map(function (fr) {
+        return '<tr><td>' + fr.icon + ' ' + esc(fr.title) + '</td><td class="small">' + esc(fr.because) + '</td><td class="small">' + esc(fr.eatMore[0] || fr.tip) + '</td></tr>';
+      }).join('');
+      var book = a.tooYoung || a.missing ? '<p class="muted">Pediatric feeding plan.</p>' : '<table><thead><tr><th>Group</th><th>Amount</th></tr></thead><tbody>' + D.DB.CHAPTERS.map(function (ch) {
+        return '<tr><td>' + ch.emoji + ' ' + esc(ch.title.split(':')[0]) + '<div class="small muted">' + esc(ch.detail(a)[0]) + '</div></td><td class="num">' + esc(ch.headline(a)) + '</td></tr>';
+      }).join('') + '</tbody></table>';
+      var week = x.w.week.length ? '<div class="week">' + x.w.week.map(function (d) { return '<div class="wd ' + d.type + '"><b>' + d.day + '</b>' + esc(d.title) + (d.minutes ? '<div class="muted">' + d.minutes + ' min</div>' : '') + '</div>'; }).join('') + '</div>' : '<p>' + esc(x.w.summary) + '</p>';
+      var emergency = [['Blood type', m.bloodType || '—'], ['Allergies', g.allergies.map(function (al) { return al.name + (al.severity ? ' (' + al.severity + ')' : ''); }).join(', ') || 'None recorded'],
+        ['Conditions', (m.conditions || []).map(function (c) { return (D.KB.CONDITIONS[c] || {}).label || c; }).join(', ') || 'None recorded'], ['Medications', (m.medications || []).join(', ') || 'None recorded'], ['Doctor', m.doctor || '—']];
+
+      document.getElementById('main').innerHTML =
+        '<div class="mobile-pick"><select id="pick" style="width:100%;padding:10px;border-radius:8px;font:inherit">' + D.state.members.map(function (p) { return '<option value="' + esc(p.id) + '"' + (p.id === who ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join('') + '</select></div>' +
+        (D.demo ? '<div class="demo">Showing the demo family. Your own family appears here once added in the main app.</div>' : '') +
+        '<div class="head"><div><h1>' + esc(m.name) + '</h1><div class="sub">' + esc([m.relation, g.age !== null ? g.age + ' years' : '', m.sex, m.heightCm ? Math.round(m.heightCm) + ' cm' : '', g.weightKg ? Math.round(g.weightKg) + ' kg' : ''].filter(Boolean).join(' · ')) + '</div></div>' +
+        '<div><button class="btn" onclick="window.print()">Print summary</button> <a class="btn primary" href="../index.html#/member/' + esc(m.id) + '">Open record</a></div></div>' +
+        '<div class="kpis">' + kpis + '</div>' +
+        '<div class="grid">' +
+        '<section><h2>Laboratory results</h2>' + (labs ? '<div class="wrap"><table><thead><tr><th>Test</th><th>Result</th><th>Interpretation</th><th>Date</th></tr></thead><tbody>' + labs + '</tbody></table></div>' : '<p class="muted">No results on file.</p>') + '</section>' +
+        '<section><h2>Items to review</h2>' + (findings ? '<div class="wrap"><table><tbody>' + findings + '</tbody></table></div>' : '<p class="muted">Nothing flagged. Complete the health questions for screening.</p>') + '</section>' +
+        '<section><h2>Care plan — nutrition focus</h2>' + (focus ? '<div class="wrap"><table><thead><tr><th>Goal</th><th>Basis</th><th>First step</th></tr></thead><tbody>' + focus + '</tbody></table></div>' : '<p class="muted">No diet changes indicated.</p>') + '</section>' +
+        '<section><h2>Emergency information</h2><table><tbody>' + emergency.map(function (e) { return '<tr><td class="muted">' + e[0] + '</td><td>' + esc(e[1]) + '</td></tr>'; }).join('') + '</tbody></table></section>' +
+        '<section><h2>Daily intake reference</h2><div class="wrap">' + book + '</div></section>' +
+        '<section><h2>Activity prescription — ' + esc(x.w.splitName || 'daily play') + '</h2>' + week + (x.w.cautions.length ? '<p class="small">' + x.w.cautions.map(esc).join('<br>') + '</p>' : '') + '</section>' +
+        '</div><p class="small muted">Guidance from USPSTF, Dietary Guidelines, ADA, ACC/AHA, KDIGO and the Physical Activity Guidelines. Not a substitute for clinical judgment.</p>';
+    }
+
+    function render() { side(); main(); }
+    document.addEventListener('click', function (ev) { var b = ev.target.closest('[data-who]'); if (b) { who = b.getAttribute('data-who'); render(); } });
+    document.addEventListener('change', function (ev) { if (ev.target.id === 'pick') { who = ev.target.value; render(); } });
+    render();
+  })();
+  </script>
+</body>
+</html>

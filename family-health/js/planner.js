@@ -29,7 +29,7 @@
     korean: { label: 'Korean', flavor: 'gochugaru, garlic, sesame, scallion and a little gochujang' }
   };
 
-  var SLOT_SHARE = Foods.MEAL_SHARE;
+  var FRUIT = ['berries', 'apple', 'banana', 'orange', 'kiwi', 'grapes'];
 
   function list(v) { return Array.isArray(v) ? v : []; }
 
@@ -82,7 +82,10 @@
         w += Math.max(0, e.pick(fd.id)) * 0.6;
       });
       if (opts.pantry[fd.id]) w += 1.5;
-      if (slot === 'breakfast' && /oats|egg|yogurt|berries|banana|ww-bread|chia|peanut-butter|cottage|apple|kiwi|orange/.test(fd.id)) w += 2;
+      var morning = /^(oats|eggs|greek-yogurt|berries|banana|ww-bread|chia|peanut-butter|sunbutter|cottage|apple|kiwi|orange|grapes)$/.test(fd.id);
+      if (slot === 'breakfast' && morning) w += 2;
+      // Lunch and dinner: vegetables over fruit, and no oatmeal.
+      if ((slot === 'lunch' || slot === 'dinner') && (morning && fd.id !== 'eggs' || FRUIT.indexOf(fd.id) !== -1)) w *= 0.08;
       if (slot === 'snack' && fd.kcal > 250) w *= 0.3;
       w /= 1 + (used[fd.id] || 0) * 1.5; // variety
       return w;

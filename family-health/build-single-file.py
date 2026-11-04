@@ -11,3 +11,16 @@ for src in ['js/knowledge.js', 'js/labs.js', 'js/foods.js', 'js/personal.js', 'j
     html = html.replace(tag, '<script>\n' + (root / src).read_text() + '</script>')
 (root / 'Family-Health-Guide.html').write_text(html)
 print('wrote Family-Health-Guide.html', len(html.encode()), 'bytes')
+
+# The three design directions, each as a self-contained file next to the app.
+import re
+for name, title in [('pulse', 'Direction-A-Pulse'), ('chart', 'Direction-B-Chart'), ('table', 'Direction-C-Table')]:
+    page = (root / 'directions' / (name + '.html')).read_text()
+    def inline(m):
+        src = m.group(1)
+        path = root / 'directions' / src
+        return '<script>\n' + path.read_text() + '</script>'
+    page = re.sub(r'<script src="([^"]+)"></script>', inline, page)
+    page = page.replace('href="../index.html', 'href="Family-Health-Guide.html')
+    (root / (title + '.html')).write_text(page)
+    print('wrote', title + '.html', len(page.encode()), 'bytes')
