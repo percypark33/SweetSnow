@@ -95,7 +95,10 @@
   // Share of the day's needs each meal should cover.
   var MEAL_SHARE = { breakfast: 0.25, lunch: 0.30, dinner: 0.35, snack: 0.10 };
 
-  function byId(id) { return FOODS.filter(function (x) { return x.id === id; })[0]; }
+  // Family-added ingredients (meal planner) resolve here too.
+  var CUSTOM = [];
+  function setCustom(list) { CUSTOM = Array.isArray(list) ? list : []; }
+  function byId(id) { return FOODS.filter(function (x) { return x.id === id; })[0] || CUSTOM.filter(function (x) { return x.id === id; })[0]; }
 
   function totals(items) {
     var t = { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, byCat: { protein: 0, carbs: 0, fiber: 0, fat: 0 } };
@@ -173,7 +176,7 @@
     return items;
   }
 
-  var Foods = { CATEGORIES: CATEGORIES, FOODS: FOODS, MEAL_SHARE: MEAL_SHARE, byId: byId, totals: totals, mealTargets: mealTargets, score: score, surprise: surprise };
+  var Foods = { CATEGORIES: CATEGORIES, FOODS: FOODS, MEAL_SHARE: MEAL_SHARE, byId: byId, setCustom: setCustom, totals: totals, mealTargets: mealTargets, score: score, surprise: surprise };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = Foods;
   else root.FHFoods = Foods;

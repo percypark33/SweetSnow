@@ -14,8 +14,12 @@
   var Docs = window.FHDocs;
   var Shop = window.FHShop;
   var P = window.FHPersonal;
+  var DB = window.FHDietBook;
+  var W = window.FHWorkout;
+  var Planner = window.FHPlanner;
 
   var state = Store.load();
+  Foods.setCustom(state.customIngredients);
   var app = document.getElementById('app');
   var AVATAR_COLORS = ['#2f7d5b', '#c0603a', '#3d6fb4', '#8a4fb0', '#b0842a', '#2a8a8a', '#b04a6e', '#5a6b2f'];
   var MEAL_LABELS = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack' };
@@ -99,6 +103,8 @@
     else if (parts[0] === 'week') { tab = 'plan'; html = viewWeek(); }
     else if (parts[0] === 'shop') { tab = 'plan'; html = viewShop(parts[1]); }
     else if (parts[0] === 'recipes') { tab = 'recipes'; html = viewRecipes(); }
+    else if (parts[0] === 'book') { tab = 'book'; html = viewBook(parts[1]); }
+    else if (parts[0] === 'planner') { tab = 'planner'; html = viewPlanner(); }
     else if (parts[0] === 'data') { tab = 'data'; html = viewData(); }
     else if (parts[0] === 'new') { html = viewQuickAdd(); }
     else if (parts[0] === 'member' && member(parts[1])) {
@@ -1599,6 +1605,61 @@
     }
   }
 
+  function plannerAction(action, id, el) {
+    var pp = plannerPrefs();
+    var num = Number(id);
+    if (action === 'pl-who') pp.who = id;
+    else if (action === 'pl-days') pp.days = num;
+    else if (action === 'pl-slot') {
+      var i = pp.slots.indexOf(id);
+      if (i === -1) pp.slots.push(id); else if (pp.slots.length > 1) pp.slots.splice(i, 1);
+    } else if (action === 'pl-cuisine') pp.cuisine = id;
+    else if (action === 'pl-time') pp.maxMinutes = num;
+    else if (action === 'pl-budget') pp.budget = id;
+    else if (action === 'pl-cat') pp.cat = id;
+    else if (action === 'pl-filter') pp.filter = id;
+    else if (action === 'ing-have') { if (state.pantry[id]) delete state.pantry[id]; else state.pantry[id] = true; }
+    else if (action === 'ing-love' || action === 'ing-no') {
+      var tgt = prefsTarget(pp), val = action === 'ing-love' ? 'love' : 'no';
+      if (tgt[id] === val) delete tgt[id]; else tgt[id] = val;
+    } else if (action === 'ing-del') {
+      if (!confirm('Delete this ingredient?')) return;
+      state.customIngredients = state.customIngredients.filter(function (x) { return x.id !== id; });
+      Foods.setCustom(state.customIngredients);
+      delete state.pantry[id];
+    } else if (action === 'pl-smart') { runSmartPlan(); return; }
+    else if (action === 'pl-ai') { runAiPlan(); return; }
+    else if (action === 'ai-key-save') {
+      var kv = (document.getElementById('ai-key') || {}).value || '';
+      if (!/^sk-ant-/.test(kv.trim())) { toast('That doesn\'t look like an Anthropic key (sk-ant-…)'); return; }
+      aiKeySession = kv.trim();
+      try { if ((document.getElementById('ai-remember') || {}).checked) localStorage.setItem('fhg-claude-key', aiKeySession); } catch (e) { /* private mode */ }
+      aiError = null;
+      toast('Key saved' + (readKey() ? ' on this device' : ' for this visit'));
+    } else if (action === 'ai-key-clear') {
+      aiKeySession = '';
+      try { localStorage.removeItem('fhg-claude-key'); } catch (e) { /* ignore */ }
+      toast('Key removed');
+    } else if (action === 'pl-save-day') {
+      var day = state.lastPlan.days[num];
+      var wk = weekKey();
+      state.meals = state.meals || {};
+      state.meals[wk] = state.meals[wk] || [];
+      var startDay = (new Date().getDay() + 6) % 7;
+      day.meals.forEach(function (mm) {
+        state.meals[wk].push({ id: 'meal' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), day: (startDay + num) % 7, slot: mm.slot, who: pp.who, name: mm.name, items: JSON.parse(JSON.stringify(mm.items)) });
+      });
+      persist('Day ' + (num + 1) + ' saved to ' + E.DAYS[(startDay + num) % 7]);
+      return;
+    } else if (action === 'pl-copy-shop') {
+      var items = Array.prototype.map.call(document.querySelectorAll('.shop-list li:not(.have)'), function (li) { return '☐ ' + li.textContent.trim(); }).join('\n');
+      if (navigator.clipboard) navigator.clipboard.writeText(items).then(function () { toast('Shopping list copied'); }, function () { toast('Couldn\'t copy — select the list instead'); });
+      return;
+    } else if (action === 'pl-clear') state.lastPlan = null;
+    persist();
+    keepScroll();
+  }
+
   function saveSteps(input) {
     if (!input) return;
     var sm = member(input.getAttribute('data-id'));
@@ -1661,15 +1722,366 @@
     }).catch(function (e) { alert(e.message); });
   }
 
+  // -------------------------------------------------------------- diet book
+
+  var ACTIVITY_SHORT = { sedentary: 'sedentary', light: 'lightly active', moderate: 'moderately active', active: 'very active', athlete: 'athlete' };
+
+  // The person a book is written for: a family member, or typed-in numbers.
+  function bookPerson(who) {
+    var m = member(who);
+    if (!m) {
+      var c = state.book.custom || {};
+      var age = c.age === undefined || c.age === '' ? 35 : Number(c.age);
+      var bd = new Date(today().getTime() - (age * 365.25 + 30) * 86400000);
+      m = Store.normalizeMember({ id: 'custom', name: 'You', sex: c.sex || 'female', birthdate: E.isoDate(bd), heightCm: c.heightCm || 165, weightKg: c.weightKg || 65,
+        activity: c.activity || 'light', goal: c.goal || 'maintain', fitness: c.fitness || {} });
+      m.custom = true;
+    }
+    var g = E.buildGuide(m, today());
+    return { m: m, g: g, a: DB.amounts({ age: g.age, sex: m.sex, heightCm: m.heightCm, weightKg: g.weightKg, kcal: g.targets.kcal, activity: m.activity, goal: m.goal }) };
+  }
+
+  function bookSources(ids, idx) {
+    return ids.map(function (id) {
+      var s = DB.SOURCES[id] || W.SOURCES[id] || P.SOURCES[id] || Q.SOURCES[id];
+      if (!s) return '';
+      if (idx.indexOf(id) === -1) idx.push(id);
+      return '<a href="' + esc(s.url) + '" target="_blank" rel="noopener" title="' + esc(s.title) + '">[' + (idx.indexOf(id) + 1) + '] ' + esc(s.org) + ' ' + s.year + '</a>';
+    }).join(' · ');
+  }
+
+  function chip(action, value, label, on, extra) {
+    return '<button class="chip' + (on ? ' on' : '') + '" data-action="' + action + '" data-id="' + esc(value) + '"' + (extra || '') + '>' + label + '</button>';
+  }
+
+  function viewBook(who) {
+    who = who || state.book.who || (state.members[0] ? state.members[0].id : 'custom');
+    if (who !== 'custom' && !member(who)) who = 'custom';
+    var bp = bookPerson(who), m = bp.m, g = bp.g, a = bp.a;
+    var idx = [];
+    var people = state.members.map(function (x) { return chip('book-who', x.id, esc(x.name), x.id === who); }).join('') + chip('book-who', 'custom', '✏️ Enter numbers', who === 'custom');
+    var c = state.book.custom || {};
+    var customForm = who === 'custom' ? '<form id="book-form" class="fields book-form">' +
+      '<div><label>Age</label><input type="number" name="age" min="2" max="110" value="' + esc(c.age === undefined ? 35 : c.age) + '"></div>' +
+      '<div><label>Sex</label><select name="sex">' + opt('female', 'Female', c.sex || 'female') + opt('male', 'Male', c.sex) + '</select></div>' +
+      '<div><label>Height (' + (us() ? 'in' : 'cm') + ')</label><input type="number" name="height" step="any" value="' + esc(us() ? Math.round((c.heightCm || 165) / 2.54) : (c.heightCm || 165)) + '"></div>' +
+      '<div><label>Weight (' + (us() ? 'lb' : 'kg') + ')</label><input type="number" name="weight" step="any" value="' + esc(us() ? kgToLb(c.weightKg || 65) : (c.weightKg || 65)) + '"></div>' +
+      '<div><label>Activity</label><select name="activity">' + Object.keys(KB.ACTIVITY).map(function (k) { return opt(k, KB.ACTIVITY[k].label, c.activity || 'light'); }).join('') + '</select></div>' +
+      '<div><label>Goal</label><select name="goal">' + Object.keys(KB.GOALS).map(function (k) { return opt(k, KB.GOALS[k].label, c.goal || 'maintain'); }).join('') + '</select></div>' +
+      '<div style="align-self:end"><button class="btn primary" type="submit">Update amounts</button></div></form>' : '';
+
+    var head = '<section class="card book-cover"><div class="book-kicker">The Family Diet Book</div><h1>' + (m.custom ? 'Your' : esc(m.name) + '\'s') + ' daily amounts</h1>' +
+      '<div class="row no-print">' + people + '</div>' + customForm;
+    if (a.missing || a.tooYoung) {
+      return '<div class="stack">' + head + '<p class="muted">' + esc(a.missing || 'Under 2, food amounts come from the pediatrician\'s feeding plan (breast milk or formula first, then solids from about 6 months).') + '</p></section></div>';
+    }
+    var basis = [ageText(g), m.sex || '', m.heightCm ? fmtHeight(m.heightCm) : '', g.weightKg ? fmtWeight(g.weightKg) : '', ACTIVITY_SHORT[m.activity] || ''].filter(Boolean).join(' · ');
+    head += '<p class="book-basis">Sized for <strong>' + esc(basis) + '</strong> → <strong>' + a.kcal.toLocaleString('en-US') + ' kcal</strong> a day' +
+      (g.targets.kcalSource ? ' <span class="muted">(' + esc(g.targets.kcalSource) + ')</span>' : '') + '. Food groups follow the USDA ' + a.patternKcal.toLocaleString('en-US') + '-calorie pattern.' +
+      (g.bmi ? ' BMI ' + g.bmi + '.' : '') + '</p>' + a.notes.map(function (n) { return '<p class="small muted">' + esc(n) + '</p>'; }).join('') +
+      '<div class="row no-print"><button class="btn" data-action="print">🖨️ Print the book</button>' + (m.custom ? '' : '<a class="btn" href="#/member/' + esc(m.id) + '/edit">Change height, weight or activity</a>') + '</div></section>';
+
+    var day = P.daily(m, g.age, g.focus);
+    var tiles = DB.CHAPTERS.map(function (ch) {
+      return '<a class="book-tile" href="#/book/' + esc(who) + '" data-jump="ch-' + ch.id + '" style="--c:' + ch.color + '"><span class="tile-emoji">' + ch.emoji + '</span><span class="tile-title">' + esc(ch.title.split(':')[0]) + '</span><strong>' + esc(ch.headline(a)) + '</strong></a>';
+    }).join('') +
+      (day.water ? '<a class="book-tile" href="#/book/' + esc(who) + '" data-jump="ch-water" style="--c:#3d6fb4"><span class="tile-emoji">💧</span><span class="tile-title">Water</span><strong>' + (day.water.cups ? day.water.cups + ' cups (' + day.water.liters + ' L)' : 'Care-team limit') + '</strong></a>' : '') +
+      '<a class="book-tile" href="#/book/' + esc(who) + '" data-jump="ch-workout" style="--c:#c0603a"><span class="tile-emoji">🏋️</span><span class="tile-title">Workouts</span><strong>' + esc(workoutHeadline(m, g)) + '</strong></a>';
+
+    var chapters = DB.CHAPTERS.map(function (ch, i) {
+      var mine = g.focus.filter(function (r) { return ch.focus.indexOf(r.id) !== -1; });
+      return '<section class="card book-chapter" id="ch-' + ch.id + '" style="--c:' + ch.color + '">' +
+        '<div class="chapter-head"><span class="chapter-no">' + (i + 1) + '</span><span class="chapter-emoji">' + ch.emoji + '</span><div><h2>' + esc(ch.title) + '</h2><div class="chapter-amount">' + esc(ch.headline(a)) + '</div></div></div>' +
+        '<ul class="chapter-detail">' + ch.detail(a).map(function (d) { return '<li>' + esc(d) + '</li>'; }).join('') + '</ul>' +
+        (mine.length ? '<div class="for-you-box"><strong>For ' + esc(m.name) + '</strong>' + mine.map(function (r) { return '<div>' + r.icon + ' ' + esc(r.title) + ' — ' + esc(r.because) + '. ' + esc(r.eatMore[0] || r.easyOn[0] || r.tip) + '</div>'; }).join('') + '</div>' : '') +
+        '<div class="chapter-grid"><div><h3>What counts as one serving</h3><ul>' + ch.serving.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul></div>' +
+        '<div><h3>Best choices</h3><ul class="good">' + ch.best.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul><h3>Limit</h3><ul class="bad">' + ch.limit.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul></div></div>' +
+        '<h3>The facts</h3><ol class="facts">' + ch.facts.map(function (f) { return '<li>' + esc(f[0]) + ' <span class="small">' + bookSources([f[1]], idx) + '</span></li>'; }).join('') + '</ol>' +
+        '<p class="small muted">Sources: ' + bookSources(ch.sources, idx) + '</p></section>';
+    }).join('');
+
+    var water = day.water ? '<section class="card book-chapter" id="ch-water" style="--c:#3d6fb4"><div class="chapter-head"><span class="chapter-no">' + (DB.CHAPTERS.length + 1) + '</span><span class="chapter-emoji">💧</span><div><h2>Water</h2><div class="chapter-amount">' +
+      (day.water.cups ? day.water.cups + ' cups (' + day.water.liters + ' L) a day from drinks' : 'Follow your care team\'s fluid limit') + '</div></div></div>' +
+      '<ul class="chapter-detail">' + day.water.why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>' +
+      '<div class="chapter-grid"><div><h3>What counts</h3><ul><li>Water, sparkling water, milk, tea and coffee all count</li><li>1 cup = 8 oz ≈ 240 mL; a standard water bottle ≈ 2 cups</li><li>Food (fruit, vegetables, soup) adds about 20% more on top</li></ul></div>' +
+      '<div><h3>Signs you\'re on track</h3><ul class="good"><li>Pale-yellow urine</li><li>Rarely thirsty</li></ul><h3>Drink more when</h3><ul class="bad"><li>It\'s hot or you sweat a lot</li><li>You\'re ill with fever, vomiting or diarrhea</li></ul></div></div>' +
+      '<h3>The facts</h3><ol class="facts"><li>The National Academies set adequate total water at 3.7 L a day for men and 2.7 L for women, about 80% of it from drinks. <span class="small">' + bookSources(['water'], idx) + '</span></li>' +
+      '<li>During exercise, drink to replace sweat losses — many people lose 0.5–2 L an hour; avoid losing more than 2% of body weight. <span class="small">' + bookSources(['acsmFluid'], idx) + '</span></li></ol>' +
+      '<p class="no-print"><a class="btn" href="#/member/' + esc(m.custom ? (state.members[0] || {}).id || '' : m.id) + '">Track water on the Today card →</a></p></section>' : '';
+
+    return '<div class="stack book">' + head + '<nav class="book-tiles" aria-label="Chapters">' + tiles + '</nav>' + chapters + water + workoutChapter(m, g, idx) + referenceAppendix(idx) +
+      '<p class="muted small">Amounts are general guidance for healthy people. Health conditions, pregnancy and medicines can change them — the guide and your care team come first.</p></div>';
+  }
+
+  function fitnessOf(m) { return m.custom ? (state.book.custom || {}).fitness || {} : (m.fitness || {}); }
+
+  function workoutHeadline(m, g) {
+    var w = W.plan({ age: g.age, sex: m.sex, conditions: m.conditions, goal: m.goal, fitness: fitnessOf(m), wearable: m.wearable });
+    return w.kind ? (w.kind === 'kids' ? '60 min a day' : 'Active play') : w.splitName;
+  }
+
+  function workoutChapter(m, g, idx) {
+    var f = fitnessOf(m);
+    var w = W.plan({ age: g.age, sex: m.sex, conditions: m.conditions, goal: m.goal, fitness: f, wearable: m.wearable });
+    var id = m.custom ? 'custom' : m.id;
+    var prefs = '';
+    if (!w.kind) {
+      var focusNow = W.FOCUS[f.focus] ? f.focus : (m.goal === 'lose' ? 'fatloss' : m.goal === 'gain' ? 'muscle' : 'general');
+      prefs = '<div class="fit-prefs no-print">' +
+        '<div class="row"><strong>Days a week</strong>' + [2, 3, 4, 5, 6].map(function (n) { return chip('fit-set', n, n, (Number(f.days) || 3) === n, ' data-k="days" data-m="' + esc(id) + '"'); }).join('') + '</div>' +
+        '<div class="row"><strong>Minutes</strong>' + [30, 45, 60, 75].map(function (n) { return chip('fit-set', n, n, (Number(f.minutes) || 45) === n, ' data-k="minutes" data-m="' + esc(id) + '"'); }).join('') + '</div>' +
+        '<div class="row"><strong>Equipment</strong>' + [['none', 'None'], ['home', 'Dumbbells / bands'], ['gym', 'Gym']].map(function (o) { return chip('fit-set', o[0], o[1], (f.equipment || 'home') === o[0], ' data-k="equipment" data-m="' + esc(id) + '"'); }).join('') + '</div>' +
+        '<div class="row"><strong>Experience</strong>' + [['new', 'New'], ['some', '6+ months'], ['experienced', '2+ years']].map(function (o) { return chip('fit-set', o[0], o[1], (f.experience || 'new') === o[0], ' data-k="experience" data-m="' + esc(id) + '"'); }).join('') + '</div>' +
+        '<div class="row"><strong>Focus</strong>' + Object.keys(W.FOCUS).map(function (k) { return chip('fit-set', k, W.FOCUS[k].label, focusNow === k, ' data-k="focus" data-m="' + esc(id) + '"'); }).join('') + '</div></div>';
+    }
+    var week = w.week.length ? '<div class="week-grid">' + w.week.map(function (d) {
+      return '<div class="wk-card wk-' + d.type + '"><div class="wk-top"><strong>' + d.day + '</strong>' + (d.minutes ? '<span class="small muted">' + d.minutes + ' min</span>' : '') + '</div><div class="wk-title">' + esc(d.title) + '</div>' +
+        (d.items.length ? '<ul>' + d.items.map(function (it) { return '<li>' + esc(it.name) + (it.sets ? ' <span class="muted">' + it.sets + '×' + esc(it.reps) + '</span>' : '') + '</li>'; }).join('') + '</ul>' : '') + '</div>';
+    }).join('') + '</div>' : '';
+    return '<section class="card book-chapter" id="ch-workout" style="--c:#c0603a"><div class="chapter-head"><span class="chapter-no">' + (DB.CHAPTERS.length + 2) + '</span><span class="chapter-emoji">🏋️</span><div><h2>Workout split</h2><div class="chapter-amount">' + esc(w.splitName || 'Daily active play') + '</div></div></div>' +
+      '<p>' + esc(w.summary) + (w.focus ? ' Focus: <strong>' + esc(w.focus) + '</strong>.' : '') + '</p>' + prefs + week +
+      (w.ideas ? '<ul>' + w.ideas.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
+      (w.cautions.length ? '<div class="for-you-box"><strong>For ' + esc(m.name) + '</strong>' + w.cautions.map(function (x) { return '<div>⚠️ ' + esc(x) + '</div>'; }).join('') + '</div>' : '') +
+      (w.why.length ? '<h3>Why this split</h3><ul>' + w.why.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
+      '<p class="small muted">Sources: ' + bookSources(w.sources, idx) + '</p></section>';
+  }
+
+  function referenceAppendix(idx) {
+    var rows = DB.referenceTable();
+    var cell = function (x) { return x.vegetables.perDay + ' · ' + x.fruits.perDay + ' · ' + x.carbs.grains + ' · ' + x.meats.proteinFoods + ' · ' + x.dairy.perDay; };
+    var w = function (age, sex) { var d = P.daily(Store.normalizeMember({ sex: sex, activity: 'light' }), age); return d.water && d.water.cups; };
+    return '<section class="card book-chapter" id="ch-appendix"><h2>Appendix: amounts by age &amp; sex</h2><p class="small muted">Typical, moderately active people. Food groups per day: vegetables · fruit (cups) · grains (oz) · protein foods (oz) · dairy (cups).</p>' +
+      '<div class="table-wrap"><table class="ref-table"><thead><tr><th>Age</th><th>Sex</th><th>kcal</th><th>Veg · Fruit · Grains · Protein · Dairy</th><th>Protein g</th><th>Carbs g</th><th>Fat g</th><th>Fiber g</th><th>Water cups</th></tr></thead><tbody>' +
+      rows.map(function (r) {
+        return ['female', 'male'].map(function (sx, j) {
+          var x = r[sx];
+          return '<tr>' + (j === 0 ? '<td rowspan="2"><strong>' + r.ages + '</strong></td>' : '') + '<td>' + (sx === 'female' ? 'F' : 'M') + '</td><td>' + x.kcal + '</td><td>' + cell(x) + '</td><td>' + x.protein.min + (x.protein.max !== x.protein.min ? '–' + x.protein.max : '') + '</td><td>' + x.carbs.min + '–' + x.carbs.max + '</td><td>' + x.fat.min + '–' + x.fat.max + '</td><td>' + x.fiber.grams + '</td><td>' + (w(x.age, sx) || '—') + '</td></tr>';
+        }).join('');
+      }).join('') + '</tbody></table></div><p class="small muted">Sources: ' + bookSources(['dga', 'dri', 'water'], idx) + '</p></section>';
+  }
+
+  // ----------------------------------------------------------- meal planner
+
+  var aiBusy = false, aiError = null, aiKeySession = '';
+  var SLOT_LIST = ['breakfast', 'lunch', 'dinner', 'snack'];
+
+  function plannerPrefs() {
+    var pp = state.planner;
+    if (!pp.slots) pp.slots = ['breakfast', 'lunch', 'dinner'];
+    if (!pp.days) pp.days = 3;
+    if (!pp.cuisine) pp.cuisine = 'any';
+    if (!pp.maxMinutes) pp.maxMinutes = 30;
+    if (!pp.budget) pp.budget = 'normal';
+    if (!pp.cat) pp.cat = 'all';
+    if (!pp.filter) pp.filter = 'all';
+    if (pp.who !== 'family' && !member(pp.who)) pp.who = state.members.length > 1 ? 'family' : (state.members[0] && state.members[0].id);
+    return pp;
+  }
+
+  function plannerEaters(pp) { return pp.who === 'family' ? state.members.slice() : [member(pp.who)].filter(Boolean); }
+
+  // A person's food preferences: household-wide ones, then their own.
+  function prefsOf(m) { return Object.assign({}, state.householdPrefs, m.foodPrefs || {}); }
+  function prefsTarget(pp) { return pp.who === 'family' ? state.householdPrefs : (member(pp.who).foodPrefs = member(pp.who).foodPrefs || {}); }
+
+  function plannerLib() { Foods.setCustom(state.customIngredients); return Planner.library(state.customIngredients); }
+
+  function viewPlanner() {
+    if (!state.members.length) return '<section class="card empty"><h1>Meal planner</h1><p class="muted">Add family members first — the planner works around everyone\'s allergies, health and taste.</p><a class="btn primary" href="#/new">Add a person</a></section>';
+    var pp = plannerPrefs();
+    var eaters = plannerEaters(pp);
+    var lib = plannerLib();
+    var q = (pp.search || '').toLowerCase();
+    var prefs = pp.who === 'family' ? state.householdPrefs : (member(pp.who).foodPrefs || {});
+
+    var who = (state.members.length > 1 ? chip('pl-who', 'family', '👨‍👩‍👧 Whole family', pp.who === 'family') : '') + state.members.map(function (x) { return chip('pl-who', x.id, esc(x.name), pp.who === x.id); }).join('');
+    var settings = '<section class="card"><div class="row"><strong>Who\'s eating?</strong>' + who + '</div>' +
+      '<div class="row"><strong>How many days?</strong>' + [1, 3, 5, 7].map(function (n) { return chip('pl-days', n, n + (n === 1 ? ' day' : ' days'), pp.days === n); }).join('') + '</div>' +
+      '<div class="row"><strong>Meals</strong>' + SLOT_LIST.map(function (s) { return chip('pl-slot', s, SLOT_EMOJI[s] + ' ' + MEAL_LABELS[s], pp.slots.indexOf(s) !== -1); }).join('') + '</div>' +
+      '<div class="row"><strong>Cuisine</strong>' + Object.keys(Planner.CUISINES).map(function (k) { return chip('pl-cuisine', k, Planner.CUISINES[k].label, pp.cuisine === k); }).join('') + '</div>' +
+      '<div class="row"><strong>Cooking time</strong>' + [15, 30, 60].map(function (n) { return chip('pl-time', n, 'Up to ' + n + ' min', pp.maxMinutes === n); }).join('') +
+      '<strong style="margin-left:8px">Budget</strong>' + [['low', 'Tight'], ['normal', 'Normal'], ['high', 'Flexible']].map(function (o) { return chip('pl-budget', o[0], o[1], pp.budget === o[0]); }).join('') + '</div>' +
+      '<label class="chip-check"><input type="checkbox" data-action="pl-only"' + (pp.onlyPantry ? ' checked' : '') + '> Only use what\'s in my kitchen</label>' +
+      '<div style="margin-top:8px"><label>Anything else? (used by Claude)</label><input type="text" id="pl-notes" value="' + esc(pp.notes || '') + '" placeholder="e.g. kid-friendly, leftovers for lunch, no oven, high-protein breakfasts"></div></section>';
+
+    // Ingredient library
+    var fits = {};
+    lib.forEach(function (fd) { fits[fd.id] = foodFit(fd, eaters); });
+    var counts = { have: 0, love: 0, no: 0 };
+    lib.forEach(function (fd) { if (state.pantry[fd.id]) counts.have++; if (prefs[fd.id] === 'love') counts.love++; if (prefs[fd.id] === 'no') counts.no++; });
+    var shown = lib.filter(function (fd) {
+      if (pp.cat !== 'all' && fd.cat !== pp.cat) return false;
+      if (q && fd.name.toLowerCase().indexOf(q) === -1) return false;
+      if (pp.filter === 'have') return !!state.pantry[fd.id];
+      if (pp.filter === 'love') return prefs[fd.id] === 'love';
+      if (pp.filter === 'no') return prefs[fd.id] === 'no' || fits[fd.id].status === 'no';
+      if (pp.filter === 'custom') return fd.custom;
+      return true;
+    });
+    var rows = shown.map(function (fd) {
+      var fit = fits[fd.id], blocked = fit.status === 'no', pref = prefs[fd.id];
+      return '<div class="ing' + (blocked ? ' ing-blocked' : '') + (pref === 'no' ? ' ing-no' : '') + (pref === 'love' ? ' ing-love' : '') + '">' +
+        '<span class="ing-emoji">' + esc(fd.emoji) + '</span><div class="ing-main"><div class="ing-name">' + esc(fd.name) + (fd.custom ? ' <span class="badge">yours</span>' : '') + '</div>' +
+        '<div class="small muted">' + esc(fd.serving) + ' · ' + fd.kcal + ' kcal · P' + fd.protein + ' C' + fd.carbs + ' F' + fd.fat + ' Fib' + fd.fiber + '</div>' +
+        (blocked ? '<div class="small fit-no-text">✕ ' + esc(fitReason(fit)) + '</div>' : '') + '</div>' +
+        '<div class="ing-actions">' +
+        '<button class="ing-btn' + (state.pantry[fd.id] ? ' on' : '') + '" data-action="ing-have" data-id="' + esc(fd.id) + '" title="In my kitchen" aria-pressed="' + !!state.pantry[fd.id] + '">🧺</button>' +
+        '<button class="ing-btn' + (pref === 'love' ? ' on' : '') + '" data-action="ing-love" data-id="' + esc(fd.id) + '" title="Love it — use more" aria-pressed="' + (pref === 'love') + '"' + (blocked ? ' disabled' : '') + '>❤️</button>' +
+        '<button class="ing-btn' + (pref === 'no' ? ' on' : '') + '" data-action="ing-no" data-id="' + esc(fd.id) + '" title="Never use" aria-pressed="' + (pref === 'no') + '">🚫</button>' +
+        (fd.custom ? '<button class="ing-btn" data-action="ing-del" data-id="' + esc(fd.id) + '" title="Delete this ingredient">🗑️</button>' : '') + '</div></div>';
+    }).join('');
+    var catTabs = [{ id: 'all', label: 'All', emoji: '🍽️' }].concat(Foods.CATEGORIES).map(function (cdef) { return chip('pl-cat', cdef.id, cdef.emoji + ' ' + esc(cdef.label), pp.cat === cdef.id); }).join('');
+    var filters = [['all', 'Everything'], ['have', '🧺 In my kitchen (' + counts.have + ')'], ['love', '❤️ Loved (' + counts.love + ')'], ['no', '🚫 Ruled out (' + counts.no + ')'], ['custom', '✏️ Added by you (' + state.customIngredients.length + ')']]
+      .map(function (o) { return chip('pl-filter', o[0], o[1], pp.filter === o[0]); }).join('');
+    var tagOpts = ['milk', 'egg', 'wheat', 'gluten', 'soy', 'peanut', 'treenut', 'fish', 'shellfish', 'sesame', 'meat', 'pork', 'poultry', 'alcohol', 'high-sodium', 'added-sugar', 'refined-carb', 'high-satfat', 'high-potassium'];
+    var addForm = '<details class="add-ing"' + (pp.addOpen ? ' open' : '') + '><summary>+ Add your own ingredient</summary><form id="ing-form" class="fields">' +
+      '<div><label>Name *</label><input type="text" name="name" required placeholder="e.g. Kimchi"></div>' +
+      '<div><label>Group</label><select name="cat">' + Foods.CATEGORIES.map(function (cdef) { return opt(cdef.id, cdef.label, 'fiber'); }).join('') + '</select></div>' +
+      '<div><label>Emoji</label><input type="text" name="emoji" maxlength="4" placeholder="🥫"></div>' +
+      '<div><label>Serving</label><input type="text" name="serving" placeholder="½ cup"></div>' +
+      ['kcal', 'protein', 'carbs', 'fat', 'fiber'].map(function (k) { return '<div><label>' + (k === 'kcal' ? 'Calories' : k.charAt(0).toUpperCase() + k.slice(1) + ' (g)') + '</label><input type="number" min="0" step="any" name="' + k + '"></div>'; }).join('') +
+      '<div class="span-all"><label>Contains (so allergies and health rules apply)</label><div class="pills">' + tagOpts.map(function (t) { return '<label class="pill"><input type="checkbox" name="tags" value="' + t + '"><span>' + esc(tagLabel(t)) + '</span></label>'; }).join('') + '</div></div>' +
+      '<div class="span-all row" style="justify-content:flex-end"><button class="btn primary" type="submit">Add ingredient</button></div></form></details>';
+    var library = '<section class="card"><div class="spread"><h2>Ingredients</h2><span class="muted small">' + esc(pp.who === 'family' ? '❤️ / 🚫 apply to the whole family' : '❤️ / 🚫 are ' + member(pp.who).name + '\'s') + ' · 🧺 is the shared kitchen</span></div>' +
+      '<div class="row">' + catTabs + '</div><div class="row"><input type="text" id="ing-search" placeholder="Search ingredients…" value="' + esc(pp.search || '') + '" style="max-width:240px">' + filters + '</div>' +
+      addForm + '<div class="ing-list">' + (rows || '<p class="muted">Nothing here yet.</p>') + '</div></section>';
+
+    // Generate + AI
+    var hasKey = !!(aiKeySession || readKey());
+    var gen = '<section class="card plan-go"><h2>Make the plan</h2><div class="row">' +
+      '<button class="btn primary" data-action="pl-smart">⚡ Smart plan (instant, offline)</button>' +
+      '<button class="btn ai-btn" data-action="pl-ai"' + (aiBusy ? ' disabled' : '') + '>' + (aiBusy ? '✨ Claude is planning…' : '✨ Plan with Claude (recipes &amp; steps)') + '</button></div>' +
+      '<details class="ai-key"' + (hasKey ? '' : ' open') + '><summary>' + (hasKey ? '🔑 Claude API key saved' : '🔑 Add your Claude API key to use ✨') + '</summary>' +
+      '<p class="small muted">Claude needs your own key from console.anthropic.com (billed to your account, usually a few cents a plan). The app sends first names, ages, allergies, health focus (e.g. "lower LDL"), the ingredient list and these settings to Anthropic — never blood-test numbers or documents. The key stays in this browser.</p>' +
+      '<div class="row"><input type="password" id="ai-key" placeholder="sk-ant-…" autocomplete="off" style="max-width:320px"><label class="chip-check"><input type="checkbox" id="ai-remember"> Remember on this device</label>' +
+      '<button class="btn small" data-action="ai-key-save">Save key</button>' + (hasKey ? '<button class="btn small ghost" data-action="ai-key-clear">Forget key</button>' : '') + '</div></details>' +
+      (aiError ? '<div class="alert warn"><div>' + esc(aiError) + '</div></div>' : '') + '</section>';
+
+    return '<div class="spread" style="margin-bottom:8px"><div><h1>Meal planner</h1><div class="muted">Pick your ingredients and preferences — get a plan that fits everyone\'s allergies, health and taste.</div></div><a class="btn" href="#/week">My week →</a></div>' +
+      '<div class="planner">' + '<div class="planner-left">' + settings + library + '</div><div class="planner-right">' + gen + planResult(lib, eaters) + '</div></div>';
+  }
+
+  function readKey() { try { return localStorage.getItem('fhg-claude-key') || ''; } catch (e) { return ''; } }
+
+  function planResult(lib, eaters) {
+    var r = state.lastPlan;
+    if (!r) return '<section class="card muted">Your plan appears here.</section>';
+    var html = '<section class="card plan-out"><div class="spread"><h2>' + (r.kind === 'ai' ? '✨ Claude\'s plan' : '⚡ Smart plan') + '</h2><span class="small muted">' + esc(r.createdAt.slice(0, 16).replace('T', ' ')) + ' · ' + esc(r.whoName) + '</span></div>';
+    if (r.kind === 'smart') {
+      html += r.days.map(function (d) {
+        return '<div class="pl-day"><div class="spread"><h3>Day ' + (d.day + 1) + '</h3><button class="btn small" data-action="pl-save-day" data-id="' + d.day + '">Save to my week</button></div>' +
+          d.meals.map(function (mm) {
+            return '<div class="pl-meal"><div><strong>' + SLOT_EMOJI[mm.slot] + ' ' + esc(mm.name) + '</strong><div class="small muted">' + mm.totals.kcal + ' kcal · ' + mm.totals.protein + ' g protein · ' + mm.totals.fiber + ' g fiber</div>' +
+              '<div class="small">' + mm.items.map(function (it) { var fd = Planner.byId(lib, it.foodId); return fd ? esc(fd.emoji + ' ' + fd.name) + (it.qty !== 1 ? ' ×' + it.qty : '') : ''; }).join(' · ') + '</div>' +
+              '<div class="small muted">Season with ' + esc(mm.flavor) + '.</div></div></div>';
+          }).join('') + '</div>';
+      }).join('');
+    } else {
+      if (r.flags && r.flags.length) html += '<div class="alert danger"><div><strong>Check before cooking:</strong> ' + esc(r.flags.map(function (f) { return f.day + ' — ' + f.meal + ': ' + f.text; }).join(' · ')) + '</div></div>';
+      html += (r.plan.days || []).map(function (d) {
+        return '<div class="pl-day"><h3>' + esc(d.day) + '</h3>' + (d.meals || []).map(function (mm) {
+          return '<details class="pl-meal"' + (mm.flags && mm.flags.length ? ' open' : '') + '><summary><strong>' + (SLOT_EMOJI[mm.slot] || '') + ' ' + esc(mm.name) + '</strong> <span class="small muted">' + mm.minutes + ' min · ' + mm.kcal + ' kcal · ' + mm.protein_g + ' g protein</span>' +
+            (mm.flags && mm.flags.length ? ' <span class="badge danger">check</span>' : '') + '</summary>' +
+            '<p class="small">' + esc(mm.why) + '</p><div class="chapter-grid"><div><h4>Ingredients</h4><ul>' + (mm.ingredients || []).map(function (i) { return '<li>' + esc(i.amount + ' ' + i.item) + '</li>'; }).join('') + '</ul></div>' +
+            '<div><h4>Steps</h4><ol>' + (mm.steps || []).map(function (st) { return '<li>' + esc(st) + '</li>'; }).join('') + '</ol></div></div>' +
+            (mm.flags && mm.flags.length ? '<p class="small fit-no-text">⚠️ ' + esc(mm.flags.join(' · ')) + '</p>' : '') + '</details>';
+        }).join('') + '</div>';
+      }).join('') + (r.plan.notes ? '<p class="small muted">' + esc(r.plan.notes) + '</p>' : '');
+    }
+    var shop = r.kind === 'smart' ? r.shopping.map(function (s) { return '<li class="' + (s.have ? 'have' : '') + '">' + esc(s.name) + ' <span class="muted small">' + s.servings + ' × ' + esc(s.serving) + (s.have ? ' · in kitchen' : '') + '</span></li>'; }).join('') :
+      (r.plan.shopping || []).map(function (s) { return '<li>' + esc(s.item) + ' <span class="muted small">' + esc(s.amount) + '</span></li>'; }).join('');
+    html += '<h3>🛒 Shopping list</h3><ul class="shop-list">' + shop + '</ul><div class="row"><button class="btn small" data-action="pl-copy-shop">Copy list</button><button class="btn small ghost" data-action="pl-clear">Clear plan</button></div></section>';
+    return html;
+  }
+
+  function slotTargets(eaters) {
+    var adults = eaters.filter(function (m) { var a = ageOf(m); return a === null || a >= 18; });
+    var base = adults.length ? adults : eaters;
+    var needs = base.map(dayNeeds);
+    var kcal = needs.reduce(function (s, n) { return s + n.kcal; }, 0) / needs.length;
+    var protein = needs.reduce(function (s, n) { return s + n.protein; }, 0) / needs.length;
+    return function (slot) { return Foods.mealTargets(kcal, protein, slot); };
+  }
+
+  function runSmartPlan() {
+    var pp = plannerPrefs(), eaters = plannerEaters(pp), lib = plannerLib();
+    var picks = personalPicks(eaters).byFood;
+    var res = Planner.smartPlan({
+      lib: lib, pantry: state.pantry, slots: SLOT_LIST.filter(function (s) { return pp.slots.indexOf(s) !== -1; }), days: pp.days, cuisine: pp.cuisine, onlyPantry: pp.onlyPantry,
+      seed: Date.now(), targets: slotTargets(eaters),
+      eaters: eaters.map(function (m) {
+        return { name: m.name, prefs: prefsOf(m), pick: function (id) { return picks[id] ? picks[id].score : 0; }, blocked: function (fd) { return foodFit(fd, [m]).status === 'no'; } };
+      })
+    });
+    if (!res.allowedCount) { toast('No ingredients left to plan with — loosen the filters'); return; }
+    state.lastPlan = { kind: 'smart', days: res.days, shopping: res.shopping, who: pp.who, whoName: pp.who === 'family' ? 'Whole family' : member(pp.who).name, createdAt: new Date().toISOString() };
+    persist('Plan ready');
+    keepScroll();
+  }
+
+  function aiBrief() {
+    var pp = plannerPrefs(), eaters = plannerEaters(pp), lib = plannerLib();
+    var allowed = lib.filter(function (fd) {
+      if (pp.onlyPantry && !state.pantry[fd.id]) return false;
+      return eaters.every(function (m) { return foodFit(fd, [m]).status !== 'no' && prefsOf(m)[fd.id] !== 'no'; });
+    });
+    return {
+      days: pp.days, slots: SLOT_LIST.filter(function (s) { return pp.slots.indexOf(s) !== -1; }), cuisine: pp.cuisine, maxMinutes: pp.maxMinutes,
+      budget: { low: 'tight — cheap staples', normal: 'normal', high: 'flexible' }[pp.budget], notes: (document.getElementById('pl-notes') || {}).value || pp.notes || '', onlyListed: !!pp.onlyPantry,
+      ingredients: allowed.map(function (fd) { return fd.name; }), pantry: allowed.filter(function (fd) { return state.pantry[fd.id]; }).map(function (fd) { return fd.name; }),
+      eaters: eaters.map(function (m) {
+        var g = E.buildGuide(m, today()), pr = prefsOf(m);
+        var block = Object.keys(g.rules.block).map(tagLabel).concat(m.avoidFoods || []).concat((m.otherAllergies || []).map(function (o) { return o.name; }));
+        return { name: m.name, age: g.age, sex: m.sex, kcal: g.targets.kcal, protein: dayNeeds(m).protein, mustAvoid: block, goEasy: Object.keys(g.rules.caution).map(tagLabel),
+          focus: g.focus.map(function (r) { return r.title; }), loves: lib.filter(function (fd) { return pr[fd.id] === 'love'; }).map(function (fd) { return fd.name; }).concat(m.favoriteFoods || []),
+          never: lib.filter(function (fd) { return pr[fd.id] === 'no'; }).map(function (fd) { return fd.name; }).concat(m.dislikes || []) };
+      })
+    };
+  }
+
+  function runAiPlan() {
+    var key = aiKeySession || readKey();
+    if (!key) { aiError = 'Add your Claude API key first (below).'; keepScroll(); return; }
+    var pp = plannerPrefs(), eaters = plannerEaters(pp);
+    var brief = aiBrief();
+    aiBusy = true; aiError = null; keepScroll();
+    Planner.aiPlan(key, brief).then(function (plan) {
+      var checkers = eaters.map(function (m) { return { name: m.name, allergenWords: Planner.allergenWords(Object.keys(E.profileRules(m, today()).block)) }; });
+      var flags = Planner.checkPlan(plan, checkers);
+      state.lastPlan = { kind: 'ai', plan: plan, flags: flags, who: pp.who, whoName: pp.who === 'family' ? 'Whole family' : member(pp.who).name, createdAt: new Date().toISOString() };
+      persist(flags.length ? 'Plan ready — please check the flagged meals' : 'Claude\'s plan is ready');
+    }).catch(function (e) {
+      var msg = e && e.message || String(e);
+      if (e && (e.status === 401 || /authentication|invalid x-api-key/i.test(msg))) msg = 'That API key was rejected. Check it on console.anthropic.com.';
+      else if (e && e.status === 429) msg = 'Claude is busy or your account hit its rate limit — try again in a minute.';
+      else if (/Failed to fetch|NetworkError|import|module/i.test(msg)) msg = 'Couldn\'t reach Claude — this needs an internet connection. The ⚡ Smart plan works offline.';
+      aiError = msg;
+    }).then(function () { aiBusy = false; if (/#\/planner/.test(location.hash)) keepScroll(); });
+  }
+
   // ----------------------------------------------------------------- events
 
   document.addEventListener('click', function (ev) {
+    var jump = ev.target.closest('[data-jump]');
+    if (jump) { ev.preventDefault(); var target = document.getElementById(jump.getAttribute('data-jump')); if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     var el = ev.target.closest('[data-action]');
     if (!el || el.tagName === 'INPUT' || el.tagName === 'SELECT') return;
     var action = el.getAttribute('data-action');
     var id = el.getAttribute('data-id');
 
     if (action === 'print') window.print();
+    else if (action === 'book-who') { state.book.who = id; persist(); go('#/book/' + id); }
+    else if (action === 'fit-set') {
+      var fm = el.getAttribute('data-m'), fk = el.getAttribute('data-k');
+      var fobj;
+      if (fm === 'custom') { state.book.custom = state.book.custom || {}; fobj = state.book.custom.fitness = state.book.custom.fitness || {}; }
+      else { var fmm = member(fm); fobj = fmm.fitness = fmm.fitness || {}; }
+      fobj[fk] = /^\d+$/.test(id) ? Number(id) : id;
+      persist();
+      keepScroll();
+    } else if (action.indexOf('pl-') === 0 || action.indexOf('ing-') === 0 || action.indexOf('ai-key') === 0) {
+      plannerAction(action, id, el);
+    }
     else if (action === 'load-demo') {
       if (state.members.length && !confirm('Replace your current family with the demo family?')) return;
       state = Store.migrate(JSON.parse(JSON.stringify(window.FHDemo)));
@@ -1785,6 +2197,11 @@
     if (el.type === 'file' && el.getAttribute('data-action') === 'report-file') { if (el.files[0]) readReport(el.closest('.reader-box'), el.files[0]); el.value = ''; return; }
     if (el.id === 'steps-today') return;
     if (el.getAttribute('data-action') === 'b-safe') { builder().safeOnly = el.checked; persist(); keepScroll(); return; }
+    if (el.getAttribute('data-action') === 'pl-only') { plannerPrefs().onlyPantry = el.checked; persist(); keepScroll(); return; }
+    if (el.id === 'pl-notes') { plannerPrefs().notes = el.value; persist(); return; }
+    if (el.id === 'ai-key' || el.id === 'ai-remember') return;
+    if (el.closest && el.closest('#ing-form')) return;
+    if (el.form && el.form.id === 'book-form') return;
     // Record/link boxes and the lab form keep their own state until their button is pressed.
     if (el.closest && el.closest('.link-box, .upload-box, .lab-entry, .reader-box')) return;
     var checkForm = el.form && el.form.id === 'check-form' ? el.form : null;
@@ -1868,6 +2285,29 @@
       route();
       return;
     }
+    if (form.id === 'book-form') {
+      var bfe = form.elements, bcu = state.book.custom = state.book.custom || {};
+      bcu.age = bfe.age.value === '' ? 35 : Math.max(2, Math.min(110, Number(bfe.age.value)));
+      bcu.sex = bfe.sex.value; bcu.activity = bfe.activity.value; bcu.goal = bfe.goal.value;
+      if (bfe.height.value) bcu.heightCm = us() ? Math.round(Number(bfe.height.value) * 2.54) : Number(bfe.height.value);
+      if (bfe.weight.value) bcu.weightKg = us() ? lbToKg(Number(bfe.weight.value)) : Number(bfe.weight.value);
+      persist('Amounts updated');
+      keepScroll();
+      return;
+    }
+    if (form.id === 'ing-form') {
+      var inf = form.elements;
+      try {
+        var ci = Planner.makeCustom({ name: inf.name.value, cat: inf.cat.value, emoji: inf.emoji.value.trim(), serving: inf.serving.value, kcal: inf.kcal.value, protein: inf.protein.value,
+          carbs: inf.carbs.value, fat: inf.fat.value, fiber: inf.fiber.value, tags: Array.prototype.slice.call(form.querySelectorAll('input[name="tags"]:checked')).map(function (i) { return i.value; }) });
+        state.customIngredients.push(ci);
+        Foods.setCustom(state.customIngredients);
+        plannerPrefs().addOpen = false;
+        persist('Added ' + ci.name);
+        keepScroll();
+      } catch (e) { toast(e.message); }
+      return;
+    }
     if (form.id === 'rating-form') {
       var rfE = form.elements, fid = form.getAttribute('data-id');
       state.ratings = state.ratings || {};
@@ -1949,6 +2389,14 @@
   });
 
   document.addEventListener('input', function (ev) {
+    if (ev.target.id === 'ing-search') {
+      plannerPrefs().search = ev.target.value;
+      var ipos = ev.target.selectionStart;
+      keepScroll();
+      var ib = document.getElementById('ing-search');
+      if (ib) { ib.focus(); ib.setSelectionRange(ipos, ipos); }
+      return;
+    }
     if (ev.target.id !== 'food-search') return;
     builder().search = ev.target.value;
     var pos = ev.target.selectionStart;

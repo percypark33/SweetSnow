@@ -441,6 +441,71 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
 .flash { border: 2px solid var(--brand); margin-bottom: 14px; }
 .flash h3 { margin-top: 0; }
 .builder-foods { min-width: 0; }
+
+/* ---------- diet book ---------- */
+.book-cover { background: linear-gradient(135deg, var(--brand-soft), var(--surface) 70%); }
+.book-kicker { text-transform: uppercase; letter-spacing: .12em; font-size: .75rem; font-weight: 700; color: var(--brand); }
+.book-cover h1 { margin: 4px 0 10px; font-size: 2rem; }
+.book-basis { margin: 12px 0 6px; }
+.book-form { margin-top: 10px; }
+.book-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.book-tile { display: grid; gap: 2px; padding: 12px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--c); text-decoration: none; color: var(--text); box-shadow: var(--shadow); }
+.book-tile:hover { border-color: var(--c); }
+.tile-emoji { font-size: 1.5rem; }
+.tile-title { font-size: .8rem; color: var(--muted); font-weight: 600; }
+.book-chapter { border-left: 5px solid var(--c, var(--brand)); scroll-margin-top: 80px; }
+.chapter-head { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+.chapter-head h2 { margin: 0; }
+.chapter-no { width: 28px; height: 28px; border-radius: 50%; background: var(--c, var(--brand)); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: .85rem; flex: none; }
+.chapter-emoji { font-size: 2rem; }
+.chapter-amount { font-size: 1.35rem; font-weight: 800; color: var(--c, var(--brand)); }
+.chapter-detail { margin: 0 0 10px; }
+.chapter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 4px 18px; }
+.chapter-grid ul { margin-top: 0; }
+ul.good li::marker { content: '✓  '; color: var(--ok); }
+ul.bad li::marker { content: '–  '; color: var(--danger); }
+.facts li { margin-bottom: 6px; }
+.for-you-box { background: var(--warn-soft); border-radius: 10px; padding: 10px 12px; margin: 10px 0; display: grid; gap: 4px; font-size: .92rem; }
+.ref-table td, .ref-table th { white-space: nowrap; font-size: .85rem; }
+.fit-prefs { display: grid; gap: 6px; margin: 10px 0; }
+.week-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 10px 0; }
+.wk-card { border: 1px solid var(--line); border-radius: 12px; padding: 10px; background: var(--bg); font-size: .85rem; }
+.wk-card ul { margin: 6px 0 0; padding-left: 16px; }
+.wk-top { display: flex; justify-content: space-between; }
+.wk-title { font-weight: 700; margin-top: 2px; }
+.wk-strength { border-top: 4px solid #c0603a; }
+.wk-cardio, .wk-walk, .wk-vigorous { border-top: 4px solid #3d6fb4; }
+.wk-rest { opacity: .75; border-top: 4px solid var(--line); }
+
+/* ---------- planner ---------- */
+.planner { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.planner-left, .planner-right { display: grid; gap: 16px; min-width: 0; }
+.planner .row { margin-bottom: 6px; }
+.ing-list { display: grid; gap: 6px; margin-top: 10px; max-height: 640px; overflow-y: auto; }
+.ing { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.ing-emoji { font-size: 1.5rem; }
+.ing-main { flex: 1; min-width: 0; }
+.ing-name { font-weight: 600; }
+.ing-actions { display: flex; gap: 4px; }
+.ing-btn { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; width: 36px; height: 36px; cursor: pointer; filter: grayscale(1); opacity: .55; font-size: 1rem; }
+.ing-btn.on { filter: none; opacity: 1; border-color: var(--brand); background: var(--brand-soft); }
+.ing-btn:disabled { cursor: not-allowed; opacity: .25; }
+.ing-love { border-color: #e8a0a0; }
+.ing-no, .ing-blocked { opacity: .6; }
+.fit-no-text { color: var(--danger); }
+.add-ing { margin-top: 10px; }
+.add-ing summary, .ai-key summary { cursor: pointer; color: var(--brand); font-weight: 600; }
+.span-all { grid-column: 1 / -1; }
+.btn.ai-btn { background: linear-gradient(90deg, #8a4fb0, #3d6fb4); color: #fff; border: 0; }
+.btn.ai-btn:disabled { opacity: .7; }
+.pl-day { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 8px; }
+.pl-meal { padding: 6px 0; }
+.pl-meal summary { cursor: pointer; }
+.shop-list { columns: 2; column-gap: 20px; }
+.shop-list li.have { opacity: .55; text-decoration: line-through; }
+@media (max-width: 900px) { .planner { grid-template-columns: minmax(0, 1fr); } .shop-list { columns: 1; } }
+@media (max-width: 720px) { .tabs { flex-wrap: nowrap; overflow-x: auto; } .tabs a { white-space: nowrap; } .book-cover h1 { font-size: 1.5rem; } }
+@media print { .book-chapter { break-inside: avoid-page; border-left-width: 3px; } .book-tiles { display: none; } }
 </style>
 </head>
 <body>
@@ -452,6 +517,8 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
     <nav class="tabs" aria-label="Main">
       <a href="#/" data-tab="family">Family</a>
       <a href="#/plan" data-tab="plan">Build meals</a>
+      <a href="#/book" data-tab="book">Diet book</a>
+      <a href="#/planner" data-tab="planner">Planner</a>
       <a href="#/recipes" data-tab="recipes">Recipes</a>
       <a href="#/data" data-tab="data">Data</a>
     </nav>
@@ -1577,7 +1644,10 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
   // Share of the day's needs each meal should cover.
   var MEAL_SHARE = { breakfast: 0.25, lunch: 0.30, dinner: 0.35, snack: 0.10 };
 
-  function byId(id) { return FOODS.filter(function (x) { return x.id === id; })[0]; }
+  // Family-added ingredients (meal planner) resolve here too.
+  var CUSTOM = [];
+  function setCustom(list) { CUSTOM = Array.isArray(list) ? list : []; }
+  function byId(id) { return FOODS.filter(function (x) { return x.id === id; })[0] || CUSTOM.filter(function (x) { return x.id === id; })[0]; }
 
   function totals(items) {
     var t = { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, byCat: { protein: 0, carbs: 0, fiber: 0, fat: 0 } };
@@ -1655,7 +1725,7 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
     return items;
   }
 
-  var Foods = { CATEGORIES: CATEGORIES, FOODS: FOODS, MEAL_SHARE: MEAL_SHARE, byId: byId, totals: totals, mealTargets: mealTargets, score: score, surprise: surprise };
+  var Foods = { CATEGORIES: CATEGORIES, FOODS: FOODS, MEAL_SHARE: MEAL_SHARE, byId: byId, setCustom: setCustom, totals: totals, mealTargets: mealTargets, score: score, surprise: surprise };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = Foods;
   else root.FHFoods = Foods;
@@ -3661,6 +3731,769 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
 </script>
   <script>
 /*
+ * Family Health Guide — the Diet Book.
+ *
+ * How much of each food group one person needs, from:
+ *  - Calories (engine.js: Mifflin-St Jeor for adults, Dietary Guidelines
+ *    estimates for children) → the matching USDA Healthy US-Style eating
+ *    pattern (Dietary Guidelines 2020–2025, Appendix 3) for food groups.
+ *  - Dietary Reference Intakes for protein (g/kg), the AMDR ranges for
+ *    carbs/fat/protein, and 14 g fiber per 1,000 kcal.
+ * Weekly limits (red and processed meat, fish) come from WCRF, IARC and the
+ * FDA/EPA fish advice. Amounts are rounded the way the patterns are.
+ */
+(function (root) {
+  'use strict';
+
+  // Per day unless noted. veg/fruit/dairy in cup-equivalents, grains and
+  // protein foods in ounce-equivalents, oils in grams. *Wk = per week.
+  var KCAL = [1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000, 3200];
+  var PATTERN = {
+    veg:        [1, 1.5, 1.5, 2, 2.5, 2.5, 3, 3, 3.5, 3.5, 4, 4],
+    fruit:      [1, 1, 1.5, 1.5, 1.5, 2, 2, 2, 2, 2.5, 2.5, 2.5],
+    grains:     [3, 4, 5, 5, 6, 6, 7, 8, 9, 10, 10, 10],
+    dairy:      [2, 2.5, 2.5, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    protein:    [2, 3, 4, 5, 5, 5.5, 6, 6.5, 6.5, 7, 7, 7],
+    oils:       [15, 17, 17, 22, 24, 27, 29, 31, 34, 36, 44, 51],
+    darkGreenWk: [0.5, 1, 1, 1.5, 1.5, 1.5, 2, 2, 2.5, 2.5, 2.5, 2.5],
+    redOrangeWk: [2.5, 3, 3, 4, 5.5, 5.5, 6, 6, 7, 7, 7.5, 7.5],
+    beansWk:    [0.5, 0.5, 0.5, 1, 1.5, 1.5, 2, 2, 2.5, 2.5, 3, 3],
+    starchyWk:  [2, 3.5, 3.5, 4, 5, 5, 6, 6, 7, 7, 8, 8],
+    otherVegWk: [1.5, 2.5, 2.5, 3.5, 4, 4, 5, 5, 5.5, 5.5, 7, 7],
+    meatWk:     [10, 14, 19, 23, 23, 26, 28, 31, 31, 33, 33, 33],
+    nutsWk:     [2, 2, 3, 4, 4, 5, 5, 5, 5, 6, 6, 6]
+  };
+
+  var SOURCES = {
+    dga: { title: 'Dietary Guidelines for Americans 2020–2025 (Appendix 3: USDA food patterns)', org: 'USDA & HHS', year: 2020, url: 'https://www.dietaryguidelines.gov/resources/2020-2025-dietary-guidelines-online-materials' },
+    myplate: { title: 'MyPlate food group gallery — what counts as a cup or ounce-equivalent', org: 'USDA', year: 2024, url: 'https://www.myplate.gov/eat-healthy/food-group-gallery' },
+    dri: { title: 'Dietary Reference Intakes for energy, carbohydrate, fiber, fat, fatty acids, cholesterol, protein and amino acids (macronutrients)', org: 'National Academies', year: 2005, url: 'https://nap.nationalacademies.org/catalog/10490' },
+    aune2017: { title: 'Fruit and vegetable intake and the risk of cardiovascular disease, cancer and all-cause mortality: meta-analysis (Aune et al., Int J Epidemiol)', org: 'Peer-reviewed meta-analysis', year: 2017, url: 'https://academic.oup.com/ije/article/46/3/1029/3039477' },
+    cdcFv: { title: 'Adults meeting fruit and vegetable intake recommendations — United States, 2019 (MMWR)', org: 'CDC', year: 2022, url: 'https://www.cdc.gov/mmwr/volumes/71/wr/mm7101a1.htm' },
+    aapJuice: { title: 'Fruit juice in infants, children and adolescents: current recommendations', org: 'American Academy of Pediatrics', year: 2017, url: 'https://publications.aap.org/pediatrics/article/139/6/e20170967/38735' },
+    iarc: { title: 'Carcinogenicity of consumption of red and processed meat (IARC Monographs, Lancet Oncology)', org: 'WHO International Agency for Research on Cancer', year: 2015, url: 'https://www.thelancet.com/journals/lanonc/article/PIIS1470-2045(15)00444-1/fulltext' },
+    wcrf: { title: 'Cancer prevention recommendations — limit red and processed meat', org: 'World Cancer Research Fund / AICR', year: 2018, url: 'https://www.wcrf.org/research-policy/evidence-for-our-recommendations/limit-red-processed-meat/' },
+    fdaFish: { title: 'Advice about eating fish (for adults and children)', org: 'FDA & EPA', year: 2021, url: 'https://www.fda.gov/food/consumers/advice-about-eating-fish' },
+    guasch2019: { title: 'Red meat vs other diets and cardiovascular risk factors: meta-analysis of RCTs (Guasch-Ferré et al., Circulation)', org: 'Peer-reviewed meta-analysis', year: 2019, url: 'https://www.ahajournals.org/doi/10.1161/CIRCULATIONAHA.118.035225' },
+    predimed: { title: 'Primary prevention of cardiovascular disease with a Mediterranean diet supplemented with olive oil or nuts (PREDIMED, NEJM)', org: 'Randomised trial', year: 2018, url: 'https://www.nejm.org/doi/full/10.1056/NEJMoa1800389' },
+    aune2016: { title: 'Whole grain consumption and risk of cardiovascular disease, cancer and mortality: meta-analysis (Aune et al., BMJ)', org: 'Peer-reviewed meta-analysis', year: 2016, url: 'https://www.bmj.com/content/353/bmj.i2716' },
+    reynolds2019: { title: 'Carbohydrate quality and human health: systematic reviews and meta-analyses (Reynolds et al., Lancet)', org: 'WHO-commissioned meta-analysis', year: 2019, url: 'https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(18)31809-9/fulltext' },
+    ahaSatFat: { title: 'Dietary fats and cardiovascular disease: a presidential advisory', org: 'American Heart Association', year: 2017, url: 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000510' },
+    protAge: { title: 'Evidence-based recommendations for optimal dietary protein intake in older people (PROT-AGE)', org: 'PROT-AGE Study Group', year: 2013, url: 'https://pubmed.ncbi.nlm.nih.gov/23867520/' },
+    acsmProtein: { title: 'Nutrition and athletic performance — joint position statement (protein 1.2–2.0 g/kg)', org: 'ACSM, Academy of Nutrition and Dietetics, Dietitians of Canada', year: 2016, url: 'https://pubmed.ncbi.nlm.nih.gov/26891166/' },
+    ahaSugar: { title: 'Added sugars and cardiovascular disease risk in children', org: 'American Heart Association', year: 2017, url: 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000439' }
+  };
+
+  function nearestIndex(kcal) {
+    var k = Math.max(1000, Math.min(3200, kcal || 2000));
+    var best = 0;
+    KCAL.forEach(function (c, i) { if (Math.abs(c - k) < Math.abs(KCAL[best] - k)) best = i; });
+    return best;
+  }
+
+  function r1(n) { return Math.round(n * 10) / 10; }
+  function r5(n) { return Math.round(n / 5) * 5; }
+
+  // Protein RDA in g per kg of body weight (DRI 2005).
+  function proteinPerKg(age) {
+    if (age < 4) return 1.05;
+    if (age < 14) return 0.95;
+    if (age < 19) return 0.85;
+    return 0.8;
+  }
+
+  // AMDR (% of calories) by age.
+  function amdr(age) {
+    if (age < 4) return { carbs: [45, 65], fat: [30, 40], protein: [5, 20] };
+    if (age < 19) return { carbs: [45, 65], fat: [25, 35], protein: [10, 30] };
+    return { carbs: [45, 65], fat: [20, 35], protein: [10, 35] };
+  }
+
+  // FDA/EPA: two servings a week; serving size grows with age.
+  function fishOzWeek(age) {
+    if (age < 4) return 2;
+    if (age < 8) return 4;
+    if (age < 11) return 6;
+    return 8;
+  }
+
+  /*
+   * p: { age, sex, heightCm, weightKg, kcal, activity, goal }
+   * Returns the person's amounts for each chapter, or { tooYoung } under 2.
+   */
+  function amounts(p) {
+    var age = p.age;
+    if (age === null || age === undefined) return { missing: 'Add a birth date (or an age) to size the amounts.' };
+    if (age < 2) return { tooYoung: true };
+    var i = nearestIndex(p.kcal);
+    var kcal = p.kcal || 2000;
+    var pat = {};
+    Object.keys(PATTERN).forEach(function (k) { pat[k] = PATTERN[k][i]; });
+    var range = amdr(age);
+    var notes = [];
+
+    // Protein: g/kg of a healthy reference weight when BMI is 30+, as the DRIs use reference weights.
+    var bmi = p.heightCm && p.weightKg ? p.weightKg / Math.pow(p.heightCm / 100, 2) : null;
+    var refKg = p.weightKg || null;
+    if (bmi && age >= 19 && bmi >= 30) {
+      refKg = 25 * Math.pow(p.heightCm / 100, 2);
+      notes.push('Protein uses the weight at a BMI of 25 for your height (' + Math.round(refKg) + ' kg), because protein needs follow lean mass, not total weight.');
+    }
+    var lo = proteinPerKg(age), hi = lo;
+    var proteinWhy = 'RDA ' + lo + ' g per kg' + (age < 19 ? ' for this age' : '');
+    if (age >= 65) { lo = 1.0; hi = 1.2; proteinWhy = '1.0–1.2 g/kg for adults 65+ to protect muscle (PROT-AGE)'; }
+    if (age >= 19 && (p.activity === 'active' || p.activity === 'athlete')) { lo = Math.max(lo, 1.2); hi = Math.max(hi, p.activity === 'athlete' ? 2.0 : 1.6); proteinWhy = lo + '–' + hi + ' g/kg for regular hard training (ACSM)'; }
+    if (age >= 19 && p.goal === 'gain') { lo = Math.max(lo, 1.2); hi = Math.max(hi, 1.6); proteinWhy = lo + '–' + hi + ' g/kg while building muscle (ACSM)'; }
+    var protein = refKg ? { min: Math.round(refKg * lo), max: Math.round(refKg * hi), why: proteinWhy } : { min: Math.round(kcal * range.protein[0] / 100 / 4), max: Math.round(kcal * range.protein[0] / 100 / 4), why: range.protein[0] + '% of calories (add weight for a precise number)' };
+    // Never below the AMDR floor.
+    var floor = Math.round(kcal * range.protein[0] / 100 / 4);
+    if (protein.min < floor) { protein.min = floor; protein.max = Math.max(protein.max, floor); }
+    protein.perMeal = age >= 19 ? Math.round(protein.min / 3) : null;
+    protein.pct = range.protein;
+
+    var carbs = { min: Math.max(130, Math.round(kcal * range.carbs[0] / 100 / 4)), max: Math.round(kcal * range.carbs[1] / 100 / 4), pct: range.carbs,
+      addedSugarMax: age < 2 ? 0 : (age < 19 ? 25 : Math.round(kcal * 0.10 / 4)), grains: pat.grains, wholeGrains: r1(pat.grains / 2) };
+    if (carbs.min > carbs.max) carbs.min = carbs.max;
+    var fat = { min: Math.round(kcal * range.fat[0] / 100 / 9), max: Math.round(kcal * range.fat[1] / 100 / 9), pct: range.fat,
+      satMax: Math.round(kcal * 0.10 / 9), oils: pat.oils, oilsTsp: r1(pat.oils / 4.5) };
+    var fiber = { grams: Math.round(kcal / 1000 * 14) };
+
+    var fish = fishOzWeek(age);
+    var meatWk = pat.meatWk;
+    var redMax = age >= 19 ? 12 : null; // WCRF ≈350 g cooked ≈ 12 oz a week
+    var vegetables = { perDay: pat.veg, darkGreenWk: pat.darkGreenWk, redOrangeWk: pat.redOrangeWk, beansWk: pat.beansWk, starchyWk: pat.starchyWk, otherWk: pat.otherVegWk,
+      grams: Math.round(pat.veg * 130) };
+    var fruits = { perDay: pat.fruit, juiceMaxOz: age < 4 ? 4 : age < 7 ? 6 : 8, grams: Math.round(pat.fruit * 150) };
+    var meats = { meatWk: meatWk, perDay: r1(meatWk / 7), fishWk: fish, redMaxWk: redMax, proteinFoods: pat.protein };
+    var plants = { beansWk: pat.beansWk, nutsWk: pat.nutsWk };
+    var dairy = { perDay: pat.dairy };
+
+    return { age: age, kcal: kcal, patternKcal: KCAL[i], bmi: bmi ? r1(bmi) : null, notes: notes,
+      vegetables: vegetables, fruits: fruits, meats: meats, plants: plants, carbs: carbs, fat: fat, protein: protein, fiber: fiber, dairy: dairy };
+  }
+
+  function fmt(n) { return String(n).replace(/\.5$/, '½').replace(/^0½$/, '½'); }
+  function cups(n) { return fmt(n) + (n <= 1 ? ' cup' : ' cups'); }
+
+  // The chapters. Each builds its text from the person's amounts (a).
+  var CHAPTERS = [
+    {
+      id: 'vegetables', title: 'Vegetables', emoji: '🥦', color: '#2f7d5b',
+      headline: function (a) { return cups(a.vegetables.perDay) + ' a day'; },
+      detail: function (a) {
+        var v = a.vegetables;
+        return ['About ' + v.grams + ' g of vegetables a day.', 'Each week: ' + fmt(v.darkGreenWk) + ' cups dark green · ' + fmt(v.redOrangeWk) + ' red & orange · ' + fmt(v.beansWk) + ' beans, peas & lentils · ' + fmt(v.starchyWk) + ' starchy · ' + fmt(v.otherWk) + ' other.'];
+      },
+      serving: ['1 cup raw or cooked vegetables', '2 cups raw leafy greens (salad)', '1 cup 100% vegetable juice', '1 large tomato or 2 medium carrots'],
+      facts: [
+        ['In a meta-analysis of 95 studies, risk of early death fell steadily up to about 800 g of fruit and vegetables a day (≈10 portions) — 31% lower than eating none.', 'aune2017'],
+        ['Only about 1 in 10 US adults eats enough vegetables.', 'cdcFv'],
+        ['Variety matters: different color groups supply different nutrients — dark greens bring folate and vitamin K, red/orange bring vitamin A and potassium.', 'dga']
+      ],
+      best: ['Broccoli, spinach, kale, Brussels sprouts', 'Carrots, sweet potato, tomatoes, red peppers', 'Beans, lentils, chickpeas', 'Mushrooms, onions, zucchini, cauliflower'],
+      limit: ['Fried vegetables and creamy sauces', 'Canned vegetables with added salt — rinse or choose "no salt added"'],
+      sources: ['dga', 'aune2017', 'cdcFv', 'myplate'], focus: ['ldl', 'bp', 'sugar', 'goal-lose', 'liver', 'pregnancy']
+    },
+    {
+      id: 'fruits', title: 'Fruits', emoji: '🍎', color: '#c0603a',
+      headline: function (a) { return cups(a.fruits.perDay) + ' a day'; },
+      detail: function (a) { return ['About ' + a.fruits.grams + ' g of fruit a day; at least half as whole fruit.', '100% juice: no more than ' + a.fruits.juiceMaxOz + ' oz a day' + (a.age < 19 ? ' (AAP limit for this age).' : '.')]; },
+      serving: ['1 cup fresh, frozen or canned fruit', '½ cup dried fruit', '1 large banana or 1 small apple', '8 large strawberries', '1 cup 100% juice (counts, but less filling)'],
+      facts: [
+        ['Whole fruit keeps its fiber; juice loses it and raises blood sugar faster — that\'s why at least half should be whole.', 'dga'],
+        ['Only about 1 in 8 US adults eats enough fruit.', 'cdcFv'],
+        ['The AAP advises no juice under age 1 and caps it at 4–8 oz a day for children.', 'aapJuice']
+      ],
+      best: ['Berries, citrus, kiwi (vitamin C)', 'Apples, pears (soluble fiber)', 'Bananas, oranges (potassium)', 'Frozen fruit without added sugar'],
+      limit: ['Fruit drinks, cocktails and "-ades" (added sugar, not fruit)', 'Fruit canned in heavy syrup'],
+      sources: ['dga', 'cdcFv', 'aapJuice', 'myplate'], focus: ['iron', 'bp', 'uric']
+    },
+    {
+      id: 'meats', title: 'Meat, poultry, fish & eggs', emoji: '🍗', color: '#a34a3a',
+      headline: function (a) { return a.meats.meatWk + ' oz a week + ' + a.meats.fishWk + ' oz fish'; },
+      detail: function (a) {
+        var m = a.meats;
+        return ['Meat, poultry and eggs: about ' + fmt(m.perDay) + ' oz a day (' + m.meatWk + ' oz a week).', 'Fish and seafood: ' + m.fishWk + ' oz a week (two servings).',
+          m.redMaxWk ? 'Red meat (beef, pork, lamb): no more than about ' + m.redMaxWk + '–18 oz cooked a week. Processed meat: as little as possible.' : 'Keep processed meats (hot dogs, deli meat, bacon) occasional.'];
+      },
+      serving: ['1 oz-eq = 1 oz cooked meat, poultry or fish', '1 egg', 'A palm-sized piece of meat ≈ 3–4 oz', 'A small can of tuna ≈ 3 oz'],
+      facts: [
+        ['Processed meat is a Group 1 carcinogen: every 50 g a day (about 2 slices of ham) raises colorectal cancer risk about 18%. Red meat is "probably carcinogenic" (Group 2A).', 'iarc'],
+        ['WCRF advises at most about 3 portions (350–500 g cooked) of red meat a week and very little processed meat.', 'wcrf'],
+        ['Two servings of fish a week supply omega-3s for heart and brain; pick low-mercury fish. Avoid king mackerel, marlin, orange roughy, shark, swordfish, Gulf tilefish and bigeye tuna.', 'fdaFish']
+      ],
+      best: ['Salmon, sardines, trout, light tuna (low mercury, omega-3)', 'Chicken and turkey without skin', 'Eggs', 'Lean beef or pork loin, in modest portions'],
+      limit: ['Bacon, sausage, hot dogs, ham, deli meats, jerky', 'Fried and charred meats', 'High-mercury fish (see above)'],
+      sources: ['dga', 'iarc', 'wcrf', 'fdaFish'], focus: ['ldl', 'iron', 'b12', 'vitd', 'uric', 'pregnancy', 'protein']
+    },
+    {
+      id: 'plants', title: 'Plant proteins: beans, lentils, nuts, seeds & soy', emoji: '🫘', color: '#7a6a2f',
+      headline: function (a) { return cups(a.plants.beansWk) + ' beans + ' + a.plants.nutsWk + ' oz nuts a week'; },
+      detail: function (a) { return ['Beans, peas and lentils: at least ' + cups(a.plants.beansWk) + ' a week (they count as vegetables or protein).', 'Nuts, seeds and soy: ' + a.plants.nutsWk + ' oz-eq a week (½ oz nuts or 1 Tbsp nut butter = 1 oz-eq).', 'Swapping some meat for these is one of the best-supported changes for heart health.']; },
+      serving: ['¼ cup cooked beans, lentils or peas = 1 oz-eq protein', '½ oz nuts or seeds (12 almonds) = 1 oz-eq', '1 Tbsp peanut butter = 1 oz-eq', '¼ cup (2 oz) tofu = 1 oz-eq'],
+      facts: [
+        ['In trials, replacing red meat with high-quality plant proteins lowered LDL and total cholesterol more than replacing it with refined carbs.', 'guasch2019'],
+        ['In the PREDIMED trial, a Mediterranean diet with a daily handful of nuts cut heart attacks, strokes and cardiovascular deaths by about 30%.', 'predimed'],
+        ['Beans and lentils are among the richest fiber sources: about 15 g per cooked cup.', 'myplate']
+      ],
+      best: ['Lentils, black beans, chickpeas, edamame', 'Almonds, walnuts, peanuts, pumpkin and chia seeds', 'Tofu, tempeh, soy milk'],
+      limit: ['Candied or heavily salted nuts', 'Highly processed "meat-free" products high in sodium'],
+      sources: ['dga', 'guasch2019', 'predimed', 'myplate'], focus: ['ldl', 'sugar', 'iron', 'hdl', 'tg', 'pregnancy']
+    },
+    {
+      id: 'carbs', title: 'Carbs & grains', emoji: '🍚', color: '#b0842a',
+      headline: function (a) { return a.carbs.min + '–' + a.carbs.max + ' g a day'; },
+      detail: function (a) {
+        var c = a.carbs;
+        return [c.pct[0] + '–' + c.pct[1] + '% of calories; never below 130 g (the brain\'s minimum).', 'Grains: ' + c.grains + ' oz-eq a day, at least ' + fmt(c.wholeGrains) + ' of them whole grain.',
+          'Added sugar: under ' + c.addedSugarMax + ' g a day' + (a.age < 19 ? ' (AHA limit for children).' : ' (10% of calories).')];
+      },
+      serving: ['1 oz-eq = 1 slice of bread', '½ cup cooked rice, pasta or oatmeal', '1 cup flaked cereal', '1 small (6") tortilla', '3 cups popped popcorn'],
+      facts: [
+        ['About 3 servings (90 g) of whole grains a day is linked to about 20% lower risk of heart disease and 17% lower risk of early death.', 'aune2016'],
+        ['Carb quality matters more than quantity: whole grains and fiber lower risk of heart disease, stroke, type 2 diabetes and colon cancer.', 'reynolds2019'],
+        ['The AHA advises children eat under 25 g (6 tsp) of added sugar a day and none under age 2.', 'ahaSugar']
+      ],
+      best: ['Oats, barley, quinoa, brown rice', 'Whole-wheat bread and pasta', 'Sweet potatoes, potatoes with skin, corn tortillas', 'Beans and lentils (carbs + protein + fiber)'],
+      limit: ['White bread, white rice, regular pasta — make at least half whole', 'Sugary drinks, sweets and pastries', 'Sweetened cereals'],
+      sources: ['dga', 'dri', 'aune2016', 'reynolds2019', 'ahaSugar'], focus: ['sugar', 'tg', 'liver', 'goal-lose']
+    },
+    {
+      id: 'fat', title: 'Fats & oils', emoji: '🥑', color: '#3d6fb4',
+      headline: function (a) { return a.fat.min + '–' + a.fat.max + ' g a day'; },
+      detail: function (a) {
+        var f = a.fat;
+        return [f.pct[0] + '–' + f.pct[1] + '% of calories.', 'Oils: about ' + f.oils + ' g a day (≈' + fmt(Math.round(f.oilsTsp * 2) / 2) + ' tsp) — olive, canola and other plant oils, plus nuts, seeds, avocado and fish.', 'Saturated fat: under ' + f.satMax + ' g a day (10% of calories).'];
+      },
+      serving: ['1 tsp oil ≈ 4.5 g fat', '1 Tbsp oil ≈ 14 g fat', '½ avocado ≈ 15 g fat', '1 oz nuts ≈ 14–18 g fat'],
+      facts: [
+        ['In trials, replacing saturated fat with polyunsaturated vegetable oils lowered cardiovascular disease by about 30% — similar to statins.', 'ahaSatFat'],
+        ['Children under 4 need more fat (30–40% of calories) for growth and brain development.', 'dri'],
+        ['Artificial trans fats (partially hydrogenated oils) were removed from the US food supply in 2018 — still check imported foods.', 'dga']
+      ],
+      best: ['Extra-virgin olive oil, canola oil', 'Avocado, nuts, seeds, nut butters', 'Fatty fish (salmon, sardines)'],
+      limit: ['Butter, lard, coconut and palm oil', 'Fatty and processed meats, full-fat cheese in large amounts', 'Fried foods and pastries'],
+      sources: ['dga', 'dri', 'ahaSatFat'], focus: ['ldl', 'hdl', 'liver', 'tg']
+    },
+    {
+      id: 'protein', title: 'Protein', emoji: '💪', color: '#8a4fb0',
+      headline: function (a) { return (a.protein.min === a.protein.max ? a.protein.min : a.protein.min + '–' + a.protein.max) + ' g a day'; },
+      detail: function (a) {
+        var p = a.protein;
+        return [p.why + '.', 'Protein foods: ' + fmt(a.meats.proteinFoods) + ' oz-eq a day from meat, fish, eggs, beans, nuts and soy — dairy adds more.', p.perMeal ? 'Spread it out: about ' + p.perMeal + '–' + Math.max(p.perMeal, 30) + ' g per meal works best for muscle.' : 'Growing kids get enough from regular meals and snacks — no supplements needed.'];
+      },
+      serving: ['3 oz chicken or fish ≈ 21–26 g', '1 cup Greek yogurt ≈ 23 g', '2 eggs ≈ 13 g', '1 cup cooked lentils ≈ 18 g', '½ cup firm tofu ≈ 22 g'],
+      facts: [
+        ['The RDA is 0.8 g per kg of body weight for adults — the amount that meets the needs of 97–98% of healthy people.', 'dri'],
+        ['Adults over 65 keep more muscle with 1.0–1.2 g/kg.', 'protAge'],
+        ['People who train hard benefit from 1.2–2.0 g/kg, spread over meals.', 'acsmProtein']
+      ],
+      best: ['Fish, poultry, eggs, Greek yogurt', 'Beans, lentils, tofu, tempeh, edamame', 'Lean meat in modest portions'],
+      limit: ['Processed meats as a protein source', 'Protein bars and shakes with lots of added sugar', 'Very high protein (over 2 g/kg) with kidney disease — ask your doctor'],
+      sources: ['dri', 'protAge', 'acsmProtein', 'dga'], focus: ['protein', 'goal-lose', 'b12', 'kidney']
+    },
+    {
+      id: 'fiber', title: 'Fiber', emoji: '🌾', color: '#5a8a2f',
+      headline: function (a) { return a.fiber.grams + ' g a day'; },
+      detail: function (a) { return ['14 g for every 1,000 calories you eat.', 'Easy way to get there: the vegetables, fruit, beans and whole grains in this book already add up to about ' + a.fiber.grams + ' g.', 'Add it gradually and drink more water to avoid bloating.']; },
+      serving: ['1 cup cooked lentils or black beans ≈ 15 g', '1 cup raspberries ≈ 8 g', '½ cup dry oats ≈ 4 g', '2 Tbsp chia seeds ≈ 10 g', '1 medium pear ≈ 6 g'],
+      facts: [
+        ['Eating 25–29 g of fiber a day was linked to 15–30% lower risk of early death, heart disease, stroke, type 2 diabetes and colon cancer, with more benefit above that.', 'reynolds2019'],
+        ['Most Americans get only about half the fiber they need.', 'dga'],
+        ['Soluble fiber (oats, barley, beans, apples) lowers LDL cholesterol; insoluble fiber (whole grains, vegetables) keeps you regular.', 'dri']
+      ],
+      best: ['Beans, lentils, chickpeas', 'Berries, pears, apples with skin', 'Oats, barley, whole grains', 'Chia, flax, nuts', 'Broccoli, Brussels sprouts, artichokes'],
+      limit: ['Fiber pills in place of food — food fiber comes with vitamins and minerals'],
+      sources: ['dri', 'reynolds2019', 'dga'], focus: ['ldl', 'sugar', 'tg', 'goal-lose', 'liver']
+    },
+    {
+      id: 'dairy', title: 'Dairy & calcium', emoji: '🥛', color: '#4a7fa8',
+      headline: function (a) { return cups(a.dairy.perDay) + ' a day'; },
+      detail: function () { return ['Milk, yogurt, cheese — or lactose-free milk and calcium-fortified soy milk, which count the same.', 'Choose low-fat or fat-free most of the time.']; },
+      serving: ['1 cup milk, yogurt or fortified soy milk', '1½ oz natural cheese (2 slices)', '2 oz processed cheese'],
+      facts: [['Dairy and fortified soy milk supply calcium, vitamin D and potassium — nutrients most Americans fall short on.', 'dga'],
+        ['Almond, rice and oat "milks" don\'t count as dairy in the guidelines: their protein and nutrients differ.', 'dga']],
+      best: ['Plain yogurt and Greek yogurt', 'Low-fat milk or fortified soy milk', 'Cottage cheese'],
+      limit: ['Flavored milks and yogurts with added sugar', 'Large amounts of full-fat cheese'],
+      sources: ['dga', 'myplate'], focus: ['vitd', 'uric', 'bp']
+    }
+  ];
+
+  // Reference people for the appendix: moderately active, typical sizes.
+  var REFERENCE = [
+    ['2–3', 2.5, 1200, 1200, 13, 14], ['4–8', 6, 1400, 1600, 21, 22], ['9–13', 11, 1800, 2000, 37, 38], ['14–18', 16, 2000, 2600, 55, 66],
+    ['19–30', 25, 2000, 2600, 62, 77], ['31–50', 40, 2000, 2400, 62, 77], ['51–64', 57, 1800, 2200, 62, 77], ['65+', 70, 1800, 2200, 62, 77]
+  ];
+
+  function referenceTable() {
+    return REFERENCE.map(function (r) {
+      return {
+        ages: r[0],
+        female: amounts({ age: r[1], sex: 'female', kcal: r[2], weightKg: r[4], activity: 'moderate' }),
+        male: amounts({ age: r[1], sex: 'male', kcal: r[3], weightKg: r[5], activity: 'moderate' })
+      };
+    });
+  }
+
+  var DietBook = { KCAL: KCAL, PATTERN: PATTERN, SOURCES: SOURCES, CHAPTERS: CHAPTERS, amounts: amounts, referenceTable: referenceTable, fmt: fmt, nearestIndex: nearestIndex };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = DietBook;
+  else root.FHDietBook = DietBook;
+})(this);
+</script>
+  <script>
+/*
+ * Family Health Guide — a weekly workout split for each person.
+ *
+ * Built from the Physical Activity Guidelines (150–300 min moderate cardio,
+ * strength 2+ days, balance for older adults, 60 min/day for kids), ACSM's
+ * resistance-training progression (full body for beginners, upper/lower or
+ * splits as experience grows), and meta-analyses showing each muscle trained
+ * twice a week and ~10+ hard sets per muscle per week grow more muscle.
+ * Health conditions add the cautions their guidelines call for.
+ */
+(function (root) {
+  'use strict';
+
+  var SOURCES = {
+    pag: { title: 'Physical Activity Guidelines for Americans, 2nd edition', org: 'US Department of Health and Human Services', year: 2018, url: 'https://health.gov/our-work/nutrition-physical-activity/physical-activity-guidelines' },
+    acsmRt: { title: 'Progression models in resistance training for healthy adults — position stand', org: 'American College of Sports Medicine', year: 2009, url: 'https://pubmed.ncbi.nlm.nih.gov/19204579/' },
+    freq: { title: 'Effects of resistance training frequency on muscle hypertrophy: meta-analysis (Schoenfeld et al., Sports Med) — twice a week beats once', org: 'Peer-reviewed meta-analysis', year: 2016, url: 'https://pubmed.ncbi.nlm.nih.gov/27102172/' },
+    volume: { title: 'Dose-response relationship between weekly resistance training volume and muscle growth (Schoenfeld et al., J Sports Sci) — 10+ sets per muscle per week', org: 'Peer-reviewed meta-analysis', year: 2017, url: 'https://pubmed.ncbi.nlm.nih.gov/27433992/' },
+    isometric: { title: 'Exercise training and resting blood pressure: network meta-analysis (Edwards et al., Br J Sports Med) — isometric exercise lowered BP most', org: 'Peer-reviewed meta-analysis', year: 2023, url: 'https://bjsm.bmj.com/content/57/20/1317' },
+    adaExercise: { title: 'Physical activity/exercise and diabetes: a position statement', org: 'American Diabetes Association', year: 2016, url: 'https://diabetesjournals.org/care/article/39/11/2065/37249' },
+    acog: { title: 'Physical activity and exercise during pregnancy and the postpartum period (Committee Opinion 804)', org: 'American College of Obstetricians and Gynecologists', year: 2020, url: 'https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2020/04/physical-activity-and-exercise-during-pregnancy-and-the-postpartum-period' },
+    falls: { title: 'Exercise for preventing falls in older people living in the community (Cochrane review)', org: 'Cochrane', year: 2019, url: 'https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD012424.pub2/full' }
+  };
+
+  var DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  // Movement patterns → an exercise for each equipment level.
+  var MOVES = {
+    squat:   { none: 'Bodyweight squat (to a chair)', home: 'Goblet squat', gym: 'Back squat or leg press', senior: 'Sit-to-stand from a chair' },
+    hinge:   { none: 'Glute bridge', home: 'Dumbbell Romanian deadlift', gym: 'Romanian deadlift', senior: 'Glute bridge' },
+    hpush:   { none: 'Push-up (on a counter or knees if needed)', home: 'Dumbbell floor or bench press', gym: 'Bench press', senior: 'Wall push-up' },
+    vpush:   { none: 'Pike push-up', home: 'Dumbbell shoulder press', gym: 'Overhead press', senior: 'Seated band or light dumbbell press' },
+    hpull:   { none: 'Inverted row under a sturdy table', home: 'One-arm dumbbell row', gym: 'Cable or barbell row', senior: 'Seated band row' },
+    vpull:   { none: 'Towel door-frame pull (isometric)', home: 'Band lat pulldown', gym: 'Lat pulldown or pull-up', senior: 'Band pulldown' },
+    lunge:   { none: 'Reverse lunge', home: 'Dumbbell split squat', gym: 'Walking lunge', senior: 'Step-up onto a low step (hold a rail)' },
+    core:    { none: 'Plank or dead bug', home: 'Side plank + dead bug', gym: 'Cable crunch or Pallof press', senior: 'Seated march + bird-dog' },
+    carry:   { none: 'Suitcase carry with grocery bags', home: 'Farmer carry with dumbbells', gym: 'Farmer carry', senior: 'Carry light bags, upright posture' },
+    arms:    { none: 'Bench dips + towel curls', home: 'Dumbbell triceps extension + curls', gym: 'Cable pushdown + cable curls', senior: 'Band curls + triceps press' },
+    calf:    { none: 'Calf raises', home: 'Single-leg calf raise', gym: 'Calf raise machine', senior: 'Calf raises holding a counter' }
+  };
+
+  var TEMPLATES = {
+    full: { title: 'Full body', moves: ['squat', 'hpush', 'hpull', 'hinge', 'vpush', 'core'] },
+    fullB: { title: 'Full body B', moves: ['hinge', 'lunge', 'vpull', 'hpush', 'carry', 'core'] },
+    upper: { title: 'Upper body', moves: ['hpush', 'hpull', 'vpush', 'vpull', 'core'] },
+    lower: { title: 'Lower body', moves: ['squat', 'hinge', 'lunge', 'calf', 'core'] },
+    push: { title: 'Push (chest, shoulders, triceps)', moves: ['hpush', 'vpush', 'arms', 'core'] },
+    pull: { title: 'Pull (back, biceps)', moves: ['vpull', 'hpull', 'arms', 'carry'] },
+    legs: { title: 'Legs', moves: ['squat', 'hinge', 'lunge', 'calf'] }
+  };
+
+  var FOCUS = {
+    general: { label: 'Overall health', reps: '8–15', rest: '60–90 s' },
+    muscle: { label: 'Build muscle', reps: '6–12', rest: '1–2 min' },
+    strength: { label: 'Get stronger', reps: '6–10', rest: '2–3 min' },
+    fatloss: { label: 'Lose fat', reps: '8–15', rest: '45–90 s' },
+    endurance: { label: 'Endurance', reps: '12–20', rest: '45–60 s' }
+  };
+
+  function has(list, k) { return (list || []).indexOf(k) !== -1; }
+
+  // Which weekdays get strength: spread out so no muscle trains two days running when possible.
+  var STRENGTH_DAYS = { 1: [2], 2: [0, 3], 3: [0, 2, 4], 4: [0, 1, 3, 4], 5: [0, 1, 2, 4, 5], 6: [0, 1, 2, 3, 4, 5] };
+
+  /*
+   * p: { age, sex, conditions, goal, fitness: { days, minutes, equipment, experience, focus }, wearable }
+   */
+  function plan(p) {
+    var f = p.fitness || {};
+    var age = p.age;
+    var conds = p.conditions || [];
+    var out = { cautions: [], why: [], sources: ['pag'], week: [] };
+
+    if (age !== null && age !== undefined && age < 6) {
+      out.kind = 'kids-young';
+      out.summary = 'Active play throughout the day — about 3 hours, with an hour of energetic play.';
+      out.ideas = ['Tag, chasing games, dancing', 'Climbing at the playground', 'Riding a balance bike or tricycle', 'Throwing, kicking and catching balls'];
+      return out;
+    }
+    if (age !== null && age !== undefined && age < 18) {
+      out.kind = 'kids';
+      out.summary = '60 minutes of activity every day. On 3 days make it vigorous, on 3 days include muscle- and bone-strengthening play.';
+      out.ideas = ['Vigorous: running games, soccer, swimming, bike riding, dance', 'Muscle: climbing, push-ups, sit-ups, tug-of-war, gymnastics', 'Bone: jumping rope, hopscotch, basketball, running'];
+      out.week = DAYS.map(function (d, i) {
+        return { day: d, type: i % 2 === 0 ? 'vigorous' : 'strength', title: i % 2 === 0 ? 'Vigorous play' : 'Strength & jumping play', minutes: 60, items: [] };
+      });
+      if (age >= 12) out.why.push('Teens can start supervised strength training with light weights and good form — it is safe and builds bone.');
+      return out;
+    }
+
+    // Adults
+    var days = Math.max(2, Math.min(6, Number(f.days) || 3));
+    var minutes = Number(f.minutes) || 45;
+    var equip = f.equipment || 'home';
+    var exp = f.experience || 'new';
+    var focus = FOCUS[f.focus] ? f.focus : (p.goal === 'lose' ? 'fatloss' : p.goal === 'gain' ? 'muscle' : 'general');
+    var senior = age !== null && age >= 65;
+    var pregnant = has(conds, 'pregnancy');
+    var moveKey = senior && equip !== 'gym' ? 'senior' : equip;
+
+    // Strength sessions and split.
+    var strengthN = focus === 'endurance' ? Math.min(2, days) : focus === 'fatloss' ? Math.min(3, days) : Math.min(days, exp === 'new' ? 3 : exp === 'some' ? 4 : 6);
+    if (senior || pregnant) strengthN = Math.min(strengthN, 3);
+    strengthN = Math.max(2, strengthN);
+    var split;
+    if (strengthN <= 3) split = strengthN === 2 ? ['full', 'fullB'] : ['full', 'fullB', 'full'];
+    else if (strengthN === 4) split = ['upper', 'lower', 'upper', 'lower'];
+    else if (strengthN === 5) split = ['upper', 'lower', 'push', 'pull', 'legs'];
+    else split = ['push', 'pull', 'legs', 'push', 'pull', 'legs'];
+    out.splitName = strengthN <= 3 ? 'Full body ×' + strengthN : strengthN === 4 ? 'Upper / lower ×2' : strengthN === 5 ? 'Upper / lower + push / pull / legs' : 'Push / pull / legs ×2';
+
+    var sets = exp === 'new' ? 2 : exp === 'some' ? 3 : 4;
+    if (senior) sets = Math.min(sets, 2);
+    var fo = FOCUS[focus];
+    var reps = senior ? '10–15' : fo.reps;
+
+    var cardioDays = days - strengthN;
+    var weeklyCardioGoal = focus === 'endurance' || focus === 'fatloss' ? 225 : 150;
+    var sDays = STRENGTH_DAYS[strengthN];
+    // Cardio days fill the gaps first.
+    var free = [0, 1, 2, 3, 4, 5, 6].filter(function (d) { return sDays.indexOf(d) === -1; });
+    var cDays = free.slice(0, Math.max(0, cardioDays));
+    var cardioMinutes = cDays.length ? Math.max(20, Math.min(60, Math.round((weeklyCardioGoal - strengthN * 15) / cDays.length / 5) * 5)) : 0;
+
+    var si = 0;
+    out.week = DAYS.map(function (d, i) {
+      if (sDays.indexOf(i) !== -1) {
+        var tpl = TEMPLATES[split[si++]];
+        var items = tpl.moves.map(function (mv, j) {
+          var first = j === 0 && focus === 'strength' && !senior;
+          return { name: MOVES[mv][moveKey], sets: first ? sets + 1 : sets, reps: first ? '3–6' : reps, move: mv };
+        });
+        if (senior) items.push({ name: 'Balance: single-leg stand, heel-to-toe walk (hold a counter)', sets: 2, reps: '30 s each side', move: 'balance' });
+        var finisher = (focus === 'fatloss' || cardioDays === 0) ? ' + 15 min brisk cardio' : '';
+        return { day: d, type: 'strength', title: tpl.title + finisher, minutes: minutes, items: items };
+      }
+      if (cDays.indexOf(i) !== -1) {
+        var interval = focus === 'endurance' && exp !== 'new' && i === cDays[cDays.length - 1] && !pregnant && !senior;
+        return { day: d, type: 'cardio', title: interval ? 'Intervals: 5 × 3 min hard / 2 min easy' : 'Steady cardio (brisk walk, bike, swim, jog)', minutes: cardioMinutes,
+          items: [{ name: interval ? 'Warm up 10 min, then 5 rounds, cool down 5 min' : 'Moderate pace — you can talk, not sing', sets: null, reps: null }] };
+      }
+      return { day: d, type: 'rest', title: senior ? 'Rest — gentle walk, stretching or tai chi' : 'Rest or an easy walk', minutes: 0, items: [] };
+    });
+
+    var cardioTotal = cDays.length * cardioMinutes + ((focus === 'fatloss' || cardioDays === 0) ? strengthN * 15 : 0);
+    // Reach the 150-minute minimum with brisk walks on rest days, keeping one full rest day.
+    var rests = out.week.filter(function (x) { return x.type === 'rest'; });
+    for (var k = 0; k < rests.length - 1 && cardioTotal < weeklyCardioGoal; k++) {
+      var mins = Math.min(45, Math.max(20, Math.ceil((weeklyCardioGoal - cardioTotal) / (rests.length - 1 - k) / 5) * 5));
+      rests[k].type = 'walk'; rests[k].title = 'Brisk walk ' + mins + ' min (or bike, swim)'; rests[k].minutes = mins;
+      cardioTotal += mins;
+    }
+    out.summary = days + ' days a week: ' + out.splitName + (cDays.length ? ' + ' + cDays.length + ' cardio day' + (cDays.length === 1 ? '' : 's') : '') + '. About ' + cardioTotal + ' min of cardio a week.';
+    out.focus = fo.label;
+    out.why.push(exp === 'new' ? 'New to lifting: full-body sessions train every muscle 2–3 times a week with few sets — the fastest way to learn the moves and build strength.' :
+      'Each muscle is trained twice a week — research shows that grows more muscle than once a week.');
+    out.why.push(sets + ' sets per exercise, ' + reps + ' reps, rest ' + (senior ? '60–90 s' : fo.rest) + '. Stop each set 1–3 reps before failure; add weight or reps when the last set feels easy.');
+    out.why.push('Weekly target: 150–300 minutes of moderate cardio (or 75–150 vigorous) plus strength on 2+ days.' + (cardioTotal < 150 ? ' Your plan is under 150 min of cardio — add brisk walks on rest days or after meals.' : ''));
+    out.sources.push('acsmRt', exp === 'new' ? 'freq' : 'volume');
+    if (senior) { out.why.push('Balance work 3 days a week reduces falls by about a quarter.'); out.sources.push('falls'); }
+
+    // Conditions and recovery.
+    if (has(conds, 'heart') || has(conds, 'ckd')) out.cautions.push('Heart or kidney condition: get your care team\'s OK before starting, and ask about a safe heart-rate range.');
+    if (has(conds, 'hypertension')) { out.cautions.push('High blood pressure: breathe out on effort — no breath-holding. Add 4 × 2-minute wall sits or hand-grip squeezes 3 days a week: isometric work lowered blood pressure the most in a 270-trial analysis.'); out.sources.push('isometric'); }
+    if (has(conds, 'diabetes1') || has(conds, 'diabetes2') || has(conds, 'prediabetes')) { out.cautions.push('Blood sugar: don\'t go more than 2 days in a row without activity; a 10–15 minute walk after meals helps most.' + (has(conds, 'diabetes1') ? ' With insulin, check glucose before and after workouts and carry fast carbs.' : '')); out.sources.push('adaExercise'); }
+    if (pregnant) { out.cautions.push('Pregnancy: 150 minutes a week at a talk-test pace. Avoid contact sports, fall-risk activities and lying flat on your back for long after the first trimester. Stop with bleeding, dizziness, chest pain or contractions.'); out.sources.push('acog'); }
+    if (has(conds, 'gout') || has(conds, 'osteoporosis')) out.cautions.push(has(conds, 'osteoporosis') ? 'Osteoporosis: avoid deep forward bending and twisting under load; weight-bearing and strength work help bone.' : 'Gout: during a flare rest the joint; between flares low-impact cardio (bike, swim) is easiest on joints.');
+    var w = p.wearable || {};
+    if ((w.recovery !== null && w.recovery !== undefined && w.recovery !== '' && Number(w.recovery) < 50)) out.cautions.push('Your tracker shows low recovery — swap today\'s hard session for an easy walk or mobility.');
+    return out;
+  }
+
+  var Workout = { SOURCES: SOURCES, FOCUS: FOCUS, MOVES: MOVES, plan: plan, DAYS: DAYS };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = Workout;
+  else root.FHWorkout = Workout;
+})(this);
+</script>
+  <script>
+/*
+ * Family Health Guide — preference-based meal planner.
+ *
+ *  - Ingredient library: the meal-builder foods plus anything the family
+ *    adds. Each ingredient can be marked "in my kitchen", and loved or
+ *    ruled out per person.
+ *  - Smart planner (offline): builds days of balanced plates from allowed
+ *    ingredients, favouring loved, in-stock and health-matched foods, with
+ *    variety, sized to each meal's calorie and protein target.
+ *  - Claude planner (optional): sends the same constraints to the Claude
+ *    API with the user's own key and asks for recipes as JSON. Results are
+ *    re-checked against allergies here, never trusted blindly.
+ */
+(function (root) {
+  'use strict';
+
+  var node = typeof module !== 'undefined' && module.exports;
+  var Foods = node ? require('./foods.js') : root.FHFoods;
+  var KB = node ? require('./knowledge.js') : root.FHKnowledge;
+
+  var CUISINES = {
+    any: { label: 'Anything', flavor: 'salt, pepper, garlic and lemon' },
+    mediterranean: { label: 'Mediterranean', flavor: 'olive oil, lemon, garlic, oregano and parsley' },
+    mexican: { label: 'Mexican', flavor: 'lime, cumin, chili, cilantro and salsa' },
+    asian: { label: 'East Asian', flavor: 'ginger, garlic, scallion, low-sodium soy or tamari and sesame' },
+    indian: { label: 'Indian', flavor: 'cumin, turmeric, garam masala, ginger and yogurt' },
+    middleeast: { label: 'Middle Eastern', flavor: 'za\'atar, sumac, cumin, lemon and tahini' },
+    american: { label: 'American', flavor: 'smoked paprika, garlic, onion and herbs' },
+    korean: { label: 'Korean', flavor: 'gochugaru, garlic, sesame, scallion and a little gochujang' }
+  };
+
+  var SLOT_SHARE = Foods.MEAL_SHARE;
+
+  function list(v) { return Array.isArray(v) ? v : []; }
+
+  // All ingredients: built-in foods + custom ones from state.
+  function library(custom) {
+    return Foods.FOODS.concat(list(custom).map(function (c) { return Object.assign({ tags: [], custom: true, emoji: '🥫' }, c); }));
+  }
+
+  function byId(lib, id) { return lib.filter(function (x) { return x.id === id; })[0]; }
+
+  function makeCustom(form) {
+    var name = String(form.name || '').trim();
+    if (!name) throw new Error('Give the ingredient a name.');
+    var num = function (v) { var n = Number(v); return isNaN(n) || v === '' || v === undefined ? 0 : Math.max(0, n); };
+    return {
+      id: 'c-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now().toString(36).slice(-4),
+      name: name, cat: Foods.CATEGORIES.some(function (c) { return c.id === form.cat; }) ? form.cat : 'fiber',
+      emoji: form.emoji || '🥫', serving: String(form.serving || '1 serving').trim(),
+      kcal: num(form.kcal), protein: num(form.protein), carbs: num(form.carbs), fat: num(form.fat), fiber: num(form.fiber),
+      tags: list(form.tags), custom: true
+    };
+  }
+
+  // Seeded random so "Plan again" changes the plan but the same seed repeats it.
+  function rng(seed) {
+    var h = 2166136261;
+    String(seed).split('').forEach(function (ch) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); });
+    return function () { h += 0x6D2B79F5; var t = h; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+
+  /*
+   * opts: {
+   *   lib, eaters: [{ name, blocked(food) → reason|null, pick(foodId) → score, prefs: { id: 'love'|'no' } }],
+   *   pantry: { id: true }, slots: ['breakfast', ...], days: 7, cuisine, maxMinutes, seed,
+   *   targets(slot) → { kcal, protein }, onlyPantry: bool
+   * }
+   */
+  function smartPlan(opts) {
+    var rand = rng(opts.seed || 'plan');
+    var lib = opts.lib;
+    var used = {};
+    var allowed = lib.filter(function (fd) {
+      if (opts.onlyPantry && !opts.pantry[fd.id]) return false;
+      return opts.eaters.every(function (e) { return !e.blocked(fd) && (e.prefs || {})[fd.id] !== 'no'; });
+    });
+    function weight(fd, slot) {
+      var w = 1;
+      opts.eaters.forEach(function (e) {
+        if ((e.prefs || {})[fd.id] === 'love') w += 2;
+        w += Math.max(0, e.pick(fd.id)) * 0.6;
+      });
+      if (opts.pantry[fd.id]) w += 1.5;
+      if (slot === 'breakfast' && /oats|egg|yogurt|berries|banana|ww-bread|chia|peanut-butter|cottage|apple|kiwi|orange/.test(fd.id)) w += 2;
+      if (slot === 'snack' && fd.kcal > 250) w *= 0.3;
+      w /= 1 + (used[fd.id] || 0) * 1.5; // variety
+      return w;
+    }
+    function pick(cat, slot, not) {
+      var pool = allowed.filter(function (fd) { return fd.cat === cat && (!not || not.indexOf(fd.id) === -1); });
+      if (!pool.length) return null;
+      var ws = pool.map(function (fd) { return weight(fd, slot); });
+      var total = ws.reduce(function (s, x) { return s + x; }, 0), r = rand() * total;
+      for (var i = 0; i < pool.length; i++) { r -= ws[i]; if (r <= 0) return pool[i]; }
+      return pool[pool.length - 1];
+    }
+    var days = [];
+    for (var d = 0; d < (opts.days || 7); d++) {
+      var meals = (opts.slots || ['breakfast', 'lunch', 'dinner']).map(function (slot) {
+        var t = opts.targets(slot);
+        var items = [];
+        var cats = slot === 'snack' ? ['fiber', 'fat'] : slot === 'breakfast' ? ['protein', 'carbs', 'fiber'] : ['protein', 'carbs', 'fiber', 'fiber', 'fat'];
+        cats.forEach(function (cat) {
+          var fd = pick(cat, slot, items.map(function (x) { return x.foodId; }));
+          if (fd) { items.push({ foodId: fd.id, qty: 1 }); used[fd.id] = (used[fd.id] || 0) + 1; }
+        });
+        // Size to the meal: more protein if short, halve the fat if over calories.
+        var tot = totals(lib, items);
+        var prot = items.filter(function (x) { return byId(lib, x.foodId).cat === 'protein'; })[0];
+        if (prot && t.protein && tot.protein < t.protein * 0.8) { prot.qty = 1.5; tot = totals(lib, items); }
+        var carb = items.filter(function (x) { return byId(lib, x.foodId).cat === 'carbs'; })[0];
+        if (carb && tot.kcal > t.kcal * 1.25) { carb.qty = 0.5; tot = totals(lib, items); }
+        var fatItem = items.filter(function (x) { return byId(lib, x.foodId).cat === 'fat'; })[0];
+        if (fatItem && tot.kcal > t.kcal * 1.25) { fatItem.qty = 0.5; tot = totals(lib, items); }
+        return { slot: slot, items: items, name: mealName(lib, items, slot, opts.cuisine), totals: tot, flavor: (CUISINES[opts.cuisine] || CUISINES.any).flavor };
+      });
+      days.push({ day: d, meals: meals });
+    }
+    return { days: days, allowedCount: allowed.length, shopping: shoppingList(lib, days, opts.pantry) };
+  }
+
+  function totals(lib, items) {
+    var t = { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
+    items.forEach(function (it) { var fd = byId(lib, it.foodId); if (!fd) return; ['kcal', 'protein', 'carbs', 'fat', 'fiber'].forEach(function (k) { t[k] += fd[k] * it.qty; }); });
+    Object.keys(t).forEach(function (k) { t[k] = Math.round(t[k]); });
+    return t;
+  }
+
+  var STYLE = { breakfast: ['bowl', 'plate', 'scramble'], lunch: ['bowl', 'wrap', 'salad'], dinner: ['plate', 'bowl', 'skillet'], snack: ['snack'] };
+
+  function mealName(lib, items, slot, cuisine) {
+    var names = items.map(function (it) { return byId(lib, it.foodId).name.split(/[,(]/)[0].replace(/^(Canned|Firm|Lean|Rolled|Mixed) /i, '').trim(); }).map(function (n, i) { return i ? n.charAt(0).toLowerCase() + n.slice(1) : n.charAt(0).toUpperCase() + n.slice(1); });
+    var main = names.slice(0, 3);
+    var style = STYLE[slot][items.length % STYLE[slot].length];
+    var c = cuisine && cuisine !== 'any' ? CUISINES[cuisine].label + ' ' : '';
+    return c + main.join(', ').replace(/, ([^,]*)$/, ' & $1') + ' ' + style;
+  }
+
+  function shoppingList(lib, days, pantry) {
+    var need = {};
+    days.forEach(function (d) { d.meals.forEach(function (m) { m.items.forEach(function (it) { need[it.foodId] = (need[it.foodId] || 0) + it.qty; }); }); });
+    return Object.keys(need).map(function (id) { var fd = byId(lib, id); return { id: id, name: fd.name, cat: fd.cat, servings: Math.round(need[id] * 10) / 10, serving: fd.serving, have: !!(pantry || {})[id] }; })
+      .sort(function (a, b) { return (a.have - b.have) || a.cat.localeCompare(b.cat) || a.name.localeCompare(b.name); });
+  }
+
+  // ---------------------------------------------------------------- Claude
+
+  var MODEL = 'claude-opus-5-5';
+  var SDK_URL = 'https://cdn.jsdelivr.net/npm/@anthropic-ai/sdk@1.1.0/+esm';
+
+  var PLAN_SCHEMA = {
+    type: 'object', additionalProperties: false, required: ['days', 'shopping', 'notes'],
+    properties: {
+      days: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['day', 'meals'], properties: {
+        day: { type: 'string' },
+        meals: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['slot', 'name', 'ingredients', 'steps', 'minutes', 'why', 'kcal', 'protein_g'], properties: {
+          slot: { type: 'string', enum: ['breakfast', 'lunch', 'dinner', 'snack'] },
+          name: { type: 'string' },
+          ingredients: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['item', 'amount'], properties: { item: { type: 'string' }, amount: { type: 'string' } } } },
+          steps: { type: 'array', items: { type: 'string' } },
+          minutes: { type: 'integer' },
+          kcal: { type: 'integer' },
+          protein_g: { type: 'integer' },
+          why: { type: 'string' }
+        } } }
+      } } },
+      shopping: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['item', 'amount'], properties: { item: { type: 'string' }, amount: { type: 'string' } } } },
+      notes: { type: 'string' }
+    }
+  };
+
+  /*
+   * brief: { eaters: [{ name, age, sex, kcal, protein, mustAvoid: [..], goEasy: [..], focus: [..], loves: [..], never: [..] }],
+   *          ingredients: [names], pantry: [names], slots, days, cuisine, maxMinutes, budget, notes, onlyListed }
+   */
+  function buildPrompt(brief) {
+    var lines = [];
+    lines.push('Plan ' + brief.days + ' day(s) of ' + brief.slots.join(', ') + ' for this household.');
+    lines.push('');
+    lines.push('People:');
+    brief.eaters.forEach(function (e) {
+      lines.push('- ' + e.name + ' (' + [e.age !== null ? 'age ' + e.age : null, e.sex, e.kcal ? '~' + e.kcal + ' kcal/day' : null, e.protein ? e.protein + ' g protein/day' : null].filter(Boolean).join(', ') + ')');
+      if (e.mustAvoid.length) lines.push('  MUST NOT EAT (allergy/medical — never include, including hidden sources): ' + e.mustAvoid.join(', '));
+      if (e.goEasy.length) lines.push('  Go easy on: ' + e.goEasy.join(', '));
+      if (e.focus.length) lines.push('  Health focus from blood tests/conditions: ' + e.focus.join('; '));
+      if (e.loves.length) lines.push('  Loves: ' + e.loves.join(', '));
+      if (e.never.length) lines.push('  Won\'t eat: ' + e.never.join(', '));
+    });
+    lines.push('');
+    lines.push((brief.onlyListed ? 'Use ONLY these ingredients (plus water, salt, pepper, herbs and spices): ' : 'Build meals mainly from these ingredients: ') + brief.ingredients.join(', ') + '.');
+    if (brief.pantry.length) lines.push('Already in the kitchen — use these first: ' + brief.pantry.join(', ') + '.');
+    lines.push('Cuisine: ' + (CUISINES[brief.cuisine] || CUISINES.any).label + '. Max cooking time per meal: ' + brief.maxMinutes + ' minutes. Budget: ' + brief.budget + '.');
+    if (brief.notes) lines.push('Other requests: ' + brief.notes);
+    lines.push('');
+    lines.push('Size each meal for one adult portion and note in "why" how it serves each person\'s health focus. Keep steps short and practical. List the shopping items not already in the kitchen.');
+    return lines.join('\n');
+  }
+
+  var SYSTEM = 'You are a registered-dietitian-style meal planner for a family. Follow every MUST NOT EAT constraint absolutely, including hidden sources (sauces, broths, dressings, cross-contact). Prefer whole foods, vegetables, legumes, whole grains, fish and olive oil, in line with the Dietary Guidelines for Americans. Do not give medical advice beyond food choices.';
+
+  function loadSdk() { return import(SDK_URL).then(function (mod) { return mod.default || mod.Anthropic; }); }
+
+  // Calls Claude with the user's own key. Returns the parsed plan.
+  function aiPlan(apiKey, brief, loader) {
+    return (loader || loadSdk)().then(function (Anthropic) {
+      var client = new Anthropic({ apiKey: apiKey, dangerouslyAllowBrowser: true });
+      return client.beta.messages.create({
+        model: MODEL,
+        max_tokens: 16000,
+        betas: ['server-side-fallback-2026-07-01'],
+        fallbacks: 'default',
+        thinking: { type: 'adaptive' },
+        output_config: { effort: 'medium', format: { type: 'json_schema', schema: PLAN_SCHEMA } },
+        system: SYSTEM,
+        messages: [{ role: 'user', content: buildPrompt(brief) }]
+      });
+    }).then(function (msg) {
+      if (msg.stop_reason === 'refusal') throw new Error('Claude declined this request' + (msg.stop_details && msg.stop_details.explanation ? ': ' + msg.stop_details.explanation : '.'));
+      if (msg.stop_reason === 'max_tokens') throw new Error('The plan was too long to finish — try fewer days or meals.');
+      var text = msg.content.filter(function (b) { return b.type === 'text'; }).map(function (b) { return b.text; }).join('');
+      try { return JSON.parse(text); } catch (e) { throw new Error('Claude\'s answer couldn\'t be read. Try again.'); }
+    });
+  }
+
+  // Flags AI ingredients that may contain a person's allergens or "never" foods.
+  function checkPlan(plan, eaters) {
+    var flags = [];
+    (plan.days || []).forEach(function (d) {
+      (d.meals || []).forEach(function (m) {
+        var text = (m.ingredients || []).map(function (i) { return i.item; }).join(' | ').toLowerCase() + ' | ' + (m.name || '').toLowerCase();
+        m.flags = [];
+        eaters.forEach(function (e) {
+          e.allergenWords.forEach(function (w) {
+            // Plant "milks" and nut/seed butters aren't dairy.
+            var plant = w.tag === 'milk' && /^(milk|butter|cream)$/.test(w.word) ? '(?<!(peanut|almond|nut|seed|sunflower|apple|coconut|soy|oat|cashew|cocoa|rice|shea) )' : '';
+            if (new RegExp(plant + '\\b' + w.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(s|es)?\\b', 'i').test(text)) {
+              var f = e.name + ': may contain ' + w.label + ' ("' + w.word + '")';
+              if (m.flags.indexOf(f) === -1) { m.flags.push(f); flags.push({ day: d.day, meal: m.name, text: f }); }
+            }
+          });
+        });
+      });
+    });
+    return flags;
+  }
+
+  // Words that reveal each blocked allergen in a free-text ingredient list.
+  var ALLERGEN_WORDS = {
+    peanut: ['peanut', 'groundnut', 'arachis', 'satay'], treenut: ['almond', 'cashew', 'walnut', 'pecan', 'pistachio', 'hazelnut', 'macadamia', 'brazil nut', 'pine nut', 'pesto', 'marzipan', 'praline', 'nutella'],
+    milk: ['milk', 'cheese', 'butter', 'cream', 'yogurt', 'yoghurt', 'whey', 'casein', 'ghee', 'parmesan', 'feta', 'mozzarella', 'ricotta', 'paneer', 'kefir'],
+    egg: ['egg', 'mayonnaise', 'mayo', 'aioli', 'meringue', 'albumin'], wheat: ['wheat', 'flour', 'bread', 'pasta', 'couscous', 'bulgur', 'seitan', 'farro', 'spelt', 'soy sauce', 'panko', 'tortilla (flour)', 'noodle'],
+    soy: ['soy', 'tofu', 'tempeh', 'edamame', 'miso', 'tamari', 'natto', 'shoyu'], fish: ['fish', 'salmon', 'tuna', 'cod', 'sardine', 'anchovy', 'tilapia', 'trout', 'halibut', 'mackerel', 'fish sauce', 'worcestershire'],
+    shellfish: ['shrimp', 'prawn', 'crab', 'lobster', 'crawfish', 'crayfish', 'scallop', 'clam', 'mussel', 'oyster', 'squid'], sesame: ['sesame', 'tahini', 'hummus', 'za\'atar', 'halva'],
+    gluten: ['wheat', 'barley', 'rye', 'malt', 'flour', 'bread', 'pasta', 'couscous', 'bulgur', 'seitan', 'farro', 'spelt', 'soy sauce'],
+    pork: ['pork', 'bacon', 'ham', 'prosciutto', 'pancetta', 'chorizo', 'sausage', 'lard'], meat: ['beef', 'steak', 'lamb', 'veal'], alcohol: ['wine', 'beer', 'sake', 'mirin', 'rum', 'vodka', 'bourbon']
+  };
+
+  function allergenWords(blockTags) {
+    var out = [];
+    blockTags.forEach(function (t) { (ALLERGEN_WORDS[t] || []).forEach(function (w) { out.push({ word: w, label: KB.TAG_LABELS[t] || t, tag: t }); }); });
+    return out;
+  }
+
+  var Planner = { CUISINES: CUISINES, MODEL: MODEL, SDK_URL: SDK_URL, PLAN_SCHEMA: PLAN_SCHEMA, library: library, byId: byId, makeCustom: makeCustom, smartPlan: smartPlan,
+    totals: totals, shoppingList: shoppingList, buildPrompt: buildPrompt, aiPlan: aiPlan, checkPlan: checkPlan, allergenWords: allergenWords, ALLERGEN_WORDS: ALLERGEN_WORDS, rng: rng };
+
+  if (node) module.exports = Planner;
+  else root.FHPlanner = Planner;
+})(this);
+</script>
+  <script>
+/*
  * Family Health Guide — health records (PDFs, photos of lab reports, notes).
  *
  * Files are kept in the browser's IndexedDB on this device; localStorage is
@@ -4016,8 +4849,10 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
   var VERSION = 1;
 
   function empty() {
-    return { version: VERSION, settings: { units: 'us' }, members: [], customRecipes: [], plan: { overrides: {}, eaters: null, seed: '' }, meals: {}, ratings: {}, location: null, builder: {}, savedAt: null };
+    return { version: VERSION, settings: { units: 'us' }, members: [], customRecipes: [], plan: { overrides: {}, eaters: null, seed: '' }, meals: {}, ratings: {}, location: null, builder: {}, pantry: {}, householdPrefs: {}, customIngredients: [], planner: {}, lastPlan: null, book: {}, savedAt: null };
   }
+
+  function obj(v) { return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; }
 
   function migrate(data) {
     var base = empty();
@@ -4032,6 +4867,9 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
       ratings: (data.ratings && typeof data.ratings === 'object') ? data.ratings : {},
       location: data.location || null,
       builder: (data.builder && typeof data.builder === 'object') ? data.builder : {},
+      pantry: obj(data.pantry), householdPrefs: obj(data.householdPrefs), planner: obj(data.planner), book: obj(data.book),
+      customIngredients: Array.isArray(data.customIngredients) ? data.customIngredients : [],
+      lastPlan: data.lastPlan && typeof data.lastPlan === 'object' ? data.lastPlan : null,
       savedAt: data.savedAt || null
     };
     if (!out.plan.overrides || typeof out.plan.overrides !== 'object') out.plan.overrides = {};
@@ -4052,6 +4890,8 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
       otherConditions: arr(m && m.otherConditions), medications: arr(m && m.medications), dietRules: arr(m && m.dietRules),
       dislikes: arr(m && m.dislikes), avoidFoods: arr(m && m.avoidFoods), limitFoods: arr(m && m.limitFoods),
       favoriteFoods: arr(m && m.favoriteFoods), log: arr(m && m.log), labs: arr(m && m.labs), links: arr(m && m.links), daily: (m && m.daily && typeof m.daily === 'object' && !Array.isArray(m.daily)) ? m.daily : {},
+      foodPrefs: (m && m.foodPrefs && typeof m.foodPrefs === 'object' && !Array.isArray(m.foodPrefs)) ? m.foodPrefs : {},
+      fitness: (m && m.fitness && typeof m.fitness === 'object' && !Array.isArray(m.fitness)) ? m.fitness : {},
       answers: (m && m.answers && typeof m.answers === 'object' && !Array.isArray(m.answers)) ? m.answers : {}
     });
   }
@@ -4186,8 +5026,12 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
   var Docs = window.FHDocs;
   var Shop = window.FHShop;
   var P = window.FHPersonal;
+  var DB = window.FHDietBook;
+  var W = window.FHWorkout;
+  var Planner = window.FHPlanner;
 
   var state = Store.load();
+  Foods.setCustom(state.customIngredients);
   var app = document.getElementById('app');
   var AVATAR_COLORS = ['#2f7d5b', '#c0603a', '#3d6fb4', '#8a4fb0', '#b0842a', '#2a8a8a', '#b04a6e', '#5a6b2f'];
   var MEAL_LABELS = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack' };
@@ -4271,6 +5115,8 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
     else if (parts[0] === 'week') { tab = 'plan'; html = viewWeek(); }
     else if (parts[0] === 'shop') { tab = 'plan'; html = viewShop(parts[1]); }
     else if (parts[0] === 'recipes') { tab = 'recipes'; html = viewRecipes(); }
+    else if (parts[0] === 'book') { tab = 'book'; html = viewBook(parts[1]); }
+    else if (parts[0] === 'planner') { tab = 'planner'; html = viewPlanner(); }
     else if (parts[0] === 'data') { tab = 'data'; html = viewData(); }
     else if (parts[0] === 'new') { html = viewQuickAdd(); }
     else if (parts[0] === 'member' && member(parts[1])) {
@@ -5771,6 +6617,61 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
     }
   }
 
+  function plannerAction(action, id, el) {
+    var pp = plannerPrefs();
+    var num = Number(id);
+    if (action === 'pl-who') pp.who = id;
+    else if (action === 'pl-days') pp.days = num;
+    else if (action === 'pl-slot') {
+      var i = pp.slots.indexOf(id);
+      if (i === -1) pp.slots.push(id); else if (pp.slots.length > 1) pp.slots.splice(i, 1);
+    } else if (action === 'pl-cuisine') pp.cuisine = id;
+    else if (action === 'pl-time') pp.maxMinutes = num;
+    else if (action === 'pl-budget') pp.budget = id;
+    else if (action === 'pl-cat') pp.cat = id;
+    else if (action === 'pl-filter') pp.filter = id;
+    else if (action === 'ing-have') { if (state.pantry[id]) delete state.pantry[id]; else state.pantry[id] = true; }
+    else if (action === 'ing-love' || action === 'ing-no') {
+      var tgt = prefsTarget(pp), val = action === 'ing-love' ? 'love' : 'no';
+      if (tgt[id] === val) delete tgt[id]; else tgt[id] = val;
+    } else if (action === 'ing-del') {
+      if (!confirm('Delete this ingredient?')) return;
+      state.customIngredients = state.customIngredients.filter(function (x) { return x.id !== id; });
+      Foods.setCustom(state.customIngredients);
+      delete state.pantry[id];
+    } else if (action === 'pl-smart') { runSmartPlan(); return; }
+    else if (action === 'pl-ai') { runAiPlan(); return; }
+    else if (action === 'ai-key-save') {
+      var kv = (document.getElementById('ai-key') || {}).value || '';
+      if (!/^sk-ant-/.test(kv.trim())) { toast('That doesn\'t look like an Anthropic key (sk-ant-…)'); return; }
+      aiKeySession = kv.trim();
+      try { if ((document.getElementById('ai-remember') || {}).checked) localStorage.setItem('fhg-claude-key', aiKeySession); } catch (e) { /* private mode */ }
+      aiError = null;
+      toast('Key saved' + (readKey() ? ' on this device' : ' for this visit'));
+    } else if (action === 'ai-key-clear') {
+      aiKeySession = '';
+      try { localStorage.removeItem('fhg-claude-key'); } catch (e) { /* ignore */ }
+      toast('Key removed');
+    } else if (action === 'pl-save-day') {
+      var day = state.lastPlan.days[num];
+      var wk = weekKey();
+      state.meals = state.meals || {};
+      state.meals[wk] = state.meals[wk] || [];
+      var startDay = (new Date().getDay() + 6) % 7;
+      day.meals.forEach(function (mm) {
+        state.meals[wk].push({ id: 'meal' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), day: (startDay + num) % 7, slot: mm.slot, who: pp.who, name: mm.name, items: JSON.parse(JSON.stringify(mm.items)) });
+      });
+      persist('Day ' + (num + 1) + ' saved to ' + E.DAYS[(startDay + num) % 7]);
+      return;
+    } else if (action === 'pl-copy-shop') {
+      var items = Array.prototype.map.call(document.querySelectorAll('.shop-list li:not(.have)'), function (li) { return '☐ ' + li.textContent.trim(); }).join('\n');
+      if (navigator.clipboard) navigator.clipboard.writeText(items).then(function () { toast('Shopping list copied'); }, function () { toast('Couldn\'t copy — select the list instead'); });
+      return;
+    } else if (action === 'pl-clear') state.lastPlan = null;
+    persist();
+    keepScroll();
+  }
+
   function saveSteps(input) {
     if (!input) return;
     var sm = member(input.getAttribute('data-id'));
@@ -5833,15 +6734,366 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
     }).catch(function (e) { alert(e.message); });
   }
 
+  // -------------------------------------------------------------- diet book
+
+  var ACTIVITY_SHORT = { sedentary: 'sedentary', light: 'lightly active', moderate: 'moderately active', active: 'very active', athlete: 'athlete' };
+
+  // The person a book is written for: a family member, or typed-in numbers.
+  function bookPerson(who) {
+    var m = member(who);
+    if (!m) {
+      var c = state.book.custom || {};
+      var age = c.age === undefined || c.age === '' ? 35 : Number(c.age);
+      var bd = new Date(today().getTime() - (age * 365.25 + 30) * 86400000);
+      m = Store.normalizeMember({ id: 'custom', name: 'You', sex: c.sex || 'female', birthdate: E.isoDate(bd), heightCm: c.heightCm || 165, weightKg: c.weightKg || 65,
+        activity: c.activity || 'light', goal: c.goal || 'maintain', fitness: c.fitness || {} });
+      m.custom = true;
+    }
+    var g = E.buildGuide(m, today());
+    return { m: m, g: g, a: DB.amounts({ age: g.age, sex: m.sex, heightCm: m.heightCm, weightKg: g.weightKg, kcal: g.targets.kcal, activity: m.activity, goal: m.goal }) };
+  }
+
+  function bookSources(ids, idx) {
+    return ids.map(function (id) {
+      var s = DB.SOURCES[id] || W.SOURCES[id] || P.SOURCES[id] || Q.SOURCES[id];
+      if (!s) return '';
+      if (idx.indexOf(id) === -1) idx.push(id);
+      return '<a href="' + esc(s.url) + '" target="_blank" rel="noopener" title="' + esc(s.title) + '">[' + (idx.indexOf(id) + 1) + '] ' + esc(s.org) + ' ' + s.year + '</a>';
+    }).join(' · ');
+  }
+
+  function chip(action, value, label, on, extra) {
+    return '<button class="chip' + (on ? ' on' : '') + '" data-action="' + action + '" data-id="' + esc(value) + '"' + (extra || '') + '>' + label + '</button>';
+  }
+
+  function viewBook(who) {
+    who = who || state.book.who || (state.members[0] ? state.members[0].id : 'custom');
+    if (who !== 'custom' && !member(who)) who = 'custom';
+    var bp = bookPerson(who), m = bp.m, g = bp.g, a = bp.a;
+    var idx = [];
+    var people = state.members.map(function (x) { return chip('book-who', x.id, esc(x.name), x.id === who); }).join('') + chip('book-who', 'custom', '✏️ Enter numbers', who === 'custom');
+    var c = state.book.custom || {};
+    var customForm = who === 'custom' ? '<form id="book-form" class="fields book-form">' +
+      '<div><label>Age</label><input type="number" name="age" min="2" max="110" value="' + esc(c.age === undefined ? 35 : c.age) + '"></div>' +
+      '<div><label>Sex</label><select name="sex">' + opt('female', 'Female', c.sex || 'female') + opt('male', 'Male', c.sex) + '</select></div>' +
+      '<div><label>Height (' + (us() ? 'in' : 'cm') + ')</label><input type="number" name="height" step="any" value="' + esc(us() ? Math.round((c.heightCm || 165) / 2.54) : (c.heightCm || 165)) + '"></div>' +
+      '<div><label>Weight (' + (us() ? 'lb' : 'kg') + ')</label><input type="number" name="weight" step="any" value="' + esc(us() ? kgToLb(c.weightKg || 65) : (c.weightKg || 65)) + '"></div>' +
+      '<div><label>Activity</label><select name="activity">' + Object.keys(KB.ACTIVITY).map(function (k) { return opt(k, KB.ACTIVITY[k].label, c.activity || 'light'); }).join('') + '</select></div>' +
+      '<div><label>Goal</label><select name="goal">' + Object.keys(KB.GOALS).map(function (k) { return opt(k, KB.GOALS[k].label, c.goal || 'maintain'); }).join('') + '</select></div>' +
+      '<div style="align-self:end"><button class="btn primary" type="submit">Update amounts</button></div></form>' : '';
+
+    var head = '<section class="card book-cover"><div class="book-kicker">The Family Diet Book</div><h1>' + (m.custom ? 'Your' : esc(m.name) + '\'s') + ' daily amounts</h1>' +
+      '<div class="row no-print">' + people + '</div>' + customForm;
+    if (a.missing || a.tooYoung) {
+      return '<div class="stack">' + head + '<p class="muted">' + esc(a.missing || 'Under 2, food amounts come from the pediatrician\'s feeding plan (breast milk or formula first, then solids from about 6 months).') + '</p></section></div>';
+    }
+    var basis = [ageText(g), m.sex || '', m.heightCm ? fmtHeight(m.heightCm) : '', g.weightKg ? fmtWeight(g.weightKg) : '', ACTIVITY_SHORT[m.activity] || ''].filter(Boolean).join(' · ');
+    head += '<p class="book-basis">Sized for <strong>' + esc(basis) + '</strong> → <strong>' + a.kcal.toLocaleString('en-US') + ' kcal</strong> a day' +
+      (g.targets.kcalSource ? ' <span class="muted">(' + esc(g.targets.kcalSource) + ')</span>' : '') + '. Food groups follow the USDA ' + a.patternKcal.toLocaleString('en-US') + '-calorie pattern.' +
+      (g.bmi ? ' BMI ' + g.bmi + '.' : '') + '</p>' + a.notes.map(function (n) { return '<p class="small muted">' + esc(n) + '</p>'; }).join('') +
+      '<div class="row no-print"><button class="btn" data-action="print">🖨️ Print the book</button>' + (m.custom ? '' : '<a class="btn" href="#/member/' + esc(m.id) + '/edit">Change height, weight or activity</a>') + '</div></section>';
+
+    var day = P.daily(m, g.age, g.focus);
+    var tiles = DB.CHAPTERS.map(function (ch) {
+      return '<a class="book-tile" href="#/book/' + esc(who) + '" data-jump="ch-' + ch.id + '" style="--c:' + ch.color + '"><span class="tile-emoji">' + ch.emoji + '</span><span class="tile-title">' + esc(ch.title.split(':')[0]) + '</span><strong>' + esc(ch.headline(a)) + '</strong></a>';
+    }).join('') +
+      (day.water ? '<a class="book-tile" href="#/book/' + esc(who) + '" data-jump="ch-water" style="--c:#3d6fb4"><span class="tile-emoji">💧</span><span class="tile-title">Water</span><strong>' + (day.water.cups ? day.water.cups + ' cups (' + day.water.liters + ' L)' : 'Care-team limit') + '</strong></a>' : '') +
+      '<a class="book-tile" href="#/book/' + esc(who) + '" data-jump="ch-workout" style="--c:#c0603a"><span class="tile-emoji">🏋️</span><span class="tile-title">Workouts</span><strong>' + esc(workoutHeadline(m, g)) + '</strong></a>';
+
+    var chapters = DB.CHAPTERS.map(function (ch, i) {
+      var mine = g.focus.filter(function (r) { return ch.focus.indexOf(r.id) !== -1; });
+      return '<section class="card book-chapter" id="ch-' + ch.id + '" style="--c:' + ch.color + '">' +
+        '<div class="chapter-head"><span class="chapter-no">' + (i + 1) + '</span><span class="chapter-emoji">' + ch.emoji + '</span><div><h2>' + esc(ch.title) + '</h2><div class="chapter-amount">' + esc(ch.headline(a)) + '</div></div></div>' +
+        '<ul class="chapter-detail">' + ch.detail(a).map(function (d) { return '<li>' + esc(d) + '</li>'; }).join('') + '</ul>' +
+        (mine.length ? '<div class="for-you-box"><strong>For ' + esc(m.name) + '</strong>' + mine.map(function (r) { return '<div>' + r.icon + ' ' + esc(r.title) + ' — ' + esc(r.because) + '. ' + esc(r.eatMore[0] || r.easyOn[0] || r.tip) + '</div>'; }).join('') + '</div>' : '') +
+        '<div class="chapter-grid"><div><h3>What counts as one serving</h3><ul>' + ch.serving.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul></div>' +
+        '<div><h3>Best choices</h3><ul class="good">' + ch.best.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul><h3>Limit</h3><ul class="bad">' + ch.limit.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul></div></div>' +
+        '<h3>The facts</h3><ol class="facts">' + ch.facts.map(function (f) { return '<li>' + esc(f[0]) + ' <span class="small">' + bookSources([f[1]], idx) + '</span></li>'; }).join('') + '</ol>' +
+        '<p class="small muted">Sources: ' + bookSources(ch.sources, idx) + '</p></section>';
+    }).join('');
+
+    var water = day.water ? '<section class="card book-chapter" id="ch-water" style="--c:#3d6fb4"><div class="chapter-head"><span class="chapter-no">' + (DB.CHAPTERS.length + 1) + '</span><span class="chapter-emoji">💧</span><div><h2>Water</h2><div class="chapter-amount">' +
+      (day.water.cups ? day.water.cups + ' cups (' + day.water.liters + ' L) a day from drinks' : 'Follow your care team\'s fluid limit') + '</div></div></div>' +
+      '<ul class="chapter-detail">' + day.water.why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>' +
+      '<div class="chapter-grid"><div><h3>What counts</h3><ul><li>Water, sparkling water, milk, tea and coffee all count</li><li>1 cup = 8 oz ≈ 240 mL; a standard water bottle ≈ 2 cups</li><li>Food (fruit, vegetables, soup) adds about 20% more on top</li></ul></div>' +
+      '<div><h3>Signs you\'re on track</h3><ul class="good"><li>Pale-yellow urine</li><li>Rarely thirsty</li></ul><h3>Drink more when</h3><ul class="bad"><li>It\'s hot or you sweat a lot</li><li>You\'re ill with fever, vomiting or diarrhea</li></ul></div></div>' +
+      '<h3>The facts</h3><ol class="facts"><li>The National Academies set adequate total water at 3.7 L a day for men and 2.7 L for women, about 80% of it from drinks. <span class="small">' + bookSources(['water'], idx) + '</span></li>' +
+      '<li>During exercise, drink to replace sweat losses — many people lose 0.5–2 L an hour; avoid losing more than 2% of body weight. <span class="small">' + bookSources(['acsmFluid'], idx) + '</span></li></ol>' +
+      '<p class="no-print"><a class="btn" href="#/member/' + esc(m.custom ? (state.members[0] || {}).id || '' : m.id) + '">Track water on the Today card →</a></p></section>' : '';
+
+    return '<div class="stack book">' + head + '<nav class="book-tiles" aria-label="Chapters">' + tiles + '</nav>' + chapters + water + workoutChapter(m, g, idx) + referenceAppendix(idx) +
+      '<p class="muted small">Amounts are general guidance for healthy people. Health conditions, pregnancy and medicines can change them — the guide and your care team come first.</p></div>';
+  }
+
+  function fitnessOf(m) { return m.custom ? (state.book.custom || {}).fitness || {} : (m.fitness || {}); }
+
+  function workoutHeadline(m, g) {
+    var w = W.plan({ age: g.age, sex: m.sex, conditions: m.conditions, goal: m.goal, fitness: fitnessOf(m), wearable: m.wearable });
+    return w.kind ? (w.kind === 'kids' ? '60 min a day' : 'Active play') : w.splitName;
+  }
+
+  function workoutChapter(m, g, idx) {
+    var f = fitnessOf(m);
+    var w = W.plan({ age: g.age, sex: m.sex, conditions: m.conditions, goal: m.goal, fitness: f, wearable: m.wearable });
+    var id = m.custom ? 'custom' : m.id;
+    var prefs = '';
+    if (!w.kind) {
+      var focusNow = W.FOCUS[f.focus] ? f.focus : (m.goal === 'lose' ? 'fatloss' : m.goal === 'gain' ? 'muscle' : 'general');
+      prefs = '<div class="fit-prefs no-print">' +
+        '<div class="row"><strong>Days a week</strong>' + [2, 3, 4, 5, 6].map(function (n) { return chip('fit-set', n, n, (Number(f.days) || 3) === n, ' data-k="days" data-m="' + esc(id) + '"'); }).join('') + '</div>' +
+        '<div class="row"><strong>Minutes</strong>' + [30, 45, 60, 75].map(function (n) { return chip('fit-set', n, n, (Number(f.minutes) || 45) === n, ' data-k="minutes" data-m="' + esc(id) + '"'); }).join('') + '</div>' +
+        '<div class="row"><strong>Equipment</strong>' + [['none', 'None'], ['home', 'Dumbbells / bands'], ['gym', 'Gym']].map(function (o) { return chip('fit-set', o[0], o[1], (f.equipment || 'home') === o[0], ' data-k="equipment" data-m="' + esc(id) + '"'); }).join('') + '</div>' +
+        '<div class="row"><strong>Experience</strong>' + [['new', 'New'], ['some', '6+ months'], ['experienced', '2+ years']].map(function (o) { return chip('fit-set', o[0], o[1], (f.experience || 'new') === o[0], ' data-k="experience" data-m="' + esc(id) + '"'); }).join('') + '</div>' +
+        '<div class="row"><strong>Focus</strong>' + Object.keys(W.FOCUS).map(function (k) { return chip('fit-set', k, W.FOCUS[k].label, focusNow === k, ' data-k="focus" data-m="' + esc(id) + '"'); }).join('') + '</div></div>';
+    }
+    var week = w.week.length ? '<div class="week-grid">' + w.week.map(function (d) {
+      return '<div class="wk-card wk-' + d.type + '"><div class="wk-top"><strong>' + d.day + '</strong>' + (d.minutes ? '<span class="small muted">' + d.minutes + ' min</span>' : '') + '</div><div class="wk-title">' + esc(d.title) + '</div>' +
+        (d.items.length ? '<ul>' + d.items.map(function (it) { return '<li>' + esc(it.name) + (it.sets ? ' <span class="muted">' + it.sets + '×' + esc(it.reps) + '</span>' : '') + '</li>'; }).join('') + '</ul>' : '') + '</div>';
+    }).join('') + '</div>' : '';
+    return '<section class="card book-chapter" id="ch-workout" style="--c:#c0603a"><div class="chapter-head"><span class="chapter-no">' + (DB.CHAPTERS.length + 2) + '</span><span class="chapter-emoji">🏋️</span><div><h2>Workout split</h2><div class="chapter-amount">' + esc(w.splitName || 'Daily active play') + '</div></div></div>' +
+      '<p>' + esc(w.summary) + (w.focus ? ' Focus: <strong>' + esc(w.focus) + '</strong>.' : '') + '</p>' + prefs + week +
+      (w.ideas ? '<ul>' + w.ideas.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
+      (w.cautions.length ? '<div class="for-you-box"><strong>For ' + esc(m.name) + '</strong>' + w.cautions.map(function (x) { return '<div>⚠️ ' + esc(x) + '</div>'; }).join('') + '</div>' : '') +
+      (w.why.length ? '<h3>Why this split</h3><ul>' + w.why.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
+      '<p class="small muted">Sources: ' + bookSources(w.sources, idx) + '</p></section>';
+  }
+
+  function referenceAppendix(idx) {
+    var rows = DB.referenceTable();
+    var cell = function (x) { return x.vegetables.perDay + ' · ' + x.fruits.perDay + ' · ' + x.carbs.grains + ' · ' + x.meats.proteinFoods + ' · ' + x.dairy.perDay; };
+    var w = function (age, sex) { var d = P.daily(Store.normalizeMember({ sex: sex, activity: 'light' }), age); return d.water && d.water.cups; };
+    return '<section class="card book-chapter" id="ch-appendix"><h2>Appendix: amounts by age &amp; sex</h2><p class="small muted">Typical, moderately active people. Food groups per day: vegetables · fruit (cups) · grains (oz) · protein foods (oz) · dairy (cups).</p>' +
+      '<div class="table-wrap"><table class="ref-table"><thead><tr><th>Age</th><th>Sex</th><th>kcal</th><th>Veg · Fruit · Grains · Protein · Dairy</th><th>Protein g</th><th>Carbs g</th><th>Fat g</th><th>Fiber g</th><th>Water cups</th></tr></thead><tbody>' +
+      rows.map(function (r) {
+        return ['female', 'male'].map(function (sx, j) {
+          var x = r[sx];
+          return '<tr>' + (j === 0 ? '<td rowspan="2"><strong>' + r.ages + '</strong></td>' : '') + '<td>' + (sx === 'female' ? 'F' : 'M') + '</td><td>' + x.kcal + '</td><td>' + cell(x) + '</td><td>' + x.protein.min + (x.protein.max !== x.protein.min ? '–' + x.protein.max : '') + '</td><td>' + x.carbs.min + '–' + x.carbs.max + '</td><td>' + x.fat.min + '–' + x.fat.max + '</td><td>' + x.fiber.grams + '</td><td>' + (w(x.age, sx) || '—') + '</td></tr>';
+        }).join('');
+      }).join('') + '</tbody></table></div><p class="small muted">Sources: ' + bookSources(['dga', 'dri', 'water'], idx) + '</p></section>';
+  }
+
+  // ----------------------------------------------------------- meal planner
+
+  var aiBusy = false, aiError = null, aiKeySession = '';
+  var SLOT_LIST = ['breakfast', 'lunch', 'dinner', 'snack'];
+
+  function plannerPrefs() {
+    var pp = state.planner;
+    if (!pp.slots) pp.slots = ['breakfast', 'lunch', 'dinner'];
+    if (!pp.days) pp.days = 3;
+    if (!pp.cuisine) pp.cuisine = 'any';
+    if (!pp.maxMinutes) pp.maxMinutes = 30;
+    if (!pp.budget) pp.budget = 'normal';
+    if (!pp.cat) pp.cat = 'all';
+    if (!pp.filter) pp.filter = 'all';
+    if (pp.who !== 'family' && !member(pp.who)) pp.who = state.members.length > 1 ? 'family' : (state.members[0] && state.members[0].id);
+    return pp;
+  }
+
+  function plannerEaters(pp) { return pp.who === 'family' ? state.members.slice() : [member(pp.who)].filter(Boolean); }
+
+  // A person's food preferences: household-wide ones, then their own.
+  function prefsOf(m) { return Object.assign({}, state.householdPrefs, m.foodPrefs || {}); }
+  function prefsTarget(pp) { return pp.who === 'family' ? state.householdPrefs : (member(pp.who).foodPrefs = member(pp.who).foodPrefs || {}); }
+
+  function plannerLib() { Foods.setCustom(state.customIngredients); return Planner.library(state.customIngredients); }
+
+  function viewPlanner() {
+    if (!state.members.length) return '<section class="card empty"><h1>Meal planner</h1><p class="muted">Add family members first — the planner works around everyone\'s allergies, health and taste.</p><a class="btn primary" href="#/new">Add a person</a></section>';
+    var pp = plannerPrefs();
+    var eaters = plannerEaters(pp);
+    var lib = plannerLib();
+    var q = (pp.search || '').toLowerCase();
+    var prefs = pp.who === 'family' ? state.householdPrefs : (member(pp.who).foodPrefs || {});
+
+    var who = (state.members.length > 1 ? chip('pl-who', 'family', '👨‍👩‍👧 Whole family', pp.who === 'family') : '') + state.members.map(function (x) { return chip('pl-who', x.id, esc(x.name), pp.who === x.id); }).join('');
+    var settings = '<section class="card"><div class="row"><strong>Who\'s eating?</strong>' + who + '</div>' +
+      '<div class="row"><strong>How many days?</strong>' + [1, 3, 5, 7].map(function (n) { return chip('pl-days', n, n + (n === 1 ? ' day' : ' days'), pp.days === n); }).join('') + '</div>' +
+      '<div class="row"><strong>Meals</strong>' + SLOT_LIST.map(function (s) { return chip('pl-slot', s, SLOT_EMOJI[s] + ' ' + MEAL_LABELS[s], pp.slots.indexOf(s) !== -1); }).join('') + '</div>' +
+      '<div class="row"><strong>Cuisine</strong>' + Object.keys(Planner.CUISINES).map(function (k) { return chip('pl-cuisine', k, Planner.CUISINES[k].label, pp.cuisine === k); }).join('') + '</div>' +
+      '<div class="row"><strong>Cooking time</strong>' + [15, 30, 60].map(function (n) { return chip('pl-time', n, 'Up to ' + n + ' min', pp.maxMinutes === n); }).join('') +
+      '<strong style="margin-left:8px">Budget</strong>' + [['low', 'Tight'], ['normal', 'Normal'], ['high', 'Flexible']].map(function (o) { return chip('pl-budget', o[0], o[1], pp.budget === o[0]); }).join('') + '</div>' +
+      '<label class="chip-check"><input type="checkbox" data-action="pl-only"' + (pp.onlyPantry ? ' checked' : '') + '> Only use what\'s in my kitchen</label>' +
+      '<div style="margin-top:8px"><label>Anything else? (used by Claude)</label><input type="text" id="pl-notes" value="' + esc(pp.notes || '') + '" placeholder="e.g. kid-friendly, leftovers for lunch, no oven, high-protein breakfasts"></div></section>';
+
+    // Ingredient library
+    var fits = {};
+    lib.forEach(function (fd) { fits[fd.id] = foodFit(fd, eaters); });
+    var counts = { have: 0, love: 0, no: 0 };
+    lib.forEach(function (fd) { if (state.pantry[fd.id]) counts.have++; if (prefs[fd.id] === 'love') counts.love++; if (prefs[fd.id] === 'no') counts.no++; });
+    var shown = lib.filter(function (fd) {
+      if (pp.cat !== 'all' && fd.cat !== pp.cat) return false;
+      if (q && fd.name.toLowerCase().indexOf(q) === -1) return false;
+      if (pp.filter === 'have') return !!state.pantry[fd.id];
+      if (pp.filter === 'love') return prefs[fd.id] === 'love';
+      if (pp.filter === 'no') return prefs[fd.id] === 'no' || fits[fd.id].status === 'no';
+      if (pp.filter === 'custom') return fd.custom;
+      return true;
+    });
+    var rows = shown.map(function (fd) {
+      var fit = fits[fd.id], blocked = fit.status === 'no', pref = prefs[fd.id];
+      return '<div class="ing' + (blocked ? ' ing-blocked' : '') + (pref === 'no' ? ' ing-no' : '') + (pref === 'love' ? ' ing-love' : '') + '">' +
+        '<span class="ing-emoji">' + esc(fd.emoji) + '</span><div class="ing-main"><div class="ing-name">' + esc(fd.name) + (fd.custom ? ' <span class="badge">yours</span>' : '') + '</div>' +
+        '<div class="small muted">' + esc(fd.serving) + ' · ' + fd.kcal + ' kcal · P' + fd.protein + ' C' + fd.carbs + ' F' + fd.fat + ' Fib' + fd.fiber + '</div>' +
+        (blocked ? '<div class="small fit-no-text">✕ ' + esc(fitReason(fit)) + '</div>' : '') + '</div>' +
+        '<div class="ing-actions">' +
+        '<button class="ing-btn' + (state.pantry[fd.id] ? ' on' : '') + '" data-action="ing-have" data-id="' + esc(fd.id) + '" title="In my kitchen" aria-pressed="' + !!state.pantry[fd.id] + '">🧺</button>' +
+        '<button class="ing-btn' + (pref === 'love' ? ' on' : '') + '" data-action="ing-love" data-id="' + esc(fd.id) + '" title="Love it — use more" aria-pressed="' + (pref === 'love') + '"' + (blocked ? ' disabled' : '') + '>❤️</button>' +
+        '<button class="ing-btn' + (pref === 'no' ? ' on' : '') + '" data-action="ing-no" data-id="' + esc(fd.id) + '" title="Never use" aria-pressed="' + (pref === 'no') + '">🚫</button>' +
+        (fd.custom ? '<button class="ing-btn" data-action="ing-del" data-id="' + esc(fd.id) + '" title="Delete this ingredient">🗑️</button>' : '') + '</div></div>';
+    }).join('');
+    var catTabs = [{ id: 'all', label: 'All', emoji: '🍽️' }].concat(Foods.CATEGORIES).map(function (cdef) { return chip('pl-cat', cdef.id, cdef.emoji + ' ' + esc(cdef.label), pp.cat === cdef.id); }).join('');
+    var filters = [['all', 'Everything'], ['have', '🧺 In my kitchen (' + counts.have + ')'], ['love', '❤️ Loved (' + counts.love + ')'], ['no', '🚫 Ruled out (' + counts.no + ')'], ['custom', '✏️ Added by you (' + state.customIngredients.length + ')']]
+      .map(function (o) { return chip('pl-filter', o[0], o[1], pp.filter === o[0]); }).join('');
+    var tagOpts = ['milk', 'egg', 'wheat', 'gluten', 'soy', 'peanut', 'treenut', 'fish', 'shellfish', 'sesame', 'meat', 'pork', 'poultry', 'alcohol', 'high-sodium', 'added-sugar', 'refined-carb', 'high-satfat', 'high-potassium'];
+    var addForm = '<details class="add-ing"' + (pp.addOpen ? ' open' : '') + '><summary>+ Add your own ingredient</summary><form id="ing-form" class="fields">' +
+      '<div><label>Name *</label><input type="text" name="name" required placeholder="e.g. Kimchi"></div>' +
+      '<div><label>Group</label><select name="cat">' + Foods.CATEGORIES.map(function (cdef) { return opt(cdef.id, cdef.label, 'fiber'); }).join('') + '</select></div>' +
+      '<div><label>Emoji</label><input type="text" name="emoji" maxlength="4" placeholder="🥫"></div>' +
+      '<div><label>Serving</label><input type="text" name="serving" placeholder="½ cup"></div>' +
+      ['kcal', 'protein', 'carbs', 'fat', 'fiber'].map(function (k) { return '<div><label>' + (k === 'kcal' ? 'Calories' : k.charAt(0).toUpperCase() + k.slice(1) + ' (g)') + '</label><input type="number" min="0" step="any" name="' + k + '"></div>'; }).join('') +
+      '<div class="span-all"><label>Contains (so allergies and health rules apply)</label><div class="pills">' + tagOpts.map(function (t) { return '<label class="pill"><input type="checkbox" name="tags" value="' + t + '"><span>' + esc(tagLabel(t)) + '</span></label>'; }).join('') + '</div></div>' +
+      '<div class="span-all row" style="justify-content:flex-end"><button class="btn primary" type="submit">Add ingredient</button></div></form></details>';
+    var library = '<section class="card"><div class="spread"><h2>Ingredients</h2><span class="muted small">' + esc(pp.who === 'family' ? '❤️ / 🚫 apply to the whole family' : '❤️ / 🚫 are ' + member(pp.who).name + '\'s') + ' · 🧺 is the shared kitchen</span></div>' +
+      '<div class="row">' + catTabs + '</div><div class="row"><input type="text" id="ing-search" placeholder="Search ingredients…" value="' + esc(pp.search || '') + '" style="max-width:240px">' + filters + '</div>' +
+      addForm + '<div class="ing-list">' + (rows || '<p class="muted">Nothing here yet.</p>') + '</div></section>';
+
+    // Generate + AI
+    var hasKey = !!(aiKeySession || readKey());
+    var gen = '<section class="card plan-go"><h2>Make the plan</h2><div class="row">' +
+      '<button class="btn primary" data-action="pl-smart">⚡ Smart plan (instant, offline)</button>' +
+      '<button class="btn ai-btn" data-action="pl-ai"' + (aiBusy ? ' disabled' : '') + '>' + (aiBusy ? '✨ Claude is planning…' : '✨ Plan with Claude (recipes &amp; steps)') + '</button></div>' +
+      '<details class="ai-key"' + (hasKey ? '' : ' open') + '><summary>' + (hasKey ? '🔑 Claude API key saved' : '🔑 Add your Claude API key to use ✨') + '</summary>' +
+      '<p class="small muted">Claude needs your own key from console.anthropic.com (billed to your account, usually a few cents a plan). The app sends first names, ages, allergies, health focus (e.g. "lower LDL"), the ingredient list and these settings to Anthropic — never blood-test numbers or documents. The key stays in this browser.</p>' +
+      '<div class="row"><input type="password" id="ai-key" placeholder="sk-ant-…" autocomplete="off" style="max-width:320px"><label class="chip-check"><input type="checkbox" id="ai-remember"> Remember on this device</label>' +
+      '<button class="btn small" data-action="ai-key-save">Save key</button>' + (hasKey ? '<button class="btn small ghost" data-action="ai-key-clear">Forget key</button>' : '') + '</div></details>' +
+      (aiError ? '<div class="alert warn"><div>' + esc(aiError) + '</div></div>' : '') + '</section>';
+
+    return '<div class="spread" style="margin-bottom:8px"><div><h1>Meal planner</h1><div class="muted">Pick your ingredients and preferences — get a plan that fits everyone\'s allergies, health and taste.</div></div><a class="btn" href="#/week">My week →</a></div>' +
+      '<div class="planner">' + '<div class="planner-left">' + settings + library + '</div><div class="planner-right">' + gen + planResult(lib, eaters) + '</div></div>';
+  }
+
+  function readKey() { try { return localStorage.getItem('fhg-claude-key') || ''; } catch (e) { return ''; } }
+
+  function planResult(lib, eaters) {
+    var r = state.lastPlan;
+    if (!r) return '<section class="card muted">Your plan appears here.</section>';
+    var html = '<section class="card plan-out"><div class="spread"><h2>' + (r.kind === 'ai' ? '✨ Claude\'s plan' : '⚡ Smart plan') + '</h2><span class="small muted">' + esc(r.createdAt.slice(0, 16).replace('T', ' ')) + ' · ' + esc(r.whoName) + '</span></div>';
+    if (r.kind === 'smart') {
+      html += r.days.map(function (d) {
+        return '<div class="pl-day"><div class="spread"><h3>Day ' + (d.day + 1) + '</h3><button class="btn small" data-action="pl-save-day" data-id="' + d.day + '">Save to my week</button></div>' +
+          d.meals.map(function (mm) {
+            return '<div class="pl-meal"><div><strong>' + SLOT_EMOJI[mm.slot] + ' ' + esc(mm.name) + '</strong><div class="small muted">' + mm.totals.kcal + ' kcal · ' + mm.totals.protein + ' g protein · ' + mm.totals.fiber + ' g fiber</div>' +
+              '<div class="small">' + mm.items.map(function (it) { var fd = Planner.byId(lib, it.foodId); return fd ? esc(fd.emoji + ' ' + fd.name) + (it.qty !== 1 ? ' ×' + it.qty : '') : ''; }).join(' · ') + '</div>' +
+              '<div class="small muted">Season with ' + esc(mm.flavor) + '.</div></div></div>';
+          }).join('') + '</div>';
+      }).join('');
+    } else {
+      if (r.flags && r.flags.length) html += '<div class="alert danger"><div><strong>Check before cooking:</strong> ' + esc(r.flags.map(function (f) { return f.day + ' — ' + f.meal + ': ' + f.text; }).join(' · ')) + '</div></div>';
+      html += (r.plan.days || []).map(function (d) {
+        return '<div class="pl-day"><h3>' + esc(d.day) + '</h3>' + (d.meals || []).map(function (mm) {
+          return '<details class="pl-meal"' + (mm.flags && mm.flags.length ? ' open' : '') + '><summary><strong>' + (SLOT_EMOJI[mm.slot] || '') + ' ' + esc(mm.name) + '</strong> <span class="small muted">' + mm.minutes + ' min · ' + mm.kcal + ' kcal · ' + mm.protein_g + ' g protein</span>' +
+            (mm.flags && mm.flags.length ? ' <span class="badge danger">check</span>' : '') + '</summary>' +
+            '<p class="small">' + esc(mm.why) + '</p><div class="chapter-grid"><div><h4>Ingredients</h4><ul>' + (mm.ingredients || []).map(function (i) { return '<li>' + esc(i.amount + ' ' + i.item) + '</li>'; }).join('') + '</ul></div>' +
+            '<div><h4>Steps</h4><ol>' + (mm.steps || []).map(function (st) { return '<li>' + esc(st) + '</li>'; }).join('') + '</ol></div></div>' +
+            (mm.flags && mm.flags.length ? '<p class="small fit-no-text">⚠️ ' + esc(mm.flags.join(' · ')) + '</p>' : '') + '</details>';
+        }).join('') + '</div>';
+      }).join('') + (r.plan.notes ? '<p class="small muted">' + esc(r.plan.notes) + '</p>' : '');
+    }
+    var shop = r.kind === 'smart' ? r.shopping.map(function (s) { return '<li class="' + (s.have ? 'have' : '') + '">' + esc(s.name) + ' <span class="muted small">' + s.servings + ' × ' + esc(s.serving) + (s.have ? ' · in kitchen' : '') + '</span></li>'; }).join('') :
+      (r.plan.shopping || []).map(function (s) { return '<li>' + esc(s.item) + ' <span class="muted small">' + esc(s.amount) + '</span></li>'; }).join('');
+    html += '<h3>🛒 Shopping list</h3><ul class="shop-list">' + shop + '</ul><div class="row"><button class="btn small" data-action="pl-copy-shop">Copy list</button><button class="btn small ghost" data-action="pl-clear">Clear plan</button></div></section>';
+    return html;
+  }
+
+  function slotTargets(eaters) {
+    var adults = eaters.filter(function (m) { var a = ageOf(m); return a === null || a >= 18; });
+    var base = adults.length ? adults : eaters;
+    var needs = base.map(dayNeeds);
+    var kcal = needs.reduce(function (s, n) { return s + n.kcal; }, 0) / needs.length;
+    var protein = needs.reduce(function (s, n) { return s + n.protein; }, 0) / needs.length;
+    return function (slot) { return Foods.mealTargets(kcal, protein, slot); };
+  }
+
+  function runSmartPlan() {
+    var pp = plannerPrefs(), eaters = plannerEaters(pp), lib = plannerLib();
+    var picks = personalPicks(eaters).byFood;
+    var res = Planner.smartPlan({
+      lib: lib, pantry: state.pantry, slots: SLOT_LIST.filter(function (s) { return pp.slots.indexOf(s) !== -1; }), days: pp.days, cuisine: pp.cuisine, onlyPantry: pp.onlyPantry,
+      seed: Date.now(), targets: slotTargets(eaters),
+      eaters: eaters.map(function (m) {
+        return { name: m.name, prefs: prefsOf(m), pick: function (id) { return picks[id] ? picks[id].score : 0; }, blocked: function (fd) { return foodFit(fd, [m]).status === 'no'; } };
+      })
+    });
+    if (!res.allowedCount) { toast('No ingredients left to plan with — loosen the filters'); return; }
+    state.lastPlan = { kind: 'smart', days: res.days, shopping: res.shopping, who: pp.who, whoName: pp.who === 'family' ? 'Whole family' : member(pp.who).name, createdAt: new Date().toISOString() };
+    persist('Plan ready');
+    keepScroll();
+  }
+
+  function aiBrief() {
+    var pp = plannerPrefs(), eaters = plannerEaters(pp), lib = plannerLib();
+    var allowed = lib.filter(function (fd) {
+      if (pp.onlyPantry && !state.pantry[fd.id]) return false;
+      return eaters.every(function (m) { return foodFit(fd, [m]).status !== 'no' && prefsOf(m)[fd.id] !== 'no'; });
+    });
+    return {
+      days: pp.days, slots: SLOT_LIST.filter(function (s) { return pp.slots.indexOf(s) !== -1; }), cuisine: pp.cuisine, maxMinutes: pp.maxMinutes,
+      budget: { low: 'tight — cheap staples', normal: 'normal', high: 'flexible' }[pp.budget], notes: (document.getElementById('pl-notes') || {}).value || pp.notes || '', onlyListed: !!pp.onlyPantry,
+      ingredients: allowed.map(function (fd) { return fd.name; }), pantry: allowed.filter(function (fd) { return state.pantry[fd.id]; }).map(function (fd) { return fd.name; }),
+      eaters: eaters.map(function (m) {
+        var g = E.buildGuide(m, today()), pr = prefsOf(m);
+        var block = Object.keys(g.rules.block).map(tagLabel).concat(m.avoidFoods || []).concat((m.otherAllergies || []).map(function (o) { return o.name; }));
+        return { name: m.name, age: g.age, sex: m.sex, kcal: g.targets.kcal, protein: dayNeeds(m).protein, mustAvoid: block, goEasy: Object.keys(g.rules.caution).map(tagLabel),
+          focus: g.focus.map(function (r) { return r.title; }), loves: lib.filter(function (fd) { return pr[fd.id] === 'love'; }).map(function (fd) { return fd.name; }).concat(m.favoriteFoods || []),
+          never: lib.filter(function (fd) { return pr[fd.id] === 'no'; }).map(function (fd) { return fd.name; }).concat(m.dislikes || []) };
+      })
+    };
+  }
+
+  function runAiPlan() {
+    var key = aiKeySession || readKey();
+    if (!key) { aiError = 'Add your Claude API key first (below).'; keepScroll(); return; }
+    var pp = plannerPrefs(), eaters = plannerEaters(pp);
+    var brief = aiBrief();
+    aiBusy = true; aiError = null; keepScroll();
+    Planner.aiPlan(key, brief).then(function (plan) {
+      var checkers = eaters.map(function (m) { return { name: m.name, allergenWords: Planner.allergenWords(Object.keys(E.profileRules(m, today()).block)) }; });
+      var flags = Planner.checkPlan(plan, checkers);
+      state.lastPlan = { kind: 'ai', plan: plan, flags: flags, who: pp.who, whoName: pp.who === 'family' ? 'Whole family' : member(pp.who).name, createdAt: new Date().toISOString() };
+      persist(flags.length ? 'Plan ready — please check the flagged meals' : 'Claude\'s plan is ready');
+    }).catch(function (e) {
+      var msg = e && e.message || String(e);
+      if (e && (e.status === 401 || /authentication|invalid x-api-key/i.test(msg))) msg = 'That API key was rejected. Check it on console.anthropic.com.';
+      else if (e && e.status === 429) msg = 'Claude is busy or your account hit its rate limit — try again in a minute.';
+      else if (/Failed to fetch|NetworkError|import|module/i.test(msg)) msg = 'Couldn\'t reach Claude — this needs an internet connection. The ⚡ Smart plan works offline.';
+      aiError = msg;
+    }).then(function () { aiBusy = false; if (/#\/planner/.test(location.hash)) keepScroll(); });
+  }
+
   // ----------------------------------------------------------------- events
 
   document.addEventListener('click', function (ev) {
+    var jump = ev.target.closest('[data-jump]');
+    if (jump) { ev.preventDefault(); var target = document.getElementById(jump.getAttribute('data-jump')); if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     var el = ev.target.closest('[data-action]');
     if (!el || el.tagName === 'INPUT' || el.tagName === 'SELECT') return;
     var action = el.getAttribute('data-action');
     var id = el.getAttribute('data-id');
 
     if (action === 'print') window.print();
+    else if (action === 'book-who') { state.book.who = id; persist(); go('#/book/' + id); }
+    else if (action === 'fit-set') {
+      var fm = el.getAttribute('data-m'), fk = el.getAttribute('data-k');
+      var fobj;
+      if (fm === 'custom') { state.book.custom = state.book.custom || {}; fobj = state.book.custom.fitness = state.book.custom.fitness || {}; }
+      else { var fmm = member(fm); fobj = fmm.fitness = fmm.fitness || {}; }
+      fobj[fk] = /^\d+$/.test(id) ? Number(id) : id;
+      persist();
+      keepScroll();
+    } else if (action.indexOf('pl-') === 0 || action.indexOf('ing-') === 0 || action.indexOf('ai-key') === 0) {
+      plannerAction(action, id, el);
+    }
     else if (action === 'load-demo') {
       if (state.members.length && !confirm('Replace your current family with the demo family?')) return;
       state = Store.migrate(JSON.parse(JSON.stringify(window.FHDemo)));
@@ -5957,6 +7209,11 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
     if (el.type === 'file' && el.getAttribute('data-action') === 'report-file') { if (el.files[0]) readReport(el.closest('.reader-box'), el.files[0]); el.value = ''; return; }
     if (el.id === 'steps-today') return;
     if (el.getAttribute('data-action') === 'b-safe') { builder().safeOnly = el.checked; persist(); keepScroll(); return; }
+    if (el.getAttribute('data-action') === 'pl-only') { plannerPrefs().onlyPantry = el.checked; persist(); keepScroll(); return; }
+    if (el.id === 'pl-notes') { plannerPrefs().notes = el.value; persist(); return; }
+    if (el.id === 'ai-key' || el.id === 'ai-remember') return;
+    if (el.closest && el.closest('#ing-form')) return;
+    if (el.form && el.form.id === 'book-form') return;
     // Record/link boxes and the lab form keep their own state until their button is pressed.
     if (el.closest && el.closest('.link-box, .upload-box, .lab-entry, .reader-box')) return;
     var checkForm = el.form && el.form.id === 'check-form' ? el.form : null;
@@ -6040,6 +7297,29 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
       route();
       return;
     }
+    if (form.id === 'book-form') {
+      var bfe = form.elements, bcu = state.book.custom = state.book.custom || {};
+      bcu.age = bfe.age.value === '' ? 35 : Math.max(2, Math.min(110, Number(bfe.age.value)));
+      bcu.sex = bfe.sex.value; bcu.activity = bfe.activity.value; bcu.goal = bfe.goal.value;
+      if (bfe.height.value) bcu.heightCm = us() ? Math.round(Number(bfe.height.value) * 2.54) : Number(bfe.height.value);
+      if (bfe.weight.value) bcu.weightKg = us() ? lbToKg(Number(bfe.weight.value)) : Number(bfe.weight.value);
+      persist('Amounts updated');
+      keepScroll();
+      return;
+    }
+    if (form.id === 'ing-form') {
+      var inf = form.elements;
+      try {
+        var ci = Planner.makeCustom({ name: inf.name.value, cat: inf.cat.value, emoji: inf.emoji.value.trim(), serving: inf.serving.value, kcal: inf.kcal.value, protein: inf.protein.value,
+          carbs: inf.carbs.value, fat: inf.fat.value, fiber: inf.fiber.value, tags: Array.prototype.slice.call(form.querySelectorAll('input[name="tags"]:checked')).map(function (i) { return i.value; }) });
+        state.customIngredients.push(ci);
+        Foods.setCustom(state.customIngredients);
+        plannerPrefs().addOpen = false;
+        persist('Added ' + ci.name);
+        keepScroll();
+      } catch (e) { toast(e.message); }
+      return;
+    }
     if (form.id === 'rating-form') {
       var rfE = form.elements, fid = form.getAttribute('data-id');
       state.ratings = state.ratings || {};
@@ -6121,6 +7401,14 @@ input.prefilled { border-color: var(--brand); background: var(--brand-soft); }
   });
 
   document.addEventListener('input', function (ev) {
+    if (ev.target.id === 'ing-search') {
+      plannerPrefs().search = ev.target.value;
+      var ipos = ev.target.selectionStart;
+      keepScroll();
+      var ib = document.getElementById('ing-search');
+      if (ib) { ib.focus(); ib.setSelectionRange(ipos, ipos); }
+      return;
+    }
     if (ev.target.id !== 'food-search') return;
     builder().search = ev.target.value;
     var pos = ev.target.selectionStart;

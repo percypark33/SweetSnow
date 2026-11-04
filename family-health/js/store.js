@@ -11,8 +11,10 @@
   var VERSION = 1;
 
   function empty() {
-    return { version: VERSION, settings: { units: 'us' }, members: [], customRecipes: [], plan: { overrides: {}, eaters: null, seed: '' }, meals: {}, ratings: {}, location: null, builder: {}, savedAt: null };
+    return { version: VERSION, settings: { units: 'us' }, members: [], customRecipes: [], plan: { overrides: {}, eaters: null, seed: '' }, meals: {}, ratings: {}, location: null, builder: {}, pantry: {}, householdPrefs: {}, customIngredients: [], planner: {}, lastPlan: null, book: {}, savedAt: null };
   }
+
+  function obj(v) { return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; }
 
   function migrate(data) {
     var base = empty();
@@ -27,6 +29,9 @@
       ratings: (data.ratings && typeof data.ratings === 'object') ? data.ratings : {},
       location: data.location || null,
       builder: (data.builder && typeof data.builder === 'object') ? data.builder : {},
+      pantry: obj(data.pantry), householdPrefs: obj(data.householdPrefs), planner: obj(data.planner), book: obj(data.book),
+      customIngredients: Array.isArray(data.customIngredients) ? data.customIngredients : [],
+      lastPlan: data.lastPlan && typeof data.lastPlan === 'object' ? data.lastPlan : null,
       savedAt: data.savedAt || null
     };
     if (!out.plan.overrides || typeof out.plan.overrides !== 'object') out.plan.overrides = {};
@@ -47,6 +52,8 @@
       otherConditions: arr(m && m.otherConditions), medications: arr(m && m.medications), dietRules: arr(m && m.dietRules),
       dislikes: arr(m && m.dislikes), avoidFoods: arr(m && m.avoidFoods), limitFoods: arr(m && m.limitFoods),
       favoriteFoods: arr(m && m.favoriteFoods), log: arr(m && m.log), labs: arr(m && m.labs), links: arr(m && m.links), daily: (m && m.daily && typeof m.daily === 'object' && !Array.isArray(m.daily)) ? m.daily : {},
+      foodPrefs: (m && m.foodPrefs && typeof m.foodPrefs === 'object' && !Array.isArray(m.foodPrefs)) ? m.foodPrefs : {},
+      fitness: (m && m.fitness && typeof m.fitness === 'object' && !Array.isArray(m.fitness)) ? m.fitness : {},
       answers: (m && m.answers && typeof m.answers === 'object' && !Array.isArray(m.answers)) ? m.answers : {}
     });
   }
