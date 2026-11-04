@@ -506,6 +506,33 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
 @media (max-width: 900px) { .planner { grid-template-columns: minmax(0, 1fr); } .shop-list { columns: 1; } }
 @media (max-width: 720px) { .tabs { flex-wrap: nowrap; overflow-x: auto; } .tabs a { white-space: nowrap; } .book-cover h1 { font-size: 1.5rem; } }
 @media print { .book-chapter { break-inside: avoid-page; border-left-width: 3px; } .book-tiles { display: none; } }
+
+/* ---------- nutrition score ---------- */
+.nscore { display: grid; gap: 8px; justify-items: center; }
+.score-people { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.sp { border: 1px solid var(--line); background: var(--surface); color: var(--text); border-radius: 999px; padding: 3px 9px; font: inherit; font-size: .78rem; cursor: pointer; }
+.sp.on { border-color: var(--brand); background: var(--brand-soft); }
+.sp b { margin-left: 2px; }
+.nbars { display: grid; gap: 4px; margin: 10px 0; }
+.nbars-head { margin-top: 6px; }
+.nbar { display: grid; grid-template-columns: 92px 1fr 96px; gap: 8px; align-items: center; font-size: .8rem; }
+.nbar.key .nbar-label { font-weight: 700; }
+.nbar-track { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.nbar-track span { display: block; height: 100%; border-radius: 99px; }
+.nb-good span { background: var(--ok); } .nb-mid span { background: #d9a92b; } .nb-low span { background: #d9735a; } .nb-over span { background: var(--danger); }
+.nbar-val { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.gaps { display: grid; gap: 6px; margin: 8px 0; }
+.gap { font-size: .82rem; background: var(--surface-2); border-radius: 10px; padding: 8px 10px; display: grid; gap: 6px; }
+.gap.over { background: var(--danger-soft); color: var(--danger); }
+.gap-adds { display: flex; flex-wrap: wrap; gap: 4px; }
+.small-chip { font-size: .75rem; padding: 3px 8px; }
+.small-chip small { color: var(--muted); }
+.macro-box { margin: 6px 0; }
+.macro-box summary { cursor: pointer; font-size: .85rem; color: var(--brand); font-weight: 600; }
+.grade { font-weight: 800; color: #fff !important; }
+.grade.g-A { background: #2f7d5b !important; } .grade.g-B { background: #6a9a3a !important; } .grade.g-C { background: #c79a1f !important; } .grade.g-D { background: #d0743c !important; } .grade.g-E { background: #b3261e !important; } .grade.g-\? { background: var(--muted) !important; }
+.sp.g-A b { color: #2f7d5b; } .sp.g-B b { color: #6a9a3a; } .sp.g-C b { color: #b08516; } .sp.g-D b, .sp.g-E b { color: #c0603a; }
+.day-scores { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; font-weight: 400; }
 </style>
 </head>
 <body>
@@ -1641,6 +1668,85 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
     f('olives', 'fat', '🫒', 'Olives', '10 large', 50, 0, 3, 5, 1, ['high-sodium'])
   ];
 
+
+  /*
+   * Vitamins, minerals and limits per listed serving, rounded from USDA
+   * FoodData Central (SR Legacy / Foundation): [vitamin A mcg RAE, vitamin C mg,
+   * vitamin E mg, calcium mg, iron mg, magnesium mg, potassium mg, sodium mg,
+   * saturated fat g, added sugar g, vitamin D mcg, vitamin B12 mcg, folate mcg DFE].
+   * Brands vary (tofu calcium, cottage cheese and shrimp sodium especially).
+   */
+  var MICRO_KEYS = ['vitA', 'vitC', 'vitE', 'calcium', 'iron', 'magnesium', 'potassium', 'sodium', 'satFat', 'addedSugar', 'vitD', 'b12', 'folate'];
+  var MICRO = {
+    chicken: [10, 0, 0.3, 17, 1.2, 33, 290, 84, 1.1, 0, 0.1, 0.4, 5],
+    turkey: [0, 0, 0.1, 10, 0.8, 33, 280, 70, 0.3, 0, 0.1, 1.0, 7],
+    salmon: [60, 4, 1.5, 17, 0.4, 34, 430, 70, 3.0, 0, 15, 3.2, 30],
+    cod: [16, 1, 0.9, 16, 0.6, 47, 280, 88, 0.2, 0, 1.3, 1.2, 9],
+    tuna: [15, 0, 0.3, 9, 1.3, 23, 200, 210, 0.2, 0, 1.0, 2.1, 3],
+    sardines: [30, 0, 1.9, 350, 2.7, 36, 365, 280, 1.4, 0, 4.4, 8.2, 9],
+    shrimp: [80, 0, 1.5, 80, 0.6, 40, 190, 330, 0.1, 0, 0.1, 1.7, 21],
+    eggs: [160, 0, 1.0, 56, 1.8, 12, 140, 140, 3.1, 0, 2.0, 0.9, 47],
+    beef: [0, 0, 0.5, 15, 2.9, 25, 390, 85, 3.3, 0, 0.1, 2.8, 10],
+    steak: [0, 0, 0.4, 25, 2.3, 32, 430, 70, 3.2, 0, 0.1, 1.9, 10],
+    pork: [0, 0.5, 0.2, 7, 1.2, 33, 470, 65, 1.3, 0, 0.6, 0.6, 0],
+    tofu: [10, 0.3, 0, 350, 3.4, 73, 300, 15, 1.6, 0, 0, 0, 37],
+    tempeh: [0, 0, 0, 92, 2.2, 67, 340, 7, 1.8, 0, 0, 0.1, 20],
+    lentils: [2, 3, 0.2, 38, 6.6, 71, 730, 4, 0.1, 0, 0, 0, 358],
+    edamame: [23, 9.5, 1.1, 98, 3.5, 99, 680, 9, 0.9, 0, 0, 0, 482],
+    'greek-yogurt': [2, 0, 0, 270, 0.2, 27, 340, 90, 0.3, 0, 0, 1.9, 17],
+    cottage: [25, 0, 0, 140, 0.3, 18, 190, 920, 1.5, 0, 0, 1.6, 27],
+    'brown-rice': [0, 0, 0.1, 6, 0.8, 79, 155, 8, 0.4, 0, 0, 0, 10],
+    'white-rice': [0, 0, 0.1, 16, 1.9, 19, 55, 2, 0.1, 0, 0, 0, 92],
+    quinoa: [2, 0, 1.2, 31, 2.8, 118, 320, 13, 0.5, 0, 0, 0, 78],
+    oats: [0, 0, 0.2, 21, 1.7, 55, 145, 2, 0.5, 0, 0, 0, 13],
+    'ww-pasta': [0, 0, 0.4, 21, 2.1, 60, 135, 6, 0.2, 0, 0, 0, 10],
+    pasta: [0, 0, 0.1, 10, 1.8, 25, 60, 1, 0.3, 0, 0, 0, 100],
+    'ww-bread': [0, 0, 0.2, 80, 1.6, 50, 160, 270, 0.4, 3, 0, 0, 30],
+    'sweet-potato': [1100, 22, 0.8, 43, 0.8, 31, 540, 41, 0, 0, 0, 0, 7],
+    potato: [2, 17, 0.1, 26, 1.9, 50, 925, 17, 0, 0, 0, 0, 48],
+    'corn-tortilla': [0, 0, 0.1, 40, 0.6, 34, 90, 20, 0.1, 0, 0, 0, 5],
+    'rice-noodles': [0, 0, 0, 7, 0.2, 5, 7, 33, 0, 0, 0, 0, 5],
+    barley: [0, 0, 0, 17, 2.1, 35, 145, 5, 0.1, 0, 0, 0, 25],
+    broccoli: [120, 100, 2.3, 62, 1.0, 33, 460, 64, 0.1, 0, 0, 0, 168],
+    spinach: [940, 18, 3.7, 245, 6.4, 157, 840, 126, 0.1, 0, 0, 0, 263],
+    salad: [220, 10, 0.4, 25, 0.6, 8, 150, 15, 0, 0, 0, 0, 60],
+    carrots: [1070, 7.6, 0.9, 42, 0.4, 15, 410, 88, 0, 0, 0, 0, 24],
+    peppers: [230, 190, 2.4, 10, 0.6, 18, 310, 6, 0, 0, 0, 0, 68],
+    'green-beans': [44, 12, 0.6, 55, 0.8, 23, 180, 1, 0, 0, 0, 0, 41],
+    brussels: [60, 97, 0.7, 56, 1.9, 31, 495, 32, 0.1, 0, 0, 0, 94],
+    cauliflower: [1, 55, 0.1, 20, 0.4, 11, 175, 19, 0.1, 0, 0, 0, 55],
+    zucchini: [100, 23, 0.2, 32, 0.6, 34, 460, 5, 0, 0, 0, 0, 50],
+    tomatoes: [75, 25, 1.0, 18, 0.5, 20, 430, 9, 0, 0, 0, 0, 27],
+    mushrooms: [0, 6, 0, 9, 2.7, 19, 555, 3, 0.1, 0, 0.3, 0, 28],
+    'black-beans': [0, 0, 0.1, 46, 3.6, 120, 610, 2, 0.2, 0, 0, 0, 256],
+    chickpeas: [2, 2, 0.6, 80, 4.7, 79, 475, 11, 0.4, 0, 0, 0, 282],
+    berries: [5, 40, 1.0, 25, 0.5, 20, 160, 1, 0, 0, 0, 0, 30],
+    apple: [5, 8, 0.3, 11, 0.2, 9, 195, 2, 0, 0, 0, 0, 5],
+    banana: [4, 10, 0.1, 6, 0.3, 32, 420, 1, 0.1, 0, 0, 0, 24],
+    orange: [15, 70, 0.2, 52, 0.1, 13, 235, 0, 0, 0, 0, 0, 40],
+    kiwi: [6, 128, 2.0, 47, 0.4, 23, 430, 4, 0, 0, 0, 0, 35],
+    grapes: [5, 5, 0.3, 15, 0.5, 11, 290, 3, 0.1, 0, 0, 0, 3],
+    chia: [0, 0, 0.1, 150, 1.9, 80, 100, 4, 0.8, 0, 0, 0, 12],
+    avocado: [7, 10, 2.1, 12, 0.6, 29, 485, 7, 2.1, 0, 0, 0, 81],
+    'olive-oil': [0, 0, 1.9, 0, 0.1, 0, 0, 0, 1.9, 0, 0, 0, 0],
+    almonds: [0, 0, 7.3, 76, 1.1, 77, 210, 0, 1.1, 0, 0, 0, 14],
+    walnuts: [0, 0.4, 0.2, 28, 0.8, 45, 125, 1, 1.7, 0, 0, 0, 28],
+    'peanut-butter': [0, 0, 2.9, 17, 0.6, 54, 180, 140, 3.3, 2, 0, 0, 24],
+    sunbutter: [0, 0, 7.4, 20, 1.3, 100, 190, 100, 2.0, 2, 0, 0, 76],
+    'pumpkin-seeds': [0, 0.5, 0.6, 13, 2.3, 156, 230, 5, 2.4, 0, 0, 0, 16],
+    flax: [0, 0, 0.1, 36, 0.8, 55, 115, 4, 0.5, 0, 0, 0, 12],
+    hummus: [1, 0, 0.5, 24, 1.5, 44, 140, 230, 0.9, 0, 0, 0, 50],
+    tahini: [0, 0, 0, 64, 1.3, 14, 62, 17, 1.1, 0, 0, 0, 15],
+    cheddar: [75, 0, 0.2, 200, 0.2, 8, 21, 180, 5.3, 0, 0.3, 0.3, 5],
+    butter: [97, 0, 0.3, 3, 0, 0, 3, 90, 7.3, 0, 0.2, 0, 0],
+    olives: [9, 0, 0.7, 39, 1.5, 2, 4, 330, 0.6, 0, 0, 0, 0]
+  };
+  FOODS.forEach(function (fd) {
+    var row = MICRO[fd.id];
+    MICRO_KEYS.forEach(function (k, i) { fd[k] = row ? row[i] : 0; });
+    fd.hasMicros = !!row;
+  });
+
   // Share of the day's needs each meal should cover.
   var MEAL_SHARE = { breakfast: 0.25, lunch: 0.30, dinner: 0.35, snack: 0.10 };
 
@@ -1725,10 +1831,209 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
     return items;
   }
 
-  var Foods = { CATEGORIES: CATEGORIES, FOODS: FOODS, MEAL_SHARE: MEAL_SHARE, byId: byId, setCustom: setCustom, totals: totals, mealTargets: mealTargets, score: score, surprise: surprise };
+  var Foods = { CATEGORIES: CATEGORIES, FOODS: FOODS, MICRO_KEYS: MICRO_KEYS, MEAL_SHARE: MEAL_SHARE, byId: byId, setCustom: setCustom, totals: totals, mealTargets: mealTargets, score: score, surprise: surprise };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = Foods;
   else root.FHFoods = Foods;
+})(this);
+</script>
+  <script>
+/*
+ * Family Health Guide — nutrition scores: a meal's nutrients against one
+ * person's needs.
+ *
+ *  - Needs: Dietary Reference Intakes (RDA or AI) by age, sex, pregnancy and
+ *    breastfeeding; protein and fiber from the person's calorie and protein
+ *    targets; limits from the Dietary Guidelines (sodium, saturated fat,
+ *    added sugar). Blood tests and conditions raise the weight of the
+ *    nutrients that matter for that person (low ferritin → iron) or tighten
+ *    a limit (high LDL → saturated fat under 6%).
+ *  - Meal score (0–100): how much of the meal's share of each daily need the
+ *    plate covers (each capped at 100%), weighted, minus points for going
+ *    over a limit or far over the meal's calories.
+ *  - Food grade (A–E): a Nutrient Rich Foods (NRF) style index — the nine
+ *    NRF9.3 nutrients plus folate, vitamin D and B12, minus the three limits,
+ *    per 100 kcal — using the person's own needs in place of label Daily
+ *    Values.
+ */
+(function (root) {
+  'use strict';
+
+  var node = typeof module !== 'undefined' && module.exports;
+  var Foods = node ? require('./foods.js') : root.FHFoods;
+
+  // NRF9.3's nine nutrients to encourage, plus three that blood tests often flag.
+  var NUTRIENTS = [
+    { id: 'protein', label: 'Protein', unit: 'g', nrf: true },
+    { id: 'fiber', label: 'Fiber', unit: 'g', nrf: true },
+    { id: 'vitA', label: 'Vitamin A', unit: 'mcg', nrf: true },
+    { id: 'vitC', label: 'Vitamin C', unit: 'mg', nrf: true },
+    { id: 'vitE', label: 'Vitamin E', unit: 'mg', nrf: true },
+    { id: 'calcium', label: 'Calcium', unit: 'mg', nrf: true },
+    { id: 'iron', label: 'Iron', unit: 'mg', nrf: true },
+    { id: 'magnesium', label: 'Magnesium', unit: 'mg', nrf: true },
+    { id: 'potassium', label: 'Potassium', unit: 'mg', nrf: true },
+    { id: 'folate', label: 'Folate', unit: 'mcg', nrf: false },
+    { id: 'vitD', label: 'Vitamin D', unit: 'mcg', nrf: false },
+    { id: 'b12', label: 'Vitamin B12', unit: 'mcg', nrf: false }
+  ];
+  var LIMITS = [
+    { id: 'sodium', label: 'Sodium', unit: 'mg' },
+    { id: 'satFat', label: 'Saturated fat', unit: 'g' },
+    { id: 'addedSugar', label: 'Added sugar', unit: 'g' }
+  ];
+
+  var SOURCES = {
+    dri: { title: 'Dietary Reference Intakes: the essential guide to nutrient requirements', org: 'National Academies', year: 2006, url: 'https://nap.nationalacademies.org/catalog/11537' },
+    driNaK: { title: 'Dietary Reference Intakes for sodium and potassium', org: 'National Academies', year: 2019, url: 'https://nap.nationalacademies.org/catalog/25353' },
+    driCaD: { title: 'Dietary Reference Intakes for calcium and vitamin D', org: 'National Academies', year: 2011, url: 'https://nap.nationalacademies.org/catalog/13050' },
+    nrf: { title: 'The Nutrient Rich Foods index helps to identify healthy, affordable foods (Drewnowski, Am J Clin Nutr) — NRF9.3', org: 'Validated nutrient-density index', year: 2010, url: 'https://pubmed.ncbi.nlm.nih.gov/20181811/' },
+    usda: { title: 'FoodData Central', org: 'USDA Agricultural Research Service', year: 2024, url: 'https://fdc.nal.usda.gov/' },
+    dga: { title: 'Dietary Guidelines for Americans 2020–2025 (limits for sodium, saturated fat and added sugar)', org: 'USDA & HHS', year: 2020, url: 'https://www.dietaryguidelines.gov/' }
+  };
+
+  function band(age, kid1, kid4, kid9, teen, adult) {
+    if (age < 4) return kid1; if (age < 9) return kid4; if (age < 14) return kid9; if (age < 19) return teen; return adult;
+  }
+
+  /*
+   * p: { age, sex, kcal, protein (g/day), conditions, smoker, focus: [rule ids] }
+   * Returns { amounts: { id: daily amount }, limits: { id: daily max }, weights: { id: w }, why: { id: text } }.
+   */
+  function needs(p) {
+    var age = p.age === null || p.age === undefined ? 35 : p.age;
+    var m = p.sex === 'male';
+    var conds = p.conditions || [];
+    var preg = conds.indexOf('pregnancy') !== -1, bf = conds.indexOf('breastfeeding') !== -1;
+    var kcal = p.kcal || 2000;
+    var focus = p.focus || [];
+    var on = function (id) { return focus.indexOf(id) !== -1; };
+    var a = {
+      protein: p.protein || Math.round(kcal * 0.15 / 4),
+      fiber: Math.round(kcal / 1000 * 14),
+      vitA: preg ? 770 : bf ? 1300 : band(age, 300, 400, 600, m ? 900 : 700, m ? 900 : 700),
+      vitC: (preg ? 85 : bf ? 120 : band(age, 15, 25, 45, m ? 75 : 65, m ? 90 : 75)) + (p.smoker ? 35 : 0),
+      vitE: bf ? 19 : band(age, 6, 7, 11, 15, 15),
+      calcium: age < 4 ? 700 : age < 9 ? 1000 : age < 19 ? 1300 : age < 51 ? 1000 : age < 71 ? (m ? 1000 : 1200) : 1200,
+      iron: preg ? 27 : age < 4 ? 7 : age < 9 ? 10 : age < 14 ? 8 : age < 19 ? (m ? 11 : 15) : age < 51 ? (m ? 8 : 18) : 8,
+      magnesium: preg ? 350 : age < 4 ? 80 : age < 9 ? 130 : age < 14 ? 240 : age < 19 ? (m ? 410 : 360) : age < 31 ? (m ? 400 : 310) : (m ? 420 : 320),
+      potassium: preg ? 2900 : bf ? 2800 : age < 4 ? 2000 : age < 9 ? 2300 : age < 14 ? (m ? 2500 : 2300) : age < 19 ? (m ? 3000 : 2300) : (m ? 3400 : 2600),
+      folate: preg ? 600 : bf ? 500 : band(age, 150, 200, 300, 400, 400),
+      vitD: age >= 71 ? 20 : 15,
+      b12: preg ? 2.6 : bf ? 2.8 : band(age, 0.9, 1.2, 1.8, 2.4, 2.4)
+    };
+    if (p.diet === 'vegetarian' || p.diet === 'vegan') a.iron = Math.round(a.iron * 1.8);
+    var hasHtn = conds.indexOf('hypertension') !== -1 || conds.indexOf('heart') !== -1 || conds.indexOf('ckd') !== -1 || on('bp') || on('kidney');
+    var lim = {
+      sodium: hasHtn ? 1500 : age < 4 ? 1200 : age < 9 ? 1500 : age < 14 ? 1800 : 2300,
+      satFat: Math.round(kcal * (on('ldl') || conds.indexOf('cholesterol') !== -1 ? 0.06 : 0.10) / 9),
+      addedSugar: age < 19 ? 25 : Math.round(kcal * (on('tg') || on('sugar') ? 0.06 : 0.10) / 4)
+    };
+    var w = {}, why = {};
+    NUTRIENTS.forEach(function (n) { w[n.id] = 1; });
+    w.protein = 1.5; w.fiber = 1.5;
+    function boost(id, text) { w[id] = 2.5; why[id] = text; }
+    if (on('iron')) { boost('iron', 'Your blood test shows low iron'); boost('vitC', 'Vitamin C helps you absorb iron'); }
+    if (on('vitd')) { boost('vitD', 'Your vitamin D is low'); boost('calcium', 'Bones need calcium with vitamin D'); }
+    if (on('b12')) boost('b12', 'Your B12 is low');
+    if (on('ldl') || on('sugar') || on('tg')) boost('fiber', 'Fiber lowers LDL and steadies blood sugar');
+    if (on('bp')) boost('potassium', 'Potassium lowers blood pressure');
+    if (preg) { boost('folate', 'Pregnancy needs extra folate'); boost('iron', 'Pregnancy needs extra iron'); }
+    if (age >= 65 || on('protein')) boost('protein', 'Protein protects muscle');
+    if (on('potassium-high') || conds.indexOf('ckd') !== -1) { w.potassium = 0; why.potassium = 'Your care team limits potassium — not scored'; }
+    return { amounts: a, limits: lim, weights: w, why: why, kcal: kcal };
+  }
+
+  function nutrientsOf(items, lib) {
+    var t = { kcal: 0 };
+    NUTRIENTS.concat(LIMITS).forEach(function (n) { t[n.id] = 0; });
+    var unknown = 0;
+    (items || []).forEach(function (it) {
+      var fd = (lib ? lib(it.foodId) : Foods.byId(it.foodId));
+      if (!fd) return;
+      var q = it.qty || 1;
+      t.kcal += fd.kcal * q;
+      NUTRIENTS.concat(LIMITS).forEach(function (n) { t[n.id] += (fd[n.id] || 0) * q; });
+      if (fd.custom && !fd.hasMicros) unknown++;
+    });
+    t.unknown = unknown;
+    return t;
+  }
+
+  /*
+   * Scores a meal for one person. share: the meal's part of the day
+   * (breakfast 0.25, lunch 0.30, dinner 0.35, snack 0.10).
+   */
+  function mealScore(items, need, share, lib) {
+    var t = nutrientsOf(items, lib);
+    if (!items || !items.length) return { score: 0, rows: [], limits: [], gaps: [], over: [], totals: t, grade: '–' };
+    var rows = NUTRIENTS.map(function (n) {
+      var target = need.amounts[n.id] * share;
+      var pct = target ? t[n.id] / target : 0;
+      return { id: n.id, label: n.label, unit: n.unit, amount: round(t[n.id]), target: round(target), pct: pct, weight: need.weights[n.id], why: need.why[n.id] || '' };
+    });
+    var wsum = 0, got = 0;
+    rows.forEach(function (r) { if (!r.weight) return; wsum += r.weight; got += r.weight * Math.min(1, r.pct); });
+    var score = wsum ? got / wsum * 100 : 0;
+    var lims = LIMITS.map(function (n) {
+      var max = need.limits[n.id] * share;
+      var pct = max ? t[n.id] / max : 0;
+      return { id: n.id, label: n.label, unit: n.unit, amount: round(t[n.id]), max: round(max), pct: pct };
+    });
+    // Each limit costs up to 15 points: nothing at or under the meal's share, all 15 at double it.
+    lims.forEach(function (l) { if (l.pct > 1) score -= Math.min(15, (l.pct - 1) * 15); });
+    var energyTarget = (need.kcal || 2000) * share;
+    if (t.kcal > energyTarget * 1.3) score -= Math.min(10, (t.kcal / energyTarget - 1.3) * 20);
+    score = Math.max(0, Math.min(100, Math.round(score)));
+    var gaps = rows.filter(function (r) { return r.weight && r.pct < 0.5; }).sort(function (a, b) { return (b.weight * (1 - b.pct)) - (a.weight * (1 - a.pct)); });
+    return { score: score, grade: score >= 85 ? 'A' : score >= 70 ? 'B' : score >= 55 ? 'C' : score >= 40 ? 'D' : 'E', rows: rows, limits: lims,
+      gaps: gaps, over: lims.filter(function (l) { return l.pct > 1; }), totals: t, unknown: t.unknown };
+  }
+
+  /*
+   * NRF9.3 for one food, per 100 kcal: sum of % of the person's need for nine
+   * nutrients (each capped at 100%), minus % of the three daily limits.
+   */
+  function nrf(fd, need) {
+    if (!fd.kcal) return null;
+    var per = 100 / fd.kcal;
+    var good = 0, bad = 0;
+    NUTRIENTS.forEach(function (n) {
+      if (!need.weights[n.id] && n.id === 'potassium') return;
+      good += Math.min(100, (fd[n.id] || 0) * per / need.amounts[n.id] * 100);
+    });
+    LIMITS.forEach(function (n) { bad += (fd[n.id] || 0) * per / need.limits[n.id] * 100; });
+    return Math.round(good - bad);
+  }
+
+  function foodGrade(fd, need) {
+    if (fd.custom && !fd.hasMicros) return { grade: '?', nrf: null };
+    var v = nrf(fd, need);
+    if (v === null) return { grade: '–', nrf: null };
+    return { nrf: v, grade: v >= 160 ? 'A' : v >= 90 ? 'B' : v >= 45 ? 'C' : v >= 15 ? 'D' : 'E' };
+  }
+
+  // Foods that best fill a gap, per calorie, from the allowed list.
+  function fillers(gap, allowed, need, n) {
+    return allowed.filter(function (fd) { return fd.kcal > 0 && (fd[gap.id] || 0) / need.amounts[gap.id] >= 0.1; })
+      // Rank by % of the need per serving, discounted gently for calories.
+      .map(function (fd) { var pct = fd[gap.id] / need.amounts[gap.id] * 100; return { food: fd, rank: pct / Math.sqrt(fd.kcal), pct: Math.round(pct) }; })
+      .sort(function (a, b) { return b.rank - a.rank; }).slice(0, n || 3);
+  }
+
+  // A day of meals: totals against full daily needs.
+  function dayScore(meals, need, lib) {
+    var all = [];
+    meals.forEach(function (m) { all = all.concat(m.items || []); });
+    return mealScore(all, need, 1, lib);
+  }
+
+  function round(v) { return v >= 100 ? Math.round(v) : v >= 10 ? Math.round(v * 10) / 10 : Math.round(v * 100) / 100; }
+
+  var Nutrition = { NUTRIENTS: NUTRIENTS, LIMITS: LIMITS, SOURCES: SOURCES, needs: needs, nutrientsOf: nutrientsOf, mealScore: mealScore, nrf: nrf, foodGrade: foodGrade, fillers: fillers, dayScore: dayScore };
+
+  if (node) module.exports = Nutrition;
+  else root.FHNutrition = Nutrition;
 })(this);
 </script>
   <script>
@@ -4313,10 +4618,16 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
       w /= 1 + (used[fd.id] || 0) * 1.5; // variety
       return w;
     }
-    function pick(cat, slot, not) {
+    function pick(cat, slot, not, items) {
       var pool = allowed.filter(function (fd) { return fd.cat === cat && (!not || not.indexOf(fd.id) === -1); });
       if (!pool.length) return null;
-      var ws = pool.map(function (fd) { return weight(fd, slot); });
+      var base = opts.scoreFn ? opts.scoreFn(items, slot) : 0;
+      var ws = pool.map(function (fd) {
+        var w = weight(fd, slot);
+        // With a nutrition scorer, strongly favour foods that raise the meal's score.
+        if (opts.scoreFn) w *= Math.pow(Math.max(0.05, 1 + (opts.scoreFn(items.concat([{ foodId: fd.id, qty: 1 }]), slot) - base) / 15), 3);
+        return w;
+      });
       var total = ws.reduce(function (s, x) { return s + x; }, 0), r = rand() * total;
       for (var i = 0; i < pool.length; i++) { r -= ws[i]; if (r <= 0) return pool[i]; }
       return pool[pool.length - 1];
@@ -4328,7 +4639,7 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
         var items = [];
         var cats = slot === 'snack' ? ['fiber', 'fat'] : slot === 'breakfast' ? ['protein', 'carbs', 'fiber'] : ['protein', 'carbs', 'fiber', 'fiber', 'fat'];
         cats.forEach(function (cat) {
-          var fd = pick(cat, slot, items.map(function (x) { return x.foodId; }));
+          var fd = pick(cat, slot, items.map(function (x) { return x.foodId; }), items);
           if (fd) { items.push({ foodId: fd.id, qty: 1 }); used[fd.id] = (used[fd.id] || 0) + 1; }
         });
         // Size to the meal: more protein if short, halve the fat if over calories.
@@ -4339,7 +4650,7 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
         if (carb && tot.kcal > t.kcal * 1.25) { carb.qty = 0.5; tot = totals(lib, items); }
         var fatItem = items.filter(function (x) { return byId(lib, x.foodId).cat === 'fat'; })[0];
         if (fatItem && tot.kcal > t.kcal * 1.25) { fatItem.qty = 0.5; tot = totals(lib, items); }
-        return { slot: slot, items: items, name: mealName(lib, items, slot, opts.cuisine), totals: tot, flavor: (CUISINES[opts.cuisine] || CUISINES.any).flavor };
+        return { slot: slot, items: items, name: mealName(lib, items, slot, opts.cuisine), totals: tot, flavor: (CUISINES[opts.cuisine] || CUISINES.any).flavor, score: opts.scoreFn ? Math.round(opts.scoreFn(items, slot)) : null };
       });
       days.push({ day: d, meals: meals });
     }
@@ -5032,6 +5343,7 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
   var DB = window.FHDietBook;
   var W = window.FHWorkout;
   var Planner = window.FHPlanner;
+  var N = window.FHNutrition;
 
   var state = Store.load();
   Foods.setCustom(state.customIngredients);
@@ -5577,6 +5889,62 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
       '<div class="bar bar-' + status + '"><span style="width:' + pct + '%"></span></div></div>';
   }
 
+  // ------------------------------------------------- nutrition scoring
+
+  // One person's daily nutrient needs, from their profile, targets and blood work.
+  function needsFor(m) {
+    var g = E.buildGuide(m, today()), dn = dayNeeds(m);
+    return N.needs({ age: g.age, sex: m.sex, kcal: dn.kcal, protein: dn.protein, conditions: m.conditions, diet: m.diet,
+      smoker: /^(cig|vape|other)$/.test((m.answers || {}).tobacco || ''), focus: g.focus.map(function (r) { return r.id; }) });
+  }
+
+  /*
+   * Scores a plate for each eater. Family meals are an adult portion, so a
+   * child's score uses their share of it (their calories ÷ the adults').
+   */
+  function plateScores(items, eaters, slot, family) {
+    var share = Foods.MEAL_SHARE[slot] || 0.3;
+    var adults = eaters.filter(function (m) { var a = ageOf(m); return a === null || a >= 18; });
+    var adultKcal = adults.length ? adults.reduce(function (s2, m) { return s2 + dayNeeds(m).kcal; }, 0) / adults.length : null;
+    return eaters.map(function (m) {
+      var ratio = family && adultKcal ? Math.min(1, dayNeeds(m).kcal / adultKcal) : 1;
+      var portion = ratio < 1 ? items.map(function (it) { return { foodId: it.foodId, qty: it.qty * ratio }; }) : items;
+      return { member: m, ratio: ratio, s: N.mealScore(portion, needsFor(m), share) };
+    });
+  }
+
+  function pctBar(r, limit) {
+    var pct = Math.round(r.pct * 100);
+    var cls = limit ? (r.pct > 1 ? 'over' : 'good') : (r.pct >= 0.8 ? 'good' : r.pct >= 0.4 ? 'mid' : 'low');
+    return '<div class="nbar' + (r.weight > 1 ? ' key' : '') + '" title="' + esc(r.why || '') + '"><span class="nbar-label">' + esc(r.label) + (r.weight > 1 && r.why ? ' ★' : '') + '</span>' +
+      '<span class="nbar-track nb-' + cls + '"><span style="width:' + Math.min(100, pct) + '%"></span></span><span class="nbar-val">' + (limit ? r.amount + '/' + r.max + ' ' + r.unit : pct + '%') + '</span></div>';
+  }
+
+  function nutritionPanel(b, eaters, fits) {
+    var scores = plateScores(b.items, eaters, b.meal, b.who === 'family');
+    if (!b.detail || !scores.some(function (x) { return x.member.id === b.detail; })) b.detail = scores[0].member.id;
+    var cur = scores.filter(function (x) { return x.member.id === b.detail; })[0];
+    var s0 = cur.s;
+    var avg = Math.round(scores.reduce(function (s2, x) { return s2 + x.s.score; }, 0) / scores.length);
+    var people = scores.length > 1 ? '<div class="score-people">' + scores.map(function (x) {
+      return '<button class="sp' + (x.member.id === b.detail ? ' on' : '') + ' g-' + x.s.grade + '" data-action="b-detail" data-id="' + esc(x.member.id) + '">' + esc(x.member.name) + ' <b>' + x.s.score + '</b></button>';
+    }).join('') + '</div>' : '';
+    var allowed = Foods.FOODS.filter(function (fd) { return fits[fd.id].status === 'ok'; });
+    var need = needsFor(cur.member);
+    var gaps = b.items.length ? s0.gaps.slice(0, 3).map(function (g) {
+      var f = N.fillers(g, allowed, need, 3);
+      return f.length ? '<div class="gap"><span>Low on <strong>' + esc(/^Vitamin/.test(g.label) ? g.label.replace('Vitamin', 'vitamin') : g.label.toLowerCase()) + '</strong> (' + Math.round(g.pct * 100) + '%)' + (g.why ? ' — ' + esc(g.why.toLowerCase()) : '') + '</span><span class="gap-adds">' +
+        f.map(function (x) { return '<button class="chip small-chip" data-action="b-add" data-id="' + x.food.id + '">+ ' + x.food.emoji + ' ' + esc(x.food.name.split(/[,(]/)[0]) + ' <small>' + x.pct + '%</small></button>'; }).join('') + '</span></div>' : '';
+    }).join('') : '';
+    var over = s0.over.map(function (l) { return '<div class="gap over">Over on <strong>' + esc(l.label.toLowerCase()) + '</strong>: ' + l.amount + ' of ' + l.max + ' ' + l.unit + ' for this meal</div>'; }).join('');
+    return { avg: avg, html: '<div class="nscore"><div class="score' + (avg >= 85 ? ' great' : '') + '"><div class="score-num">' + (b.items.length ? avg : '–') + '</div><div class="score-label">nutrition score' + (scores.length > 1 ? ' (avg)' : '') + '</div></div>' + people + '</div>' +
+      (b.items.length ? '<div class="nbars"><div class="nbars-head small muted">' + esc(cur.member.name) + '\'s needs for this ' + MEAL_LABELS[b.meal].toLowerCase() + (cur.ratio < 1 ? ' (child portion ×' + Math.round(cur.ratio * 100) / 100 + ')' : '') + ' — % covered</div>' +
+        s0.rows.filter(function (r) { return r.weight; }).map(function (r) { return pctBar(r, false); }).join('') +
+        '<div class="nbars-head small muted">Limits</div>' + s0.limits.map(function (l) { return pctBar(l, true); }).join('') + '</div>' +
+        (over || gaps ? '<div class="gaps">' + over + gaps + '</div>' : '') +
+        (s0.unknown ? '<p class="small muted">' + s0.unknown + ' of your own ingredients have no vitamin data, so they only count for calories and macros.</p>' : '') : '') };
+  }
+
   function picksStrip(b, eaters, picks, fits) {
     var names = eaters.length > 1 ? 'your family' : esc(eaters[0].name);
     if (!picks.rules.length) {
@@ -5610,6 +5978,8 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
     // Star only the strongest matches so the stars mean something.
     var topScore = Math.max.apply(null, Foods.FOODS.map(function (fd) { return fits[fd.id].status === 'no' ? 0 : picks.byFood[fd.id].score; }));
     var starAt = Math.max(1, Math.ceil(topScore * 0.5));
+    var nut = nutritionPanel(b, eaters, fits);
+    var gradeNeed = needsFor(member(b.detail) || eaters[0]);
 
     var whoChips = (state.members.length > 1 ? ['family'] : []).concat(state.members.map(function (m) { return m.id; })).map(function (id) {
       var label = id === 'family' ? '👨‍👩‍👧 Whole family' : esc(member(id).name);
@@ -5643,7 +6013,7 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
           (good ? '<span class="pick-star" title="' + esc(pk.reasons.join('\n')) + '">★</span>' : '') +
           '<button class="food-add" data-action="b-add" data-id="' + fd.id + '"' + (fit.status === 'no' ? ' disabled' : '') + ' title="' + esc(fit.status === 'no' ? 'Not for ' + reason : 'Add to plate') + '">' +
           '<span class="food-emoji">' + fd.emoji + '</span><span class="food-name">' + esc(fd.name) + '</span><span class="food-serving">' + esc(fd.serving) + ' · ' + fd.kcal + ' kcal</span>' +
-          '<span class="macros"><span>P ' + fd.protein + '</span><span>C ' + fd.carbs + '</span><span>F ' + fd.fat + '</span><span>Fib ' + fd.fiber + '</span></span>' +
+          '<span class="macros"><span class="grade g-' + N.foodGrade(fd, gradeNeed).grade + '" title="Nutrient grade for ' + esc((member(b.detail) || eaters[0]).name) + '">' + N.foodGrade(fd, gradeNeed).grade + '</span><span>P ' + fd.protein + '</span><span>C ' + fd.carbs + '</span><span>F ' + fd.fat + '</span><span>Fib ' + fd.fiber + '</span></span>' +
           (onPlate ? '<span class="on-plate">×' + onPlate.qty + ' on plate</span>' : '') + '</button>' +
           (good ? '<div class="pick-note" title="' + esc(pk.reasons.join('\n')) + '">' + esc(pk.reasons[0]) + (pk.reasons.length > 1 ? ' +' + (pk.reasons.length - 1) : '') + '</div>' : '') +
           (fit.status !== 'ok' ? '<div class="fit-note">' + (fit.status === 'no' ? '✕ ' : '! ') + esc(reason) + '</div>' : '') +
@@ -5664,21 +6034,22 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
     var days = E.DAYS.map(function (d, i) { return opt(i, d, b.day); }).join('');
     var plate = '<aside class="plate-panel card" id="plate-panel">' +
       '<div class="plate-head"><h2>Your plate</h2><span class="muted small">' + esc(b.who === 'family' ? 'one adult portion — kids take smaller servings' : (member(b.who) || {}).name) + ' · ' + MEAL_LABELS[b.meal].toLowerCase() + '</span></div>' +
-      '<div class="plate-wrap">' + plateSvg(t) + '<div class="score' + (sc.score >= 85 ? ' great' : '') + '"><div class="score-num">' + sc.score + '</div><div class="score-label">balance score</div></div></div>' +
+      '<div class="plate-wrap">' + plateSvg(t) + nut.html.split('<div class="nbars">')[0] + '</div>' +
       '<div class="legend plate-legend">' + Foods.CATEGORIES.map(function (c) { return '<span><i style="background:' + c.color + '"></i>' + c.label + '</span>'; }).join('') + '</div>' +
-      (sc.badges.length ? '<div class="badges-row">' + sc.badges.map(function (x) { return '<span class="badge ok">' + esc(x) + '</span>'; }).join('') + '</div>' : '') +
+      (b.items.length && (nut.avg >= 85 || sc.badges.length > 1) ? '<div class="badges-row">' + (nut.avg >= 85 ? '<span class="badge ok">⭐ Nutrient-packed</span>' : '') + sc.badges.filter(function (x) { return !/Balanced/.test(x); }).map(function (x) { return '<span class="badge ok">' + esc(x) + '</span>'; }).join('') + '</div>' : '') +
       (b.items.length ? '<ul class="plate-items">' + plateItems + '</ul>' : '<p class="muted small">Tap foods to add them. Aim for one from each group — half the plate from 🥦 fiber.</p>') +
+      (nut.html.indexOf('<div class="nbars">') !== -1 ? '<div class="nbars">' + nut.html.split('<div class="nbars">')[1] : '') +
+      '<details class="macro-box"' + (b.items.length ? '' : ' open') + '><summary>Calories &amp; macros</summary>' +
       bar('Calories', t.kcal, Math.round(target.kcal * 0.85), Math.round(target.kcal * 1.15), 'kcal') +
       bar('Protein', t.protein, target.protein, null, 'g') +
       bar('Carbs', t.carbs, target.carbsMin, target.carbsMax, 'g') +
       bar('Fat', t.fat, target.fatMin, target.fatMax, 'g') +
-      bar('Fiber', t.fiber, target.fiber, null, 'g') +
-      (sc.parts.length ? '<p class="small muted">' + esc(sc.parts.join(' · ')) + '</p>' : '') +
+      bar('Fiber', t.fiber, target.fiber, null, 'g') + '</details>' +
       '<div class="plate-actions"><input type="text" id="meal-name" placeholder="Name it (optional)" value="' + esc(b.name || '') + '">' +
       '<select id="meal-day">' + days + '</select>' +
       '<button class="btn primary" data-action="b-save"' + (b.items.length ? '' : ' disabled') + '>Save to my week</button></div>' +
       '<div class="row"><button class="btn small" data-action="b-surprise">🎲 Surprise me</button><button class="btn small ghost" data-action="b-clear">Clear plate</button></div>' +
-      '<p class="hint">Targets: protein from body weight (0.8 g/kg), carbs 45–65% and fat 20–35% of calories, fiber 14 g per 1,000 kcal — Dietary Guidelines for Americans.</p>' +
+      '<p class="hint">Score = how much of this meal\'s share of each person\'s daily needs the plate covers (Dietary Reference Intakes for their age, sex and pregnancy; ★ = weighted up by their blood work), minus points for too much sodium, saturated fat or added sugar. Nutrients from USDA FoodData Central.</p>' +
       '</aside>';
 
     return '<div class="spread" style="margin-bottom:8px"><div><h1>Build a meal</h1><div class="muted">Pick what you feel like eating — the plate keeps score.</div></div>' +
@@ -5691,7 +6062,7 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
       '<label class="chip-check"><input type="checkbox" data-action="b-safe"' + (b.safeOnly ? ' checked' : '') + '> Hide foods someone can\'t eat</label></div>' +
       picksStrip(b, eaters, picks, fits) +
       grids + '</div>' + plate + '</div>' +
-      '<button class="mini-plate" data-action="b-scroll">🍽️ ' + b.items.length + ' item' + (b.items.length === 1 ? '' : 's') + ' · ' + t.kcal + ' kcal · score <strong>' + sc.score + '</strong> <span>View plate ↑</span></button>' +
+      '<button class="mini-plate" data-action="b-scroll">🍽️ ' + b.items.length + ' item' + (b.items.length === 1 ? '' : 's') + ' · ' + t.kcal + ' kcal · score <strong>' + (b.items.length ? nut.avg : '–') + '</strong> <span>View plate ↑</span></button>' +
       '<div id="confetti" aria-hidden="true"></div>';
   }
 
@@ -5701,7 +6072,18 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
     var b = builder();
     var dayHtml = E.DAYS.map(function (d, i) {
       var dm = meals.filter(function (m) { return m.day === i; }).sort(function (a, c) { return SLOTS.indexOf(a.slot) - SLOTS.indexOf(c.slot); });
-      return '<div class="week-day"><div class="day">' + d + '</div><div class="week-meals">' + (dm.length ? dm.map(function (m) {
+      // Each person's score for the whole day: every saved meal they eat, against full daily needs.
+      var dayChips = dm.length ? state.members.map(function (p) {
+        var mine = dm.filter(function (x) { return x.who === 'family' || x.who === p.id; });
+        if (!mine.length) return '';
+        // Scored against the part of the day these meals cover, so one saved dinner isn't judged as a whole day.
+        var slotsIn = {};
+        mine.forEach(function (x) { slotsIn[x.slot] = true; });
+        var dayShare = Math.min(1, Object.keys(slotsIn).reduce(function (s2, k) { return s2 + (Foods.MEAL_SHARE[k] || 0.3); }, 0));
+        var sc5 = N.mealScore(mine.reduce(function (all, x) { return all.concat(x.items); }, []), needsFor(p), dayShare);
+        return '<span class="sp g-' + sc5.grade + '" title="' + esc(p.name + ': ' + (sc5.gaps.length ? 'low on ' + sc5.gaps.slice(0, 3).map(function (gp) { return gp.label; }).join(', ') : 'needs covered')) + '">' + esc(p.name) + ' <b>' + sc5.score + '</b></span>';
+      }).join('') : '';
+      return '<div class="week-day"><div class="day">' + d + (dayChips ? '<div class="day-scores">' + dayChips + '</div>' : '') + '</div><div class="week-meals">' + (dm.length ? dm.map(function (m) {
         var tt = Foods.totals(m.items);
         var who = m.who === 'family' ? 'Family' : (member(m.who) || {}).name || '—';
         return '<div class="week-meal"><div class="label">' + SLOT_EMOJI[m.slot] + ' ' + MEAL_LABELS[m.slot] + ' · ' + esc(who) + '</div>' +
@@ -6498,9 +6880,11 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
     var b = builder();
     var id = el.getAttribute('data-id');
     if (action === 'b-scroll') { var pp = document.querySelector('.plate-panel'); if (pp) pp.scrollIntoView({ behavior: 'smooth' }); return; }
-    var before = Foods.score(b.items, builderTargets(b, eatersFor(b))).score;
+    var scoreNow = function () { var sc2 = plateScores(b.items, eatersFor(b), b.meal, b.who === 'family'); return b.items.length ? sc2.reduce(function (s2, x) { return s2 + x.s.score; }, 0) / sc2.length : 0; };
+    var before = scoreNow();
     if (action === 'b-for') { b.who = id; persist(); go('#/plan'); return; }
-    if (action === 'b-who') b.who = id;
+    if (action === 'b-detail') b.detail = id;
+    else if (action === 'b-who') b.who = id;
     else if (action === 'b-meal') b.meal = id;
     else if (action === 'b-cat') b.cat = id;
     else if (action === 'b-add') {
@@ -6522,7 +6906,19 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
         var best = inCat.filter(function (fd) { return pp[fd.id].score > 0; });
         (best.length ? best : inCat).forEach(function (fd) { allowed.push(fd.id); });
       });
-      b.items = Foods.surprise(allowed);
+      // Build the plate one group at a time, picking among the 3 foods that raise
+      // everyone's nutrition score most, so it's varied but always strong.
+      var items = [];
+      ['protein', 'carbs', 'fiber', 'fiber', 'fat'].forEach(function (cat) {
+        var cands = allowed.map(Foods.byId).filter(function (fd) { return fd.cat === cat && !items.some(function (x) { return x.foodId === fd.id; }); });
+        var ranked = cands.map(function (fd) {
+          var trial = items.concat([{ foodId: fd.id, qty: 1 }]);
+          var sc3 = plateScores(trial, eaters, b.meal, b.who === 'family');
+          return { fd: fd, v: sc3.reduce(function (s2, x) { return s2 + x.s.score; }, 0) / sc3.length };
+        }).sort(function (x, y) { return y.v - x.v; }).slice(0, 3);
+        if (ranked.length) items.push({ foodId: ranked[Math.floor(Math.random() * ranked.length)].fd.id, qty: 1 });
+      });
+      b.items = items;
       b.name = '';
     } else if (action === 'b-save') {
       var nameEl = document.getElementById('meal-name'), dayEl = document.getElementById('meal-day');
@@ -6562,7 +6958,7 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
     if (dayNow) b.day = Number(dayNow.value);
     persist();
     keepScroll();
-    var after = Foods.score(b.items, builderTargets(b, eatersFor(b))).score;
+    var after = scoreNow();
     if (after >= 85 && before < 85) confetti();
   }
 
@@ -6758,7 +7154,7 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
 
   function bookSources(ids, idx) {
     return ids.map(function (id) {
-      var s = DB.SOURCES[id] || W.SOURCES[id] || P.SOURCES[id] || Q.SOURCES[id];
+      var s = DB.SOURCES[id] || N.SOURCES[id] || W.SOURCES[id] || P.SOURCES[id] || Q.SOURCES[id];
       if (!s) return '';
       if (idx.indexOf(id) === -1) idx.push(id);
       return '<a href="' + esc(s.url) + '" target="_blank" rel="noopener" title="' + esc(s.title) + '">[' + (idx.indexOf(id) + 1) + '] ' + esc(s.org) + ' ' + s.year + '</a>';
@@ -6824,7 +7220,19 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
       '<li>During exercise, drink to replace sweat losses — many people lose 0.5–2 L an hour; avoid losing more than 2% of body weight. <span class="small">' + bookSources(['acsmFluid'], idx) + '</span></li></ol>' +
       '<p class="no-print"><a class="btn" href="#/member/' + esc(m.custom ? (state.members[0] || {}).id || '' : m.id) + '">Track water on the Today card →</a></p></section>' : '';
 
-    return '<div class="stack book">' + head + '<nav class="book-tiles" aria-label="Chapters">' + tiles + '</nav>' + chapters + water + workoutChapter(m, g, idx) + referenceAppendix(idx) +
+    var need = m.custom ? N.needs({ age: g.age, sex: m.sex, kcal: a.kcal, protein: a.protein.min, conditions: [], diet: m.diet }) : needsFor(m);
+    var allowedFoods = Foods.FOODS.filter(function (fd) { return m.custom || !Object.keys(g.rules.block).some(function (tg) { return fd.tags.indexOf(tg) !== -1; }); });
+    var micro = '<section class="card book-chapter" id="ch-micro" style="--c:#8a4fb0"><div class="chapter-head"><span class="chapter-emoji">🧪</span><div><h2>Vitamins, minerals &amp; limits</h2><div class="chapter-amount">What every meal is scored against</div></div></div>' +
+      '<p class="small muted">Daily needs for ' + esc(m.name) + ' (Dietary Reference Intakes for age, sex' + (m.conditions && m.conditions.length ? ' and conditions' : '') + '). The meal builder scores each plate by how much of its share of these it covers. ★ = weighted up by blood work or health.</p>' +
+      '<div class="table-wrap"><table><thead><tr><th>Nutrient</th><th>Per day</th><th>Richest foods for you</th></tr></thead><tbody>' +
+      N.NUTRIENTS.map(function (n) {
+        var f = N.fillers({ id: n.id }, allowedFoods, need, 3);
+        return '<tr><td>' + esc(n.label) + (need.weights[n.id] > 1.5 ? ' ★' : '') + (need.why[n.id] ? '<div class="small muted">' + esc(need.why[n.id]) + '</div>' : '') + '</td><td>' + (need.weights[n.id] ? need.amounts[n.id] + ' ' + n.unit : '—') + '</td><td class="small">' + f.map(function (x) { return x.food.emoji + ' ' + esc(x.food.name.split(/[,(]/)[0]) + ' (' + x.pct + '%)'; }).join(' · ') + '</td></tr>';
+      }).join('') +
+      N.LIMITS.map(function (n) { return '<tr><td>' + esc(n.label) + ' <span class="badge">limit</span></td><td>under ' + need.limits[n.id] + ' ' + n.unit + '</td><td class="small muted">Highest in processed, salty and sweet foods</td></tr>'; }).join('') +
+      '</tbody></table></div><p class="small muted">Sources: ' + bookSources(['dri', 'driNaK', 'driCaD', 'usda', 'nrf'], idx) + '</p></section>';
+
+    return '<div class="stack book">' + head + '<nav class="book-tiles" aria-label="Chapters">' + tiles + '</nav>' + chapters + micro + water + workoutChapter(m, g, idx) + referenceAppendix(idx) +
       '<p class="muted small">Amounts are general guidance for healthy people. Health conditions, pregnancy and medicines can change them — the guide and your care team come first.</p></div>';
   }
 
@@ -6986,7 +7394,7 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
       html += r.days.map(function (d) {
         return '<div class="pl-day"><div class="spread"><h3>Day ' + (d.day + 1) + '</h3><button class="btn small" data-action="pl-save-day" data-id="' + d.day + '">Save to my week</button></div>' +
           d.meals.map(function (mm) {
-            return '<div class="pl-meal"><div><strong>' + SLOT_EMOJI[mm.slot] + ' ' + esc(mm.name) + '</strong><div class="small muted">' + mm.totals.kcal + ' kcal · ' + mm.totals.protein + ' g protein · ' + mm.totals.fiber + ' g fiber</div>' +
+            return '<div class="pl-meal"><div><strong>' + SLOT_EMOJI[mm.slot] + ' ' + esc(mm.name) + '</strong>' + (mm.score !== null && mm.score !== undefined ? ' <span class="badge ' + (mm.score >= 85 ? 'ok' : mm.score >= 60 ? 'warn' : 'danger') + '">nutrition ' + mm.score + '</span>' : '') + '<div class="small muted">' + mm.totals.kcal + ' kcal · ' + mm.totals.protein + ' g protein · ' + mm.totals.fiber + ' g fiber</div>' +
               '<div class="small">' + mm.items.map(function (it) { var fd = Planner.byId(lib, it.foodId); return fd ? esc(fd.emoji + ' ' + fd.name) + (it.qty !== 1 ? ' ×' + it.qty : '') : ''; }).join(' · ') + '</div>' +
               '<div class="small muted">Season with ' + esc(mm.flavor) + '.</div></div></div>';
           }).join('') + '</div>';
@@ -7024,6 +7432,7 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
     var res = Planner.smartPlan({
       lib: lib, pantry: state.pantry, slots: SLOT_LIST.filter(function (s) { return pp.slots.indexOf(s) !== -1; }), days: pp.days, cuisine: pp.cuisine, onlyPantry: pp.onlyPantry,
       seed: Date.now(), targets: slotTargets(eaters),
+      scoreFn: function (items, slot) { if (!items.length) return 0; var sc4 = plateScores(items, eaters, slot, pp.who === 'family'); return sc4.reduce(function (s2, x) { return s2 + x.s.score; }, 0) / sc4.length; },
       eaters: eaters.map(function (m) {
         return { name: m.name, prefs: prefsOf(m), pick: function (id) { return picks[id] ? picks[id].score : 0; }, blocked: function (fd) { return foodFit(fd, [m]).status === 'no'; } };
       })

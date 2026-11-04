@@ -92,6 +92,85 @@
     f('olives', 'fat', '🫒', 'Olives', '10 large', 50, 0, 3, 5, 1, ['high-sodium'])
   ];
 
+
+  /*
+   * Vitamins, minerals and limits per listed serving, rounded from USDA
+   * FoodData Central (SR Legacy / Foundation): [vitamin A mcg RAE, vitamin C mg,
+   * vitamin E mg, calcium mg, iron mg, magnesium mg, potassium mg, sodium mg,
+   * saturated fat g, added sugar g, vitamin D mcg, vitamin B12 mcg, folate mcg DFE].
+   * Brands vary (tofu calcium, cottage cheese and shrimp sodium especially).
+   */
+  var MICRO_KEYS = ['vitA', 'vitC', 'vitE', 'calcium', 'iron', 'magnesium', 'potassium', 'sodium', 'satFat', 'addedSugar', 'vitD', 'b12', 'folate'];
+  var MICRO = {
+    chicken: [10, 0, 0.3, 17, 1.2, 33, 290, 84, 1.1, 0, 0.1, 0.4, 5],
+    turkey: [0, 0, 0.1, 10, 0.8, 33, 280, 70, 0.3, 0, 0.1, 1.0, 7],
+    salmon: [60, 4, 1.5, 17, 0.4, 34, 430, 70, 3.0, 0, 15, 3.2, 30],
+    cod: [16, 1, 0.9, 16, 0.6, 47, 280, 88, 0.2, 0, 1.3, 1.2, 9],
+    tuna: [15, 0, 0.3, 9, 1.3, 23, 200, 210, 0.2, 0, 1.0, 2.1, 3],
+    sardines: [30, 0, 1.9, 350, 2.7, 36, 365, 280, 1.4, 0, 4.4, 8.2, 9],
+    shrimp: [80, 0, 1.5, 80, 0.6, 40, 190, 330, 0.1, 0, 0.1, 1.7, 21],
+    eggs: [160, 0, 1.0, 56, 1.8, 12, 140, 140, 3.1, 0, 2.0, 0.9, 47],
+    beef: [0, 0, 0.5, 15, 2.9, 25, 390, 85, 3.3, 0, 0.1, 2.8, 10],
+    steak: [0, 0, 0.4, 25, 2.3, 32, 430, 70, 3.2, 0, 0.1, 1.9, 10],
+    pork: [0, 0.5, 0.2, 7, 1.2, 33, 470, 65, 1.3, 0, 0.6, 0.6, 0],
+    tofu: [10, 0.3, 0, 350, 3.4, 73, 300, 15, 1.6, 0, 0, 0, 37],
+    tempeh: [0, 0, 0, 92, 2.2, 67, 340, 7, 1.8, 0, 0, 0.1, 20],
+    lentils: [2, 3, 0.2, 38, 6.6, 71, 730, 4, 0.1, 0, 0, 0, 358],
+    edamame: [23, 9.5, 1.1, 98, 3.5, 99, 680, 9, 0.9, 0, 0, 0, 482],
+    'greek-yogurt': [2, 0, 0, 270, 0.2, 27, 340, 90, 0.3, 0, 0, 1.9, 17],
+    cottage: [25, 0, 0, 140, 0.3, 18, 190, 920, 1.5, 0, 0, 1.6, 27],
+    'brown-rice': [0, 0, 0.1, 6, 0.8, 79, 155, 8, 0.4, 0, 0, 0, 10],
+    'white-rice': [0, 0, 0.1, 16, 1.9, 19, 55, 2, 0.1, 0, 0, 0, 92],
+    quinoa: [2, 0, 1.2, 31, 2.8, 118, 320, 13, 0.5, 0, 0, 0, 78],
+    oats: [0, 0, 0.2, 21, 1.7, 55, 145, 2, 0.5, 0, 0, 0, 13],
+    'ww-pasta': [0, 0, 0.4, 21, 2.1, 60, 135, 6, 0.2, 0, 0, 0, 10],
+    pasta: [0, 0, 0.1, 10, 1.8, 25, 60, 1, 0.3, 0, 0, 0, 100],
+    'ww-bread': [0, 0, 0.2, 80, 1.6, 50, 160, 270, 0.4, 3, 0, 0, 30],
+    'sweet-potato': [1100, 22, 0.8, 43, 0.8, 31, 540, 41, 0, 0, 0, 0, 7],
+    potato: [2, 17, 0.1, 26, 1.9, 50, 925, 17, 0, 0, 0, 0, 48],
+    'corn-tortilla': [0, 0, 0.1, 40, 0.6, 34, 90, 20, 0.1, 0, 0, 0, 5],
+    'rice-noodles': [0, 0, 0, 7, 0.2, 5, 7, 33, 0, 0, 0, 0, 5],
+    barley: [0, 0, 0, 17, 2.1, 35, 145, 5, 0.1, 0, 0, 0, 25],
+    broccoli: [120, 100, 2.3, 62, 1.0, 33, 460, 64, 0.1, 0, 0, 0, 168],
+    spinach: [940, 18, 3.7, 245, 6.4, 157, 840, 126, 0.1, 0, 0, 0, 263],
+    salad: [220, 10, 0.4, 25, 0.6, 8, 150, 15, 0, 0, 0, 0, 60],
+    carrots: [1070, 7.6, 0.9, 42, 0.4, 15, 410, 88, 0, 0, 0, 0, 24],
+    peppers: [230, 190, 2.4, 10, 0.6, 18, 310, 6, 0, 0, 0, 0, 68],
+    'green-beans': [44, 12, 0.6, 55, 0.8, 23, 180, 1, 0, 0, 0, 0, 41],
+    brussels: [60, 97, 0.7, 56, 1.9, 31, 495, 32, 0.1, 0, 0, 0, 94],
+    cauliflower: [1, 55, 0.1, 20, 0.4, 11, 175, 19, 0.1, 0, 0, 0, 55],
+    zucchini: [100, 23, 0.2, 32, 0.6, 34, 460, 5, 0, 0, 0, 0, 50],
+    tomatoes: [75, 25, 1.0, 18, 0.5, 20, 430, 9, 0, 0, 0, 0, 27],
+    mushrooms: [0, 6, 0, 9, 2.7, 19, 555, 3, 0.1, 0, 0.3, 0, 28],
+    'black-beans': [0, 0, 0.1, 46, 3.6, 120, 610, 2, 0.2, 0, 0, 0, 256],
+    chickpeas: [2, 2, 0.6, 80, 4.7, 79, 475, 11, 0.4, 0, 0, 0, 282],
+    berries: [5, 40, 1.0, 25, 0.5, 20, 160, 1, 0, 0, 0, 0, 30],
+    apple: [5, 8, 0.3, 11, 0.2, 9, 195, 2, 0, 0, 0, 0, 5],
+    banana: [4, 10, 0.1, 6, 0.3, 32, 420, 1, 0.1, 0, 0, 0, 24],
+    orange: [15, 70, 0.2, 52, 0.1, 13, 235, 0, 0, 0, 0, 0, 40],
+    kiwi: [6, 128, 2.0, 47, 0.4, 23, 430, 4, 0, 0, 0, 0, 35],
+    grapes: [5, 5, 0.3, 15, 0.5, 11, 290, 3, 0.1, 0, 0, 0, 3],
+    chia: [0, 0, 0.1, 150, 1.9, 80, 100, 4, 0.8, 0, 0, 0, 12],
+    avocado: [7, 10, 2.1, 12, 0.6, 29, 485, 7, 2.1, 0, 0, 0, 81],
+    'olive-oil': [0, 0, 1.9, 0, 0.1, 0, 0, 0, 1.9, 0, 0, 0, 0],
+    almonds: [0, 0, 7.3, 76, 1.1, 77, 210, 0, 1.1, 0, 0, 0, 14],
+    walnuts: [0, 0.4, 0.2, 28, 0.8, 45, 125, 1, 1.7, 0, 0, 0, 28],
+    'peanut-butter': [0, 0, 2.9, 17, 0.6, 54, 180, 140, 3.3, 2, 0, 0, 24],
+    sunbutter: [0, 0, 7.4, 20, 1.3, 100, 190, 100, 2.0, 2, 0, 0, 76],
+    'pumpkin-seeds': [0, 0.5, 0.6, 13, 2.3, 156, 230, 5, 2.4, 0, 0, 0, 16],
+    flax: [0, 0, 0.1, 36, 0.8, 55, 115, 4, 0.5, 0, 0, 0, 12],
+    hummus: [1, 0, 0.5, 24, 1.5, 44, 140, 230, 0.9, 0, 0, 0, 50],
+    tahini: [0, 0, 0, 64, 1.3, 14, 62, 17, 1.1, 0, 0, 0, 15],
+    cheddar: [75, 0, 0.2, 200, 0.2, 8, 21, 180, 5.3, 0, 0.3, 0.3, 5],
+    butter: [97, 0, 0.3, 3, 0, 0, 3, 90, 7.3, 0, 0.2, 0, 0],
+    olives: [9, 0, 0.7, 39, 1.5, 2, 4, 330, 0.6, 0, 0, 0, 0]
+  };
+  FOODS.forEach(function (fd) {
+    var row = MICRO[fd.id];
+    MICRO_KEYS.forEach(function (k, i) { fd[k] = row ? row[i] : 0; });
+    fd.hasMicros = !!row;
+  });
+
   // Share of the day's needs each meal should cover.
   var MEAL_SHARE = { breakfast: 0.25, lunch: 0.30, dinner: 0.35, snack: 0.10 };
 
@@ -176,7 +255,7 @@
     return items;
   }
 
-  var Foods = { CATEGORIES: CATEGORIES, FOODS: FOODS, MEAL_SHARE: MEAL_SHARE, byId: byId, setCustom: setCustom, totals: totals, mealTargets: mealTargets, score: score, surprise: surprise };
+  var Foods = { CATEGORIES: CATEGORIES, FOODS: FOODS, MICRO_KEYS: MICRO_KEYS, MEAL_SHARE: MEAL_SHARE, byId: byId, setCustom: setCustom, totals: totals, mealTargets: mealTargets, score: score, surprise: surprise };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = Foods;
   else root.FHFoods = Foods;

@@ -95,6 +95,19 @@ All scoring lives in `js/questionnaire.js` and is covered by
   logged) + 1,000 a day, working up to where benefits level off (Paluch 2022:
   ~9,000 under 60, ~7,000 for 60+; higher for blood-sugar/lipid goals); held steady on
   low-recovery days; kids 10,000–13,000. Also activity minutes and sleep hours by age.
+- **Nutrition score — the core of meal building** (`js/nutrition.js`). Every food carries
+  13 vitamins, minerals and limits from USDA FoodData Central, alongside protein, carbs,
+  fat and fiber. Each person's daily needs come from the Dietary Reference Intakes for
+  their age, sex, pregnancy and breastfeeding; blood work and conditions weight the
+  nutrients that matter for them (low ferritin → iron and vitamin C, low vitamin D, low B12,
+  high blood pressure → potassium, pregnancy → folate and iron) and tighten limits (high
+  LDL → saturated fat under 6%, high blood pressure → sodium 1,500 mg). A plate scores
+  0–100 by how much of that meal's share of each need it covers (capped per nutrient,
+  weighted), minus points for too much sodium, saturated fat or added sugar. The builder
+  shows each person's score, nutrient bars, gaps with the foods that fill them, and an
+  A–E nutrient grade on every food (an NRF-style index per 100 kcal against the person's
+  needs). *Surprise me* and the smart planner build plates that maximise everyone's score;
+  My Week shows each person's daily score.
 - **Diet Book** tab — each person's daily amounts by chapter: vegetables, fruits,
   meat/poultry/fish/eggs, plant proteins, carbs & grains, fats & oils, protein, fiber,
   dairy, water and a workout split. Sized from age, sex, height, weight and activity
@@ -183,6 +196,7 @@ family-health/
   js/engine.js          pure logic: profile → guide, meal plan, grocery list (no UI)
   js/questionnaire.js   everyday questions + validated screening scores
   js/labs.js            blood-test interpretation, lab-report reading, tracker CSV import
+  js/nutrition.js       nutrient needs (DRIs), meal score, food grades, gap fillers
   js/dietbook.js        diet book amounts and chapters
   js/workout.js         per-person weekly workout split
   js/planner.js         ingredient library, smart planner, Claude planner

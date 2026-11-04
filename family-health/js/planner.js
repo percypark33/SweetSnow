@@ -90,10 +90,16 @@
       w /= 1 + (used[fd.id] || 0) * 1.5; // variety
       return w;
     }
-    function pick(cat, slot, not) {
+    function pick(cat, slot, not, items) {
       var pool = allowed.filter(function (fd) { return fd.cat === cat && (!not || not.indexOf(fd.id) === -1); });
       if (!pool.length) return null;
-      var ws = pool.map(function (fd) { return weight(fd, slot); });
+      var base = opts.scoreFn ? opts.scoreFn(items, slot) : 0;
+      var ws = pool.map(function (fd) {
+        var w = weight(fd, slot);
+        // With a nutrition scorer, strongly favour foods that raise the meal's score.
+        if (opts.scoreFn) w *= Math.pow(Math.max(0.05, 1 + (opts.scoreFn(items.concat([{ foodId: fd.id, qty: 1 }]), slot) - base) / 15), 3);
+        return w;
+      });
       var total = ws.reduce(function (s, x) { return s + x; }, 0), r = rand() * total;
       for (var i = 0; i < pool.length; i++) { r -= ws[i]; if (r <= 0) return pool[i]; }
       return pool[pool.length - 1];
@@ -105,7 +111,7 @@
         var items = [];
         var cats = slot === 'snack' ? ['fiber', 'fat'] : slot === 'breakfast' ? ['protein', 'carbs', 'fiber'] : ['protein', 'carbs', 'fiber', 'fiber', 'fat'];
         cats.forEach(function (cat) {
-          var fd = pick(cat, slot, items.map(function (x) { return x.foodId; }));
+          var fd = pick(cat, slot, items.map(function (x) { return x.foodId; }), items);
           if (fd) { items.push({ foodId: fd.id, qty: 1 }); used[fd.id] = (used[fd.id] || 0) + 1; }
         });
         // Size to the meal: more protein if short, halve the fat if over calories.
@@ -116,7 +122,7 @@
         if (carb && tot.kcal > t.kcal * 1.25) { carb.qty = 0.5; tot = totals(lib, items); }
         var fatItem = items.filter(function (x) { return byId(lib, x.foodId).cat === 'fat'; })[0];
         if (fatItem && tot.kcal > t.kcal * 1.25) { fatItem.qty = 0.5; tot = totals(lib, items); }
-        return { slot: slot, items: items, name: mealName(lib, items, slot, opts.cuisine), totals: tot, flavor: (CUISINES[opts.cuisine] || CUISINES.any).flavor };
+        return { slot: slot, items: items, name: mealName(lib, items, slot, opts.cuisine), totals: tot, flavor: (CUISINES[opts.cuisine] || CUISINES.any).flavor, score: opts.scoreFn ? Math.round(opts.scoreFn(items, slot)) : null };
       });
       days.push({ day: d, meals: meals });
     }
