@@ -95,6 +95,14 @@ All scoring lives in `js/questionnaire.js` and is covered by
   logged) + 1,000 a day, working up to where benefits level off (Paluch 2022:
   ~9,000 under 60, ~7,000 for 60+; higher for blood-sugar/lipid goals); held steady on
   low-recovery days; kids 10,000–13,000. Also activity minutes and sleep hours by age.
+- **Learn** tab — a nutrition label for every food (each nutrient per serving and the share
+  of the chosen person's daily need, with "good source" 10–19% and "excellent source" 20%+
+  per FDA labeling rules) and a page per nutrient: what it does for the body, what too
+  little (or for sodium, saturated fat and added sugar, too much) causes, each family
+  member's daily amount, and the richest foods. These short "what it does / if you're
+  low" notes also appear on every recommended amount in the guide, the Diet Book, and the
+  meal builder's nutrient bars and gap tips (summaries of NIH Office of Dietary
+  Supplements fact sheets).
 - **Nutrition score — the core of meal building** (`js/nutrition.js`). Every food carries
   13 vitamins, minerals and limits from USDA FoodData Central, alongside protein, carbs,
   fat and fiber. Each person's daily needs come from the Dietary Reference Intakes for

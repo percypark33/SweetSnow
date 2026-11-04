@@ -72,3 +72,11 @@ test('every food has complete vitamin and mineral data', () => {
     for (const k of F.MICRO_KEYS) assert.equal(typeof fd[k], 'number', fd.id + ' ' + k);
   }
 });
+
+test('every tracked nutrient explains what it does and what too little or too much causes', () => {
+  for (const n of N.NUTRIENTS) {
+    assert.ok(N.INFO[n.id] && N.INFO[n.id].does && N.INFO[n.id].low && /^https:/.test(N.INFO[n.id].url), n.id);
+  }
+  for (const n of N.LIMITS) assert.ok(N.INFO[n.id].high, n.id);
+  for (const id of ['carbs', 'fat', 'water', 'kcal', 'vegetables', 'fruits', 'meats', 'plants', 'dairy']) assert.ok(N.INFO[id] && N.INFO[id].does, id);
+});

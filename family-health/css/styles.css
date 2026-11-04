@@ -524,3 +524,51 @@ ul.bad li::marker { content: '–  '; color: var(--danger); }
 .grade.g-A { background: #2f7d5b !important; } .grade.g-B { background: #6a9a3a !important; } .grade.g-C { background: #c79a1f !important; } .grade.g-D { background: #d0743c !important; } .grade.g-E { background: #b3261e !important; } .grade.g-\? { background: var(--muted) !important; }
 .sp.g-A b { color: #2f7d5b; } .sp.g-B b { color: #6a9a3a; } .sp.g-C b { color: #b08516; } .sp.g-D b, .sp.g-E b { color: #c0603a; }
 .day-scores { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; font-weight: 400; }
+
+/* ---------- learn & nutrient info ---------- */
+.info-box { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px 16px; background: var(--surface-2); border-radius: 12px; padding: 10px 14px; margin: 8px 0; font-size: .92rem; }
+.info-box p { margin: 2px 0 0; }
+.info-box > a { grid-column: 1 / -1; }
+.info-mini { display: grid; gap: 2px; font-size: .78rem; color: var(--muted); margin-top: 3px; font-weight: 400; line-height: 1.35; }
+.learn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.learn-card { display: block; padding: 12px; border: 1px solid var(--line); border-radius: 12px; text-decoration: none; color: var(--text); background: var(--surface); }
+.learn-card:hover { border-color: var(--brand); }
+.learn-card.limit { border-left: 4px solid var(--warn); }
+.learn-card p { margin: 6px 0 0; color: var(--muted); }
+.learn-foods { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+.learn-food { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; text-decoration: none; color: var(--text); }
+.learn-food .food-emoji { font-size: 1.6rem; }
+.learn-food span span { display: block; }
+.grade-pill { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; color: #fff; font-weight: 800; }
+.grade-pill.big { width: 40px; height: 40px; font-size: 1.3rem; }
+.grade-pill.g-A { background: #2f7d5b; } .grade-pill.g-B { background: #6a9a3a; } .grade-pill.g-C { background: #c79a1f; } .grade-pill.g-D { background: #d0743c; } .grade-pill.g-E { background: #b3261e; } .grade-pill.g-\? { background: var(--muted); }
+.food-hero { display: flex; gap: 18px; align-items: flex-start; }
+.hero-emoji { font-size: 4rem; line-height: 1; }
+.food-hero h1 { margin: 0; }
+.macro-line { display: flex; flex-wrap: wrap; gap: 14px; margin: 10px 0; }
+.label-rows { display: grid; gap: 2px; }
+.label-row { border-bottom: 1px solid var(--line); }
+.label-row summary { display: grid; grid-template-columns: 120px 80px 1fr 48px 104px; gap: 10px; align-items: center; padding: 8px 2px; cursor: pointer; list-style: none; font-size: .92rem; }
+.label-row summary::-webkit-details-marker { display: none; }
+.lr-name { font-weight: 600; }
+.lr-amt, .lr-pct { font-variant-numeric: tabular-nums; }
+.lr-pct { text-align: right; color: var(--muted); }
+.lr-bar { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.lr-bar span { display: block; height: 100%; background: var(--ok); border-radius: 99px; }
+.label-row.limit .lr-bar span, .lr-bar.over span { background: var(--warn); }
+.rank-list { display: grid; gap: 4px; }
+.rank { display: grid; grid-template-columns: 1fr 160px 130px; gap: 10px; align-items: center; padding: 6px 4px; text-decoration: none; color: var(--text); border-bottom: 1px solid var(--line); font-size: .92rem; }
+.rank .lr-pct { text-align: right; }
+.info-link { position: absolute; top: 6px; right: 30px; text-decoration: none; font-size: .95rem; color: var(--muted); }
+.food-card .pick-star { right: 52px; }
+.nbar-label { color: var(--text); text-decoration: none; }
+.nbar-label:hover { text-decoration: underline; }
+.gap-why { display: block; color: var(--muted); font-size: .76rem; margin-top: 2px; }
+.gap.over .gap-why { color: inherit; opacity: .85; }
+@media (max-width: 640px) {
+  .label-row summary { grid-template-columns: 1fr auto 44px; }
+  .label-row summary .lr-bar, .label-row summary .badge { display: none; }
+  .rank { grid-template-columns: 1fr 110px; }
+  .rank .lr-bar { display: none; }
+  .food-hero { flex-direction: column; }
+}

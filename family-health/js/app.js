@@ -105,6 +105,7 @@
     else if (parts[0] === 'shop') { tab = 'plan'; html = viewShop(parts[1]); }
     else if (parts[0] === 'recipes') { tab = 'recipes'; html = viewRecipes(); }
     else if (parts[0] === 'book') { tab = 'book'; html = viewBook(parts[1]); }
+    else if (parts[0] === 'learn') { tab = 'learn'; html = parts[1] === 'food' ? viewFood(parts[2]) : parts[1] === 'n' ? viewNutrient(parts[2]) : viewLearn(); }
     else if (parts[0] === 'planner') { tab = 'planner'; html = viewPlanner(); }
     else if (parts[0] === 'data') { tab = 'data'; html = viewData(); }
     else if (parts[0] === 'new') { html = viewQuickAdd(); }
@@ -218,7 +219,10 @@
       ['Saturated fat', t.satFat], ['Calcium', t.calcium], ['Iron', t.iron], ['Fluids', t.fluids]
     ].filter(function (r) { return r[1]; });
     var targetsHtml = t.missing ? '<p class="muted">' + esc(t.missing) + '</p>' :
-      '<table class="targets"><tbody>' + targetRows.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</tbody></table>' +
+      '<table class="targets"><tbody>' + targetRows.map(function (r) {
+        var key = INFO_KEYS[r[0]];
+        return '<tr><td>' + (key && N.NUTRIENTS.concat(N.LIMITS).some(function (x) { return x.id === key; }) ? '<a href="#/learn/n/' + key + '">' + esc(r[0]) + '</a>' : esc(r[0])) + (key ? infoBlock(key, true) : '') + '</td><td>' + esc(r[1]) + '</td></tr>';
+      }).join('') + '</tbody></table>' +
       (t.kcalSource ? '<p class="muted small" style="margin-top:8px">Calories: ' + esc(t.kcalSource) + '. Change in profile if your doctor gave you a number.</p>' : '') +
       t.notes.map(function (n) { return '<p class="small muted">' + esc(n) + '</p>'; }).join('');
 
@@ -590,7 +594,9 @@
   function pctBar(r, limit) {
     var pct = Math.round(r.pct * 100);
     var cls = limit ? (r.pct > 1 ? 'over' : 'good') : (r.pct >= 0.8 ? 'good' : r.pct >= 0.4 ? 'mid' : 'low');
-    return '<div class="nbar' + (r.weight > 1 ? ' key' : '') + '" title="' + esc(r.why || '') + '"><span class="nbar-label">' + esc(r.label) + (r.weight > 1 && r.why ? ' ★' : '') + '</span>' +
+    var inf = N.INFO[r.id] || {};
+    var tip = [r.why, inf.does ? 'What it does: ' + inf.does : '', inf.high ? 'Too much: ' + inf.high : inf.low ? 'If low: ' + inf.low : ''].filter(Boolean).join('\n');
+    return '<div class="nbar' + (r.weight > 1 ? ' key' : '') + '" title="' + esc(tip) + '"><a class="nbar-label" href="#/learn/n/' + r.id + '">' + esc(r.label) + (r.weight > 1 && r.why ? ' ★' : '') + '</a>' +
       '<span class="nbar-track nb-' + cls + '"><span style="width:' + Math.min(100, pct) + '%"></span></span><span class="nbar-val">' + (limit ? r.amount + '/' + r.max + ' ' + r.unit : pct + '%') + '</span></div>';
   }
 
@@ -607,10 +613,10 @@
     var need = needsFor(cur.member);
     var gaps = b.items.length ? s0.gaps.slice(0, 3).map(function (g) {
       var f = N.fillers(g, allowed, need, 3);
-      return f.length ? '<div class="gap"><span>Low on <strong>' + esc(/^Vitamin/.test(g.label) ? g.label.replace('Vitamin', 'vitamin') : g.label.toLowerCase()) + '</strong> (' + Math.round(g.pct * 100) + '%)' + (g.why ? ' — ' + esc(g.why.toLowerCase()) : '') + '</span><span class="gap-adds">' +
+      return f.length ? '<div class="gap"><span>Low on <strong>' + esc(/^Vitamin/.test(g.label) ? g.label.replace('Vitamin', 'vitamin') : g.label.toLowerCase()) + '</strong> (' + Math.round(g.pct * 100) + '%)' + (g.why ? ' — ' + esc(g.why.toLowerCase()) : '') + '<span class="gap-why">' + esc((N.INFO[g.id] || {}).does || '') + '</span></span><span class="gap-adds">' +
         f.map(function (x) { return '<button class="chip small-chip" data-action="b-add" data-id="' + x.food.id + '">+ ' + x.food.emoji + ' ' + esc(x.food.name.split(/[,(]/)[0]) + ' <small>' + x.pct + '%</small></button>'; }).join('') + '</span></div>' : '';
     }).join('') : '';
-    var over = s0.over.map(function (l) { return '<div class="gap over">Over on <strong>' + esc(l.label.toLowerCase()) + '</strong>: ' + l.amount + ' of ' + l.max + ' ' + l.unit + ' for this meal</div>'; }).join('');
+    var over = s0.over.map(function (l) { return '<div class="gap over">Over on <strong>' + esc(l.label.toLowerCase()) + '</strong>: ' + l.amount + ' of ' + l.max + ' ' + l.unit + ' for this meal<span class="gap-why">' + esc((N.INFO[l.id] || {}).high || '') + '</span></div>'; }).join('');
     return { avg: avg, html: '<div class="nscore"><div class="score' + (avg >= 85 ? ' great' : '') + '"><div class="score-num">' + (b.items.length ? avg : '–') + '</div><div class="score-label">nutrition score' + (scores.length > 1 ? ' (avg)' : '') + '</div></div>' + people + '</div>' +
       (b.items.length ? '<div class="nbars"><div class="nbars-head small muted">' + esc(cur.member.name) + '\'s needs for this ' + MEAL_LABELS[b.meal].toLowerCase() + (cur.ratio < 1 ? ' (child portion ×' + Math.round(cur.ratio * 100) / 100 + ')' : '') + ' — % covered</div>' +
         s0.rows.filter(function (r) { return r.weight; }).map(function (r) { return pctBar(r, false); }).join('') +
@@ -691,7 +697,7 @@
           (onPlate ? '<span class="on-plate">×' + onPlate.qty + ' on plate</span>' : '') + '</button>' +
           (good ? '<div class="pick-note" title="' + esc(pk.reasons.join('\n')) + '">' + esc(pk.reasons[0]) + (pk.reasons.length > 1 ? ' +' + (pk.reasons.length - 1) : '') + '</div>' : '') +
           (fit.status !== 'ok' ? '<div class="fit-note">' + (fit.status === 'no' ? '✕ ' : '! ') + esc(reason) + '</div>' : '') +
-          '<a class="shop-link" href="#/shop/' + fd.id + '" title="Where to buy & which brand">🛒</a></div>';
+          '<a class="shop-link" href="#/shop/' + fd.id + '" title="Where to buy & which brand">🛒</a><a class="info-link" href="#/learn/food/' + fd.id + '" title="What\'s in it">ⓘ</a></div>';
       }).join('');
       return '<section class="food-section"><h2 style="--cat:' + cat.color + '"><span>' + cat.emoji + '</span> ' + cat.label + '</h2><p class="muted small">' + esc(cat.blurb) + '</p>' +
         '<div class="food-grid">' + (cards || '<p class="muted">No matches.</p>') + '</div></section>';
@@ -1878,6 +1884,7 @@
       return '<section class="card book-chapter" id="ch-' + ch.id + '" style="--c:' + ch.color + '">' +
         '<div class="chapter-head"><span class="chapter-no">' + (i + 1) + '</span><span class="chapter-emoji">' + ch.emoji + '</span><div><h2>' + esc(ch.title) + '</h2><div class="chapter-amount">' + esc(ch.headline(a)) + '</div></div></div>' +
         '<ul class="chapter-detail">' + ch.detail(a).map(function (d) { return '<li>' + esc(d) + '</li>'; }).join('') + '</ul>' +
+        infoBlock(ch.id) +
         (mine.length ? '<div class="for-you-box"><strong>For ' + esc(m.name) + '</strong>' + mine.map(function (r) { return '<div>' + r.icon + ' ' + esc(r.title) + ' — ' + esc(r.because) + '. ' + esc(r.eatMore[0] || r.easyOn[0] || r.tip) + '</div>'; }).join('') + '</div>' : '') +
         '<div class="chapter-grid"><div><h3>What counts as one serving</h3><ul>' + ch.serving.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul></div>' +
         '<div><h3>Best choices</h3><ul class="good">' + ch.best.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul><h3>Limit</h3><ul class="bad">' + ch.limit.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul></div></div>' +
@@ -1887,7 +1894,7 @@
 
     var water = day.water ? '<section class="card book-chapter" id="ch-water" style="--c:#3d6fb4"><div class="chapter-head"><span class="chapter-no">' + (DB.CHAPTERS.length + 1) + '</span><span class="chapter-emoji">💧</span><div><h2>Water</h2><div class="chapter-amount">' +
       (day.water.cups ? day.water.cups + ' cups (' + day.water.liters + ' L) a day from drinks' : 'Follow your care team\'s fluid limit') + '</div></div></div>' +
-      '<ul class="chapter-detail">' + day.water.why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>' +
+      '<ul class="chapter-detail">' + day.water.why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>' + infoBlock('water') +
       '<div class="chapter-grid"><div><h3>What counts</h3><ul><li>Water, sparkling water, milk, tea and coffee all count</li><li>1 cup = 8 oz ≈ 240 mL; a standard water bottle ≈ 2 cups</li><li>Food (fruit, vegetables, soup) adds about 20% more on top</li></ul></div>' +
       '<div><h3>Signs you\'re on track</h3><ul class="good"><li>Pale-yellow urine</li><li>Rarely thirsty</li></ul><h3>Drink more when</h3><ul class="bad"><li>It\'s hot or you sweat a lot</li><li>You\'re ill with fever, vomiting or diarrhea</li></ul></div></div>' +
       '<h3>The facts</h3><ol class="facts"><li>The National Academies set adequate total water at 3.7 L a day for men and 2.7 L for women, about 80% of it from drinks. <span class="small">' + bookSources(['water'], idx) + '</span></li>' +
@@ -1901,9 +1908,9 @@
       '<div class="table-wrap"><table><thead><tr><th>Nutrient</th><th>Per day</th><th>Richest foods for you</th></tr></thead><tbody>' +
       N.NUTRIENTS.map(function (n) {
         var f = N.fillers({ id: n.id }, allowedFoods, need, 3);
-        return '<tr><td>' + esc(n.label) + (need.weights[n.id] > 1.5 ? ' ★' : '') + (need.why[n.id] ? '<div class="small muted">' + esc(need.why[n.id]) + '</div>' : '') + '</td><td>' + (need.weights[n.id] ? need.amounts[n.id] + ' ' + n.unit : '—') + '</td><td class="small">' + f.map(function (x) { return x.food.emoji + ' ' + esc(x.food.name.split(/[,(]/)[0]) + ' (' + x.pct + '%)'; }).join(' · ') + '</td></tr>';
+        return '<tr><td><a href="#/learn/n/' + n.id + '"><strong>' + esc(n.label) + '</strong></a>' + (need.weights[n.id] > 1.5 ? ' ★' : '') + (need.why[n.id] ? '<div class="small muted">' + esc(need.why[n.id]) + '</div>' : '') + infoBlock(n.id, true) + '</td><td>' + (need.weights[n.id] ? need.amounts[n.id] + ' ' + n.unit : '—') + '</td><td class="small">' + f.map(function (x) { return x.food.emoji + ' ' + esc(x.food.name.split(/[,(]/)[0]) + ' (' + x.pct + '%)'; }).join(' · ') + '</td></tr>';
       }).join('') +
-      N.LIMITS.map(function (n) { return '<tr><td>' + esc(n.label) + ' <span class="badge">limit</span></td><td>under ' + need.limits[n.id] + ' ' + n.unit + '</td><td class="small muted">Highest in processed, salty and sweet foods</td></tr>'; }).join('') +
+      N.LIMITS.map(function (n) { return '<tr><td><a href="#/learn/n/' + n.id + '"><strong>' + esc(n.label) + '</strong></a> <span class="badge">limit</span>' + infoBlock(n.id, true) + '</td><td>under ' + need.limits[n.id] + ' ' + n.unit + '</td><td class="small muted">Highest in processed, salty and sweet foods</td></tr>'; }).join('') +
       '</tbody></table></div><p class="small muted">Sources: ' + bookSources(['dri', 'driNaK', 'driCaD', 'usda', 'nrf'], idx) + '</p></section>';
 
     return '<div class="stack book">' + head + '<nav class="book-tiles" aria-label="Chapters">' + tiles + '</nav>' + chapters + micro + water + workoutChapter(m, g, idx) + referenceAppendix(idx) +
@@ -2157,6 +2164,115 @@
     }).then(function () { aiBusy = false; if (/#\/planner/.test(location.hash)) keepScroll(); });
   }
 
+  // ------------------------------------------------------------------ learn
+
+  var INFO_KEYS = { 'Calories': 'kcal', 'Protein': 'protein', 'Fiber': 'fiber', 'Sodium': 'sodium', 'Added sugar': 'addedSugar', 'Saturated fat': 'satFat', 'Calcium': 'calcium', 'Iron': 'iron', 'Fluids': 'water' };
+  var LIMIT_IDS = ['sodium', 'satFat', 'addedSugar'];
+
+  function nutrientLabel(id) {
+    var n = N.NUTRIENTS.concat(N.LIMITS).filter(function (x) { return x.id === id; })[0];
+    return n ? n.label : { kcal: 'Calories', carbs: 'Carbohydrates', fat: 'Fat', water: 'Water', vegetables: 'Vegetables', fruits: 'Fruits', meats: 'Meat, poultry, fish & eggs', plants: 'Plant proteins', dairy: 'Dairy' }[id] || id;
+  }
+
+  // "What it does / if you're low" for one nutrient; compact for tables.
+  function infoBlock(id, compact) {
+    var inf = N.INFO[id];
+    if (!inf) return '';
+    var bad = inf.high ? ['⚠️ Too much', inf.high] : ['📉 Too little', inf.low];
+    if (compact) return '<div class="info-mini"><span>💪 ' + esc(inf.does) + '</span><span>' + bad[0].split(' ')[0] + ' ' + esc(bad[1]) + '</span></div>';
+    return '<div class="info-box"><div><strong>💪 What it does</strong><p>' + esc(inf.does) + '</p></div><div><strong>' + bad[0] + '</strong><p>' + esc(bad[1]) + '</p></div>' +
+      (N.NUTRIENTS.concat(N.LIMITS).some(function (x) { return x.id === id; }) ? '<a class="small" href="#/learn/n/' + id + '">Learn more about ' + esc(/^Vitamin/.test(nutrientLabel(id)) ? nutrientLabel(id).replace('Vitamin', 'vitamin') : nutrientLabel(id).toLowerCase()) + ' →</a>' : '<a class="small" href="' + esc(inf.url) + '" target="_blank" rel="noopener">Source →</a>') + '</div>';
+  }
+
+  function learnWho() {
+    var w = state.learnWho;
+    if (!member(w)) w = state.members[0] ? state.members[0].id : null;
+    return w ? member(w) : null;
+  }
+
+  function learnNeed(m) { return m ? needsFor(m) : N.needs({ age: 35, sex: 'female', kcal: 2000, protein: 50 }); }
+
+  function whoBar() {
+    var m = learnWho();
+    if (!state.members.length) return '<p class="small muted">Showing needs for a typical adult woman (2,000 kcal). Add family members to see your own.</p>';
+    return '<div class="row no-print"><strong>Needs for</strong>' + state.members.map(function (x) { return chip('learn-who', x.id, esc(x.name), m && x.id === m.id); }).join('') + '</div>';
+  }
+
+  // FDA labeling: 10–19% of the Daily Value is a "good source", 20%+ "excellent".
+  function sourceLevel(pct) { return pct >= 20 ? 'excellent' : pct >= 10 ? 'good' : ''; }
+
+  function viewLearn() {
+    var m = learnWho(), need = learnNeed(m), q = (state.learnSearch || '').toLowerCase();
+    var cards = N.NUTRIENTS.concat(N.LIMITS).map(function (n) {
+      var inf = N.INFO[n.id], limit = LIMIT_IDS.indexOf(n.id) !== -1;
+      return '<a class="learn-card' + (limit ? ' limit' : '') + '" href="#/learn/n/' + n.id + '"><div class="spread"><strong>' + esc(n.label) + '</strong><span class="badge' + (limit ? ' warn' : '') + '">' + (limit ? 'under ' + need.limits[n.id] : need.amounts[n.id]) + ' ' + n.unit + '/day</span></div>' +
+        '<p class="small">' + esc(inf.does) + '</p></a>';
+    }).join('');
+    var foods = Foods.FOODS.filter(function (fd) { return !q || fd.name.toLowerCase().indexOf(q) !== -1; }).slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).map(function (fd) {
+      var gr = N.foodGrade(fd, need);
+      var rich = N.NUTRIENTS.filter(function (n) { return need.weights[n.id] && (fd[n.id] || 0) / need.amounts[n.id] >= 0.2; }).map(function (n) { return n.label; }).slice(0, 3);
+      return '<a class="learn-food" href="#/learn/food/' + fd.id + '"><span class="food-emoji">' + fd.emoji + '</span><span><strong>' + esc(fd.name) + '</strong><span class="small muted">' + esc(fd.serving) + ' · ' + fd.kcal + ' kcal' + (rich.length ? ' · rich in ' + esc(rich.join(', ').toLowerCase()) : '') + '</span></span><span class="grade-pill g-' + gr.grade + '">' + gr.grade + '</span></a>';
+    }).join('');
+    return '<div class="spread" style="margin-bottom:8px"><div><h1>Learn</h1><div class="muted">What each nutrient does for your body, how much you need, and what every food actually contains.</div></div></div>' +
+      '<section class="card">' + whoBar() + '</section>' +
+      '<section class="card"><h2>What your body needs</h2><p class="small muted">Tap a nutrient to see what it does, what happens if you\'re low, and the foods richest in it.</p><div class="learn-grid">' + cards + '</div></section>' +
+      '<section class="card"><div class="spread"><h2>What\'s in each food</h2><input type="text" id="learn-search" placeholder="Search foods…" value="' + esc(state.learnSearch || '') + '" style="max-width:240px"></div>' +
+      '<p class="small muted">Grades A–E show how much of ' + esc(m ? m.name + '\'s' : 'your') + ' needs a food covers per calorie, minus sodium, saturated fat and added sugar.</p><div class="learn-foods">' + foods + '</div></section>';
+  }
+
+  function viewFood(id) {
+    var fd = Foods.byId(id);
+    if (!fd) return '<section class="card">Food not found. <a href="#/learn">Back to Learn</a></section>';
+    var m = learnWho(), need = learnNeed(m), gr = N.foodGrade(fd, need);
+    var who = m ? m.name : 'a typical adult';
+    var rows = N.NUTRIENTS.map(function (n) {
+      var amt = fd[n.id] || 0, pct = need.amounts[n.id] ? Math.round(amt / need.amounts[n.id] * 100) : 0, lvl = sourceLevel(pct);
+      return '<details class="label-row' + (lvl ? ' src-' + lvl : '') + '"><summary><span class="lr-name">' + esc(n.label) + (need.weights[n.id] > 1.5 ? ' ★' : '') + '</span><span class="lr-amt">' + amt + ' ' + n.unit + '</span>' +
+        '<span class="lr-bar"><span style="width:' + Math.min(100, pct) + '%"></span></span><span class="lr-pct">' + pct + '%</span>' + (lvl ? '<span class="badge ok">' + lvl + ' source</span>' : '<span></span>') + '</summary>' + infoBlock(n.id) + '</details>';
+    }).join('');
+    var limits = N.LIMITS.map(function (n) {
+      var amt = fd[n.id] || 0, pct = Math.round(amt / need.limits[n.id] * 100);
+      return '<details class="label-row limit' + (pct >= 20 ? ' src-high' : '') + '"><summary><span class="lr-name">' + esc(n.label) + '</span><span class="lr-amt">' + amt + ' ' + n.unit + '</span><span class="lr-bar"><span style="width:' + Math.min(100, pct) + '%"></span></span><span class="lr-pct">' + pct + '%</span>' +
+        (pct >= 20 ? '<span class="badge warn">high</span>' : '<span></span>') + '</summary>' + infoBlock(n.id) + '</details>';
+    }).join('');
+    var rich = N.NUTRIENTS.filter(function (n) { return need.amounts[n.id] && (fd[n.id] || 0) / need.amounts[n.id] >= 0.2; });
+    var fit = m ? foodFit(fd, [m]) : null;
+    var share = fd.kcal / (need.kcal || 2000) * 100;
+    return '<div class="spread" style="margin-bottom:8px"><a class="btn" href="#/learn">← Learn</a><button class="btn primary" data-action="learn-add" data-id="' + fd.id + '">+ Add to my plate</button></div>' +
+      '<section class="card food-hero"><span class="hero-emoji">' + fd.emoji + '</span><div><h1>' + esc(fd.name) + '</h1><div class="muted">' + esc(fd.serving) + ' · ' + fd.kcal + ' kcal (' + Math.round(share) + '% of ' + esc(who) + '\'s day)</div>' +
+      '<div class="row" style="margin-top:6px"><span class="grade-pill big g-' + gr.grade + '">' + gr.grade + '</span><span class="small">' + (gr.grade === 'A' || gr.grade === 'B' ? 'Lots of nutrients for its calories' : gr.grade === 'C' ? 'Some useful nutrients' : 'Few nutrients for its calories — fine in small amounts') + '</span></div>' +
+      (rich.length ? '<p><strong>Rich in:</strong> ' + rich.map(function (n) { return '<a class="chip" href="#/learn/n/' + n.id + '">' + esc(n.label) + '</a>'; }).join(' ') + '</p>' : '') +
+      (fit && fit.status !== 'ok' ? '<div class="alert ' + (fit.status === 'no' ? 'danger' : 'warn') + '"><div>' + esc(fitReason(fit)) + '</div></div>' : '') + '</div></section>' +
+      '<section class="card"><h2>Nutrition facts — one serving</h2>' + whoBar() +
+      '<div class="macro-line"><span><b>' + fd.protein + ' g</b> protein</span><span><b>' + fd.carbs + ' g</b> carbs</span><span><b>' + fd.fat + ' g</b> fat</span><span><b>' + fd.fiber + ' g</b> fiber</span></div>' +
+      '<p class="small muted">% = share of ' + esc(who) + '\'s daily need from one serving. 10–19% is a good source, 20%+ excellent (FDA labeling rules). Tap any row to see what it does for your body.</p>' +
+      '<div class="label-rows">' + rows + '<div class="nbars-head small muted">Limits — % of the daily maximum</div>' + limits + '</div>' +
+      '<p class="small muted">Values per serving from USDA FoodData Central, rounded; brands vary.</p></section>';
+  }
+
+  function viewNutrient(id) {
+    var n = N.NUTRIENTS.concat(N.LIMITS).filter(function (x) { return x.id === id; })[0];
+    if (!n) return '<section class="card">Not found. <a href="#/learn">Back to Learn</a></section>';
+    var limit = LIMIT_IDS.indexOf(id) !== -1;
+    var m = learnWho(), need = learnNeed(m);
+    var family = state.members.map(function (x) {
+      var nd = needsFor(x);
+      return '<tr><td>' + esc(x.name) + '</td><td>' + (limit ? 'under ' + nd.limits[id] : nd.weights[id] === 0 ? 'limited by care team' : nd.amounts[id]) + ' ' + n.unit + '</td><td class="small muted">' + esc(nd.why[id] || '') + '</td></tr>';
+    }).join('');
+    var ranked = Foods.FOODS.filter(function (fd) { return (fd[id] || 0) > 0; }).map(function (fd) {
+      var base = limit ? need.limits[id] : need.amounts[id];
+      return { fd: fd, pct: Math.round(fd[id] / base * 100) };
+    }).sort(function (a, b) { return b.pct - a.pct; }).slice(0, 12);
+    return '<div class="spread" style="margin-bottom:8px"><a class="btn" href="#/learn">← Learn</a></div>' +
+      '<section class="card"><h1>' + esc(n.label) + '</h1>' + infoBlock(id).replace(/<a class="small" href="#\/learn\/n\/[^"]+">[^<]*<\/a>/, '') +
+      '<p class="small"><a href="' + esc(N.INFO[id].url) + '" target="_blank" rel="noopener">Read the full fact sheet →</a></p></section>' +
+      (family ? '<section class="card"><h2>' + (limit ? 'Daily limit' : 'Daily need') + ' in your family</h2><div class="table-wrap"><table><tbody>' + family + '</tbody></table></div><p class="small muted">From the Dietary Reference Intakes for each person\'s age, sex and pregnancy, adjusted for their blood work.</p></section>' : '') +
+      '<section class="card"><h2>' + (limit ? 'Foods highest in ' : 'Best sources of ') + esc(n.label.toLowerCase()) + '</h2>' + whoBar() +
+      '<div class="rank-list">' + ranked.map(function (r) {
+        return '<a class="rank" href="#/learn/food/' + r.fd.id + '"><span>' + r.fd.emoji + ' ' + esc(r.fd.name) + ' <span class="small muted">' + esc(r.fd.serving) + '</span></span><span class="lr-bar' + (limit ? ' over' : '') + '"><span style="width:' + Math.min(100, r.pct) + '%"></span></span><span class="lr-pct">' + r.fd[id] + ' ' + n.unit + ' · ' + r.pct + '%</span></a>';
+      }).join('') + '</div></section>';
+  }
+
   // ----------------------------------------------------------------- events
 
   document.addEventListener('click', function (ev) {
@@ -2168,6 +2284,13 @@
     var id = el.getAttribute('data-id');
 
     if (action === 'print') window.print();
+    else if (action === 'learn-who') { state.learnWho = id; persist(); keepScroll(); }
+    else if (action === 'learn-add') {
+      var lb = builder(), ex2 = lb.items.filter(function (it) { return it.foodId === id; })[0];
+      if (ex2) ex2.qty++; else lb.items.push({ foodId: id, qty: 1 });
+      persist(Foods.byId(id).name + ' added to your plate');
+      go('#/plan');
+    }
     else if (action === 'book-who') { state.book.who = id; persist(); go('#/book/' + id); }
     else if (action === 'fit-set') {
       var fm = el.getAttribute('data-m'), fk = el.getAttribute('data-k');
@@ -2487,6 +2610,14 @@
   });
 
   document.addEventListener('input', function (ev) {
+    if (ev.target.id === 'learn-search') {
+      state.learnSearch = ev.target.value;
+      var lpos = ev.target.selectionStart;
+      keepScroll();
+      var lbx = document.getElementById('learn-search');
+      if (lbx) { lbx.focus(); lbx.setSelectionRange(lpos, lpos); }
+      return;
+    }
     if (ev.target.id === 'ing-search') {
       plannerPrefs().search = ev.target.value;
       var ipos = ev.target.selectionStart;

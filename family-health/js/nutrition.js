@@ -43,6 +43,64 @@
     { id: 'addedSugar', label: 'Added sugar', unit: 'g' }
   ];
 
+
+  /*
+   * What each nutrient does and what too little (or, for limits, too much)
+   * causes. Plain-language summaries of the NIH Office of Dietary Supplements
+   * fact sheets and the Dietary Reference Intakes.
+   */
+  var ODS = 'https://ods.od.nih.gov/factsheets/';
+  var INFO = {
+    protein: { does: 'Builds and repairs muscle, skin, organs and bones; makes enzymes, hormones and antibodies; keeps you full.',
+      low: 'Muscle loss and weakness, slow wound healing, more infections, poor growth in children; older adults lose strength and balance.', url: 'https://nap.nationalacademies.org/read/10490/chapter/12' },
+    fiber: { does: 'Feeds healthy gut bacteria, keeps bowels regular, lowers LDL cholesterol, slows sugar absorption and keeps you full.',
+      low: 'Constipation and hemorrhoids; higher risk of heart disease, type 2 diabetes and colon cancer.', url: 'https://nap.nationalacademies.org/read/10490/chapter/9' },
+    vitA: { does: 'Vision (especially in dim light), a healthy immune system, skin and the lining of the gut and lungs; growth in children.',
+      low: 'Night blindness and dry eyes, more frequent infections, dry skin. Rare in the US except with gut absorption problems.', url: ODS + 'VitaminA-Consumer/' },
+    vitC: { does: 'Makes collagen for skin, gums, blood vessels and healing; an antioxidant; helps you absorb iron from plant foods.',
+      low: 'Tiredness, bleeding gums, easy bruising and slow healing; severe lack causes scurvy. Smokers need more.', url: ODS + 'VitaminC-Consumer/' },
+    vitE: { does: 'An antioxidant that protects cells from damage; supports immune function and healthy blood vessels.',
+      low: 'Nerve and muscle damage, poor balance, weak immunity — rare, mostly with fat-absorption disorders.', url: ODS + 'VitaminE-Consumer/' },
+    calcium: { does: 'Builds and keeps bones and teeth strong; needed for muscle contraction, nerve signals and heart rhythm.',
+      low: 'Weaker bones over time (osteopenia, osteoporosis, fractures); in children, poor bone growth. Blood levels stay normal by taking calcium from bone.', url: ODS + 'Calcium-Consumer/' },
+    iron: { does: 'Carries oxygen in red blood cells (hemoglobin) and muscles; needed for energy, brain development and immunity. Iron from meat and fish absorbs best; pair plant iron with vitamin C.',
+      low: 'Iron-deficiency anemia: tiredness, weakness, shortness of breath, pale skin, cold hands, trouble concentrating, ice cravings; in children, slower development.', url: ODS + 'Iron-Consumer/' },
+    magnesium: { does: 'Involved in 300+ body processes: muscle and nerve function, blood sugar and blood pressure control, energy, bone and DNA.',
+      low: 'Muscle cramps, fatigue, weakness; long-term low intake is linked to high blood pressure, type 2 diabetes and weaker bones.', url: ODS + 'Magnesium-Consumer/' },
+    potassium: { does: 'Balances fluids and sodium, lowers blood pressure, keeps heart rhythm, muscles and nerves working.',
+      low: 'Higher blood pressure and stroke risk, kidney stones, bone loss; very low blood levels cause weakness, cramps and abnormal heart rhythm.', url: ODS + 'Potassium-Consumer/' },
+    folate: { does: 'Makes DNA and new cells, including red blood cells; before and in early pregnancy it prevents birth defects of the brain and spine.',
+      low: 'Megaloblastic anemia (tiredness, weakness, irritability), mouth sores; in pregnancy, higher risk of neural tube defects.', url: ODS + 'Folate-Consumer/' },
+    vitD: { does: 'Lets your body absorb calcium for strong bones; supports muscles, nerves and the immune system.',
+      low: 'Soft, weak bones (rickets in children, osteomalacia in adults), bone pain, muscle weakness, more falls and fractures.', url: ODS + 'VitaminD-Consumer/' },
+    b12: { does: 'Keeps nerves and blood cells healthy, makes DNA, and prevents a type of anemia. Found naturally only in animal foods.',
+      low: 'Tiredness, anemia, numbness or tingling in hands and feet, balance problems, memory trouble and low mood — nerve damage can become permanent. Common with vegan diets, metformin, acid reducers and age 50+.', url: ODS + 'VitaminB12-Consumer/' },
+    sodium: { does: 'A small amount balances fluids and helps nerves and muscles work — most people get far more than they need.',
+      high: 'Raises blood pressure, which increases the risk of heart attack, stroke and kidney disease; worsens swelling in heart and kidney failure.', url: 'https://www.fda.gov/food/nutrition-education-resources-materials/sodium-your-diet' },
+    satFat: { does: 'A source of energy, but the body makes all the saturated fat it needs.',
+      high: 'Raises LDL ("bad") cholesterol, which builds up in arteries and raises the risk of heart attack and stroke.', url: 'https://www.heart.org/en/healthy-living/healthy-eating/eat-smart/fats/saturated-fats' },
+    addedSugar: { does: 'Quick energy with no other nutrients ("empty calories").',
+      high: 'Weight gain, tooth decay, higher triglycerides and fatty liver; raises the risk of type 2 diabetes and heart disease.', url: 'https://www.heart.org/en/healthy-living/healthy-eating/eat-smart/sugar/added-sugars' },
+    carbs: { does: 'The body\'s main fuel — the brain alone uses about 130 g of glucose a day. Whole-grain and vegetable carbs bring fiber, B vitamins and minerals.',
+      low: 'Below about 130 g a day: tiredness, headaches, poor focus and lower exercise performance; very low-carb diets often fall short on fiber.', url: 'https://nap.nationalacademies.org/read/10490/chapter/8' },
+    fat: { does: 'Absorbs vitamins A, D, E and K; makes hormones and cell walls; provides essential omega-3 and omega-6 fats for brain, eyes and heart.',
+      low: 'Too little fat (under ~20% of calories): poor absorption of fat-soluble vitamins, dry skin, and in children poor growth and brain development.', url: 'https://nap.nationalacademies.org/read/10490/chapter/10' },
+    kcal: { does: 'Energy for everything the body does — breathing, thinking, moving and, in children, growing.',
+      low: 'Weight loss, muscle loss, tiredness, feeling cold, and in children slowed growth; too much leads to weight gain.', url: 'https://www.dietaryguidelines.gov/' },
+    water: { does: 'Carries nutrients, controls body temperature, cushions joints, removes waste through urine and keeps blood pressure steady.',
+      low: 'Thirst, dark urine, headache, tiredness, dizziness, constipation and kidney stones; older adults may not feel thirsty.', url: 'https://nap.nationalacademies.org/read/10925/chapter/6' },
+    vegetables: { does: 'Vitamins A, C and K, folate, potassium, magnesium and fiber with very few calories.',
+      low: 'Missing these nutrients; eating few vegetables is linked to more heart disease, stroke and some cancers.', url: 'https://www.dietaryguidelines.gov/' },
+    fruits: { does: 'Vitamin C, potassium, folate and fiber; natural sweetness that can replace sweets.',
+      low: 'Lower vitamin C and fiber; low fruit intake is linked to more heart disease and stroke.', url: 'https://www.dietaryguidelines.gov/' },
+    meats: { does: 'Complete protein plus the most absorbable iron, zinc and B12; fish adds omega-3 fats and vitamin D.',
+      low: 'Without other protein sources: low protein, iron, zinc and B12 — plan plant proteins and fortified foods instead.', url: 'https://www.dietaryguidelines.gov/' },
+    plants: { does: 'Protein, fiber, folate, magnesium and healthy fats, with no cholesterol; lowers LDL when they replace red meat.',
+      low: 'Missing fiber, magnesium and folate; fewer plant proteins usually means more red and processed meat.', url: 'https://www.dietaryguidelines.gov/' },
+    dairy: { does: 'Calcium, vitamin D (fortified), potassium and protein for bones and muscles.',
+      low: 'Low calcium and vitamin D, weaker bones — choose fortified soy milk or other calcium foods if you skip dairy.', url: ODS + 'Calcium-Consumer/' }
+  };
+
   var SOURCES = {
     dri: { title: 'Dietary Reference Intakes: the essential guide to nutrient requirements', org: 'National Academies', year: 2006, url: 'https://nap.nationalacademies.org/catalog/11537' },
     driNaK: { title: 'Dietary Reference Intakes for sodium and potassium', org: 'National Academies', year: 2019, url: 'https://nap.nationalacademies.org/catalog/25353' },
@@ -190,7 +248,7 @@
 
   function round(v) { return v >= 100 ? Math.round(v) : v >= 10 ? Math.round(v * 10) / 10 : Math.round(v * 100) / 100; }
 
-  var Nutrition = { NUTRIENTS: NUTRIENTS, LIMITS: LIMITS, SOURCES: SOURCES, needs: needs, nutrientsOf: nutrientsOf, mealScore: mealScore, nrf: nrf, foodGrade: foodGrade, fillers: fillers, dayScore: dayScore };
+  var Nutrition = { INFO: INFO, NUTRIENTS: NUTRIENTS, LIMITS: LIMITS, SOURCES: SOURCES, needs: needs, nutrientsOf: nutrientsOf, mealScore: mealScore, nrf: nrf, foodGrade: foodGrade, fillers: fillers, dayScore: dayScore };
 
   if (node) module.exports = Nutrition;
   else root.FHNutrition = Nutrition;
